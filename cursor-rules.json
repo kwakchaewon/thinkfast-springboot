@@ -1,0 +1,32 @@
+{
+  "rules": [
+    {
+      "when": "엔티티 클래스를 만들 때",
+      "then": "@Entity와 @Table을 붙이고, 필드는 camelCase로 작성합니다. @Id, @GeneratedValue로 기본키를 지정하고, @Column으로 칼럼 속성을 명확히 지정하세요. 생성자 코드는 @NoArgsConstructor, @AllArgsConstructor로 대체합니다."
+    },
+    {
+      "when": "DTO 클래스를 만들 때",
+      "then": "Entity를 직접 반환하지 않고, DTO 클래스를 별도로 생성합니다. 생성자는 Lombok의 @NoArgsConstructor와 @AllArgsConstructor를 사용하여 코드 가독성을 높입니다."
+    },
+    {
+      "when": "복잡한 조회 쿼리를 작성할 때",
+      "then": "QueryDSL을 사용해 queryFactory.selectFrom(...).where(...).fetch() 패턴으로 작성하고, Q클래스는 qUser처럼 짧은 alias로 사용할 것을 권장합니다."
+    },
+    {
+      "when": "서비스 계층을 작성할 때",
+      "then": "@Transactional을 활용하고, 생성자 주입 방식을 사용합니다. DB 접근은 반드시 Repository 계층을 통해 수행하세요."
+    },
+    {
+      "when": "컨트롤러를 작성할 때",
+      "then": "@RestController와 @RequestMapping을 사용하고, DTO를 통해 요청 및 응답을 처리하세요. Entity를 직접 노출하지 않도록 주의하세요."
+    },
+    {
+      "when": "페이징 처리를 할 때",
+      "then": "offset 방식보다 ID 또는 createdAt 기반의 cursor 방식 페이지네이션을 추천합니다. 성능상 이점이 있습니다."
+    },
+    {
+      "when": "클래스 및 변수 네이밍",
+      "then": "클래스는 PascalCase, 변수와 메소드는 camelCase를 사용하세요. DTO 클래스는 ~Dto로 명명하는 것을 원칙으로 합니다."
+    }
+  ]
+}
