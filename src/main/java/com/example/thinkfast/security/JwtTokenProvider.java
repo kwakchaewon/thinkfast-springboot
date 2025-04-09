@@ -28,6 +28,9 @@ public class JwtTokenProvider {
     @Value("${jwt.token-validity-in-seconds}")
     private long tokenValidityInSeconds;
 
+    @Value("${jwt.refresh-token-validity-in-seconds}")
+    private long refreshTokenValidityInSeconds;
+
     public JwtTokenProvider(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
@@ -37,10 +40,18 @@ public class JwtTokenProvider {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    public String createToken(String username) {
+    public String createAccessToken(String username) {
+        return createToken(username, tokenValidityInSeconds);
+    }
+
+    public String createRefreshToken(String username) {
+        return createToken(username, refreshTokenValidityInSeconds);
+    }
+
+    private String createToken(String username, long validityInSeconds) {
         Claims claims = Jwts.claims().setSubject(username);
         Date now = new Date();
-        Date validity = new Date(now.getTime() + tokenValidityInSeconds * 1000);
+        Date validity = new Date(now.getTime() + validityInSeconds * 1000);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -80,5 +91,9 @@ public class JwtTokenProvider {
             log.info("Invalid JWT token: {}", e.getMessage());
             return false;
         }
+    }
+
+    public long getRefreshTokenValidityInSeconds() {
+        return refreshTokenValidityInSeconds;
     }
 } 
