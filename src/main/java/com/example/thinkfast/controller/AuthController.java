@@ -1,5 +1,6 @@
 package com.example.thinkfast.controller;
 
+import com.example.thinkfast.common.ApiResponseBody;
 import com.example.thinkfast.domain.auth.RefreshToken;
 import com.example.thinkfast.dto.auth.LoginRequest;
 import com.example.thinkfast.dto.auth.TokenResponse;
@@ -13,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+@ApiResponseBody
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
