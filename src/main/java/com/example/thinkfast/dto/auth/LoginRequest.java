@@ -1,4 +1,4 @@
-package com.example.thinkfast.dto;
+package com.example.thinkfast.dto.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

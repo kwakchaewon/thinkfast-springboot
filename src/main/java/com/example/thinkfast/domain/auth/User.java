@@ -1,4 +1,4 @@
-package com.example.thinkfast.domain;
+package com.example.thinkfast.domain.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

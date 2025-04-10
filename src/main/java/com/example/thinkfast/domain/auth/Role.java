@@ -1,4 +1,4 @@
-package com.example.thinkfast.domain;
+package com.example.thinkfast.domain.auth;
 
 public enum Role {
     ROLE_ADMIN,    // 관리자

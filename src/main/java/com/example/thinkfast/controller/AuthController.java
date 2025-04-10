@@ -1,8 +1,8 @@
 package com.example.thinkfast.controller;
 
-import com.example.thinkfast.domain.RefreshToken;
-import com.example.thinkfast.dto.LoginRequest;
-import com.example.thinkfast.dto.TokenResponse;
+import com.example.thinkfast.domain.auth.RefreshToken;
+import com.example.thinkfast.dto.auth.LoginRequest;
+import com.example.thinkfast.dto.auth.TokenResponse;
 import com.example.thinkfast.security.JwtTokenProvider;
 import com.example.thinkfast.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;

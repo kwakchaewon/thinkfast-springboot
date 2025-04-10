@@ -1,7 +1,7 @@
 package com.example.thinkfast.service;
 
-import com.example.thinkfast.domain.RefreshToken;
-import com.example.thinkfast.repository.RefreshTokenRepository;
+import com.example.thinkfast.domain.auth.RefreshToken;
+import com.example.thinkfast.repository.auth.RefreshTokenRepository;
 import com.example.thinkfast.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
-package com.example.thinkfast.repository;
+package com.example.thinkfast.repository.auth;
 
-import com.example.thinkfast.domain.RefreshToken;
+import com.example.thinkfast.domain.auth.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 
