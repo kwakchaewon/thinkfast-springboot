@@ -4,9 +4,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.tomcat.jni.Local;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -24,12 +27,12 @@ public class RefreshToken {
     private String username;
 
     @Column(nullable = false)
-    private Instant expiryDate;
+    private LocalDateTime    expiryDate;
 
     @Builder
-    public RefreshToken(String token, String username, Instant expiryDate) {
+    public RefreshToken(String token, String username, LocalDateTime expiryDate) {
         this.token = token;
         this.username = username;
         this.expiryDate = expiryDate;
     }
-} 
+}

@@ -3,8 +3,10 @@ package com.example.thinkfast.controller;
 import com.example.thinkfast.common.BaseResponseBody;
 import com.example.thinkfast.domain.auth.RefreshToken;
 import com.example.thinkfast.dto.auth.LoginRequest;
+import com.example.thinkfast.dto.auth.SignUpRequest;
 import com.example.thinkfast.dto.auth.TokenResponse;
 import com.example.thinkfast.security.JwtTokenProvider;
+import com.example.thinkfast.service.AuthService;
 import com.example.thinkfast.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
 
 @BaseResponseBody
 @RestController
@@ -23,21 +26,16 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenService refreshTokenService;
+    private final AuthService authService;
+
+    @PostMapping("/signup")
+    public void signUp(@RequestBody SignUpRequest request) {
+        authService.signUp(request);
+    }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenResponse> login(@RequestBody LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
-        );
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String accessToken = jwtTokenProvider.createAccessToken(loginRequest.getUsername());
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(loginRequest.getUsername());
-
-        return ResponseEntity.ok(TokenResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken.getToken())
-                .build());
+    public TokenResponse login(@RequestBody LoginRequest request) {
+        return authService.login(request);
     }
 
     /**
@@ -48,23 +46,12 @@ public class AuthController {
      * @return
      */
     @PostMapping("/refresh")
-    public ResponseEntity<TokenResponse> refreshToken(@RequestParam String refreshToken) {
-        return refreshTokenService.findByToken(refreshToken)
-                .map(refreshTokenService::verifyExpiration)
-                .map(RefreshToken::getUsername)
-                .map(username -> {
-                    String accessToken = jwtTokenProvider.createAccessToken(username);
-                    return ResponseEntity.ok(TokenResponse.builder()
-                            .accessToken(accessToken)
-                            .refreshToken(refreshToken)
-                            .build());
-                })
-                .orElseThrow(() -> new RuntimeException("Refresh token not found in database!"));
+    public TokenResponse refreshToken(@RequestHeader("Authorization") String refreshToken) {
+        return authService.refreshToken(refreshToken);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestParam String username) {
-        refreshTokenService.deleteByUsername(username);
-        return ResponseEntity.ok().build();
+    public void logout(@RequestHeader("Authorization") String token) {
+        authService.logout(token);
     }
 } 

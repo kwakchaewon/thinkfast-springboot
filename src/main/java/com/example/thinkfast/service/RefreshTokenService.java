@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -20,7 +21,7 @@ public class RefreshTokenService {
     public RefreshToken createRefreshToken(String username) {
         RefreshToken refreshToken = refreshTokenRepository.findByUsername(username)
                 .map(existingToken -> {
-                    existingToken.setExpiryDate(Instant.now().plusSeconds(jwtTokenProvider.getRefreshTokenValidityInSeconds()));
+                    existingToken.setExpiryDate(LocalDateTime.now().plusSeconds(jwtTokenProvider.getRefreshTokenValidityInSeconds()));
                     return existingToken;
                 })
                 .orElseGet(() -> {
@@ -28,7 +29,7 @@ public class RefreshTokenService {
                     return RefreshToken.builder()
                             .username(username)
                             .token(token)
-                            .expiryDate(Instant.now().plusSeconds(jwtTokenProvider.getRefreshTokenValidityInSeconds()))
+                            .expiryDate(LocalDateTime.now().plusSeconds(jwtTokenProvider.getRefreshTokenValidityInSeconds()))
                             .build();
                 });
 
@@ -40,7 +41,7 @@ public class RefreshTokenService {
     }
 
     public RefreshToken verifyExpiration(RefreshToken token) {
-        if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
+        if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
             refreshTokenRepository.delete(token);
             throw new RuntimeException("Refresh token was expired. Please make a new signin request");
         }
