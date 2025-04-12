@@ -39,8 +39,8 @@ public class AuthService {
         User user = User.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .roles(Role.ROLE_RESPONDER) // 기본 역할은 RESPONDER
-                .birthDate(request.getBirthDate())
+                .role(Role.RESPONDER) // 기본 역할은 RESPONDER
+                .birthDate(request.getBirthDateAsLocalDate())
                 .build();
 
         userRepository.save(user);
