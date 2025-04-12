@@ -32,10 +32,6 @@ public class AuthService {
 
     @Transactional
     public void signUp(SignUpRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("이미 존재하는 이메일입니다.");
-        }
-
         User user = User.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -44,6 +40,11 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
+    }
+
+    @Transactional
+    public Boolean checkDuplicatedUser(String username){
+        return userRepository.existsByUsername(username);
     }
 
     @Transactional

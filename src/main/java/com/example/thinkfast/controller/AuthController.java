@@ -1,5 +1,6 @@
 package com.example.thinkfast.controller;
 
+import com.example.thinkfast.common.BaseResponse;
 import com.example.thinkfast.common.BaseResponseBody;
 import com.example.thinkfast.domain.auth.RefreshToken;
 import com.example.thinkfast.dto.auth.LoginRequest;
@@ -29,8 +30,13 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public void signUp(@RequestBody SignUpRequest request) {
+    public BaseResponse signUp(@RequestBody SignUpRequest request) {
+        if (authService.checkDuplicatedUser(request.getUsername())) {
+            return BaseResponse.fail("이미 가입된 계정입니다.");
+        }
+        
         authService.signUp(request);
+        return BaseResponse.success();
     }
 
     @PostMapping("/login")
