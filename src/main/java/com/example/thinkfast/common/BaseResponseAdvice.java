@@ -8,8 +8,8 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-@RestControllerAdvice(annotations = ApiResponseBody.class)
-public class ApiResponseAdvice implements ResponseBodyAdvice<Object> {
+@RestControllerAdvice(annotations = BaseResponseBody.class)
+public class BaseResponseAdvice implements ResponseBodyAdvice<Object> {
 
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
@@ -20,9 +20,9 @@ public class ApiResponseAdvice implements ResponseBodyAdvice<Object> {
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType,
                                 Class<? extends HttpMessageConverter<?>> selectedConverterType,
                                 ServerHttpRequest request, ServerHttpResponse response) {
-        if (body instanceof ApiResponse) {
+        if (body instanceof BaseResponse) {
             return body;
         }
-        return ApiResponse.success(body);
+        return BaseResponse.success(body);
     }
 } 

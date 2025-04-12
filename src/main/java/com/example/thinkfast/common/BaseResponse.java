@@ -8,14 +8,14 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class ApiResponse<T> {
+public class BaseResponse<T> {
     private final boolean success;
     private final String message;
     private final T data;
     private final LocalDateTime timestamp;
 
-    public static <T> ApiResponse<T> success(T data) {
-        return ApiResponse.<T>builder()
+    public static <T> BaseResponse<T> success(T data) {
+        return BaseResponse.<T>builder()
                 .success(true)
                 .message("요청이 성공적으로 처리되었습니다.")
                 .data(data)
@@ -23,8 +23,8 @@ public class ApiResponse<T> {
                 .build();
     }
 
-    public static <T> ApiResponse<T> success(String message, T data) {
-        return ApiResponse.<T>builder()
+    public static <T> BaseResponse<T> success(String message, T data) {
+        return BaseResponse.<T>builder()
                 .success(true)
                 .message(message)
                 .data(data)
@@ -32,8 +32,8 @@ public class ApiResponse<T> {
                 .build();
     }
 
-    public static <T> ApiResponse<T> error(HttpStatus status, String message) {
-        return ApiResponse.<T>builder()
+    public static <T> BaseResponse<T> error(HttpStatus status, String message) {
+        return BaseResponse.<T>builder()
                 .success(false)
                 .message(message)
                 .data(null)
