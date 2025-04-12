@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 @BaseResponseBody
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
