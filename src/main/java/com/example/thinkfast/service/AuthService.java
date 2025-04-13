@@ -115,7 +115,8 @@ public class AuthService {
 
     @Transactional
     public void logout(String token) {
-        String username = jwtTokenProvider.getUsername(token);
+        String BearerToken = jwtTokenProvider.extractBearerToken(token);
+        String username = jwtTokenProvider.getUsername(BearerToken);
         refreshTokenRepository.findByUsername(username)
                 .ifPresent(refreshTokenRepository::delete);
     }

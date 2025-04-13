@@ -93,6 +93,10 @@ public class JwtTokenProvider {
         }
     }
 
+    public String extractBearerToken(String token){
+        return token.substring(7);
+    }
+
     public long getRefreshTokenValidityInSeconds() {
         return refreshTokenValidityInSeconds;
     }
