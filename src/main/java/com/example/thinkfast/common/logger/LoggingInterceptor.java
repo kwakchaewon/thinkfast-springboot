@@ -37,5 +37,9 @@ public class LoggingInterceptor implements HandlerInterceptor {
         int status = response.getStatus();
 
         log.info("[RESPONSE] {} {} => {} ({}ms)", method, uri, status, duration);
+
+        if (ex != null) {
+            log.error("[EXCEPTION] {} {} => Exception: {}", method, uri, ex.getMessage(), ex);
+        }
     }
 }
