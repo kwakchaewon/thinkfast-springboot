@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+@Table(name = "REFRESH_TOKENS")
 public class RefreshToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,8 +27,8 @@ public class RefreshToken {
     @Column(nullable = false)
     private String username;
 
-    @Column(nullable = false)
-    private LocalDateTime    expiryDate;
+    @Column(nullable = false, name = "EXPIRES_AT")
+    private LocalDateTime expiryDate;
 
     @Builder
     public RefreshToken(String token, String username, LocalDateTime expiryDate) {
