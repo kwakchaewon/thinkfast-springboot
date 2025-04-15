@@ -70,10 +70,13 @@ public class AuthService {
                 .build();
 
         refreshTokenRepository.save(newRefreshToken);
+        User user = userRepository.findByUsername(request.getUsername()).get();
 
         return TokenResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
+                .username(user.getUsername())
+                .role(user.getRole())
                 .build();
     }
 
