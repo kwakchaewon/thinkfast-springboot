@@ -1,5 +1,11 @@
 package com.example.thinkfast.domain.survey;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -10,6 +16,10 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 @Table(name = "QUESTIONS")
 public class Question {
     @Id
@@ -26,6 +36,7 @@ public class Question {
 
     private int orderIndex;
 
+    @Getter
     public enum QuestionType {
         MULTIPLE_CHOICE, SUBJECTIVE, SCALE
     }
