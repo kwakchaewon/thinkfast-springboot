@@ -20,6 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class SurveyController {
     private final SurveyService surveyService;
+
+    /**
+     * 개선 사항: 요청 데이터 유효성 검사, Bulk Insert 를 통한 성능 최적화, 트랜잭션 전파 설정 
+     * @param userDetail
+     * @param createSurveyRequest
+     */
     @PostMapping
     @PreAuthorize("hasRole('CREATOR')")
     public void createSurvey(@AuthenticationPrincipal UserDetailImpl userDetail,
