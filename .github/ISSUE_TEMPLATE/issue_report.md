@@ -1,7 +1,7 @@
 ---
-name: 🐞 Bug Report
+name: 🐞 Issue Report
 about: 예상하지 못한 문제나 오류를 제보합니다
-title: "[BUG] "
+title: "[ISSUE] "
 labels: bug
 assignees: ''
 ---
