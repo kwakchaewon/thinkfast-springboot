@@ -14,10 +14,10 @@ import java.util.Collections;
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
-    private UserRepository userRepository; // UserRepository 주입
+    private UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetailImpl loadUserByUsername(String username) throws UsernameNotFoundException {
         // 사용자 정보를 데이터베이스에서 로드
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));

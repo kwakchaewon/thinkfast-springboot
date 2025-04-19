@@ -13,7 +13,6 @@ public class UserDetailImpl implements UserDetails {
     private String email;
     private Role roles;
 
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;
@@ -55,8 +54,7 @@ public class UserDetailImpl implements UserDetails {
         return true;
     }
 
-    public static UserDetails responderBuild(User user){
-        UserDetailImpl userDetail = new UserDetailImpl(user.getUsername(), user.getPassword(), Role.RESPONDER);
-        return userDetail;
+    public static UserDetailImpl responderBuild(User user){
+        return new UserDetailImpl(user.getUsername(), user.getPassword(), Role.RESPONDER);
     }
 }

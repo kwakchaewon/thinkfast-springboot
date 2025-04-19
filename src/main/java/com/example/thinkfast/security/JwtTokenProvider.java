@@ -2,12 +2,12 @@ package com.example.thinkfast.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -18,8 +18,8 @@ import java.util.Date;
 @Slf4j
 @Component
 public class JwtTokenProvider {
-
-    private final UserDetailsService userDetailsService;
+    @Autowired
+    private UserDetailsServiceImpl userDetailsService;
     private Key key;
 
     @Value("${jwt.secret}")
@@ -28,12 +28,9 @@ public class JwtTokenProvider {
     @Value("${jwt.token-validity-in-seconds}")
     private long tokenValidityInSeconds;
 
+    @Getter
     @Value("${jwt.refresh-token-validity-in-seconds}")
     private long refreshTokenValidityInSeconds;
-
-    public JwtTokenProvider(UserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
-    }
 
     @PostConstruct
     protected void init() {
@@ -62,8 +59,8 @@ public class JwtTokenProvider {
     }
 
     public Authentication getAuthentication(String token) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(getUsername(token));
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        UserDetailImpl userDetails = userDetailsService.loadUserByUsername(getUsername(token));
+        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 
     public String getUsername(String token) {
@@ -84,20 +81,11 @@ public class JwtTokenProvider {
     }
 
     public boolean validateToken(String token) {
-        try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            log.info("Invalid JWT token: {}", e.getMessage());
-            return false;
-        }
     }
 
     public String extractBearerToken(String token){
         return token.substring(7);
     }
-
-    public long getRefreshTokenValidityInSeconds() {
-        return refreshTokenValidityInSeconds;
-    }
-} 
+}
