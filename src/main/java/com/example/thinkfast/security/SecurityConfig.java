@@ -31,6 +31,7 @@ public class SecurityConfig {
             .authorizeRequests()
             .antMatchers("/test/**").permitAll()
             .antMatchers("/auth/**").permitAll()
+            .antMatchers("/survey/**").permitAll()
             .antMatchers("/swagger-ui.html", "/swagger-resources/**", "/v2/api-docs", "/webjars/**").permitAll()
             .antMatchers("/admin/**").hasRole("ADMIN")
             .antMatchers("/creator/**").hasRole("CREATOR")
