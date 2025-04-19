@@ -31,6 +31,9 @@ public class LoggingInterceptor implements HandlerInterceptor {
             request.setAttribute(EXCEPTION_LOGGED, true);
         }
 
-        log.info("[RESPONSE] {} {} => {} ({}ms)", request.getMethod(), request.getRequestURI(), response.getStatus(), duration);
+         // 정상 응답만 로깅
+        if (response.getStatus() < 400) {
+            log.info("[RESPONSE] {} {} => {} ({}ms)", request.getMethod(), request.getRequestURI(), response.getStatus(), duration);
+        }
     }
 }
