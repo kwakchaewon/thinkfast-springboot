@@ -13,6 +13,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
 
@@ -32,9 +33,16 @@ public class Survey {
     private String description;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private Boolean isActive = true;
+    private Boolean isActive;
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        if (isActive == null) {
+            isActive = true;
+        }
+    }
 }
