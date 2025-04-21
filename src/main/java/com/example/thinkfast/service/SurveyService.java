@@ -4,6 +4,7 @@ import com.example.thinkfast.domain.survey.Option;
 import com.example.thinkfast.domain.survey.Question;
 import com.example.thinkfast.domain.survey.Survey;
 import com.example.thinkfast.dto.survey.CreateSurveyRequest;
+import com.example.thinkfast.dto.survey.GetRecentSuveysResponse;
 import com.example.thinkfast.repository.auth.UserRepository;
 import com.example.thinkfast.repository.survey.OptionRepository;
 import com.example.thinkfast.repository.survey.QuestionRepository;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -61,5 +64,12 @@ public class SurveyService {
                 }
             }
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<GetRecentSuveysResponse> getRecentSurveys(UserDetailImpl userDetail) {
+        Long creatorId = userRepository.findIdByUsername(userDetail.getUsername());
+        List<GetRecentSuveysResponse> surveys = surveyRepository.findTop5GetRecentSuveysResponseByCreatorIdOrderByCreatedAtDesc(creatorId);
+        return surveys;
     }
 }

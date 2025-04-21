@@ -26,7 +26,7 @@ public class SurveySchedule {
             LocalDateTime now = LocalDateTime.now();
             
             // 종료 시간이 지난 활성화된 설문 조회
-            List<Survey> expiredSurveys = surveyRepository.findByIsActiveTrueAndEndDateBefore(now);            
+            List<Survey> expiredSurveys = surveyRepository.findByIsActiveTrueAndEndTimeBefore(now);
             
             // 설문 비활성화 처리
             expiredSurveys.forEach(survey -> {

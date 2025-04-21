@@ -2,17 +2,17 @@ package com.example.thinkfast.controller;
 
 import com.example.thinkfast.common.BaseResponseBody;
 import com.example.thinkfast.dto.survey.CreateSurveyRequest;
+import com.example.thinkfast.dto.survey.GetRecentSuveysResponse;
 import com.example.thinkfast.security.UserDetailImpl;
-import com.example.thinkfast.service.AuthService;
+
 import com.example.thinkfast.service.SurveyService;
-import com.sun.security.auth.UserPrincipal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @BaseResponseBody
 @RestController
@@ -33,4 +33,10 @@ public class SurveyController {
         surveyService.createSurvey(userDetail, createSurveyRequest);
     }
 
+    @GetMapping("/recent")
+    @PreAuthorize("hasRole('CREATOR')")
+    public ResponseEntity<List<GetRecentSuveysResponse>> getRecentSurveys(@AuthenticationPrincipal UserDetailImpl userDetail) {
+        List<GetRecentSuveysResponse> recentSurveys = surveyService.getRecentSurveys(userDetail);
+        return ResponseEntity.ok(recentSurveys);
+    }
 }
