@@ -1,12 +1,10 @@
 package com.example.thinkfast.dto.survey;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 public class GetRecentSurveysResponse {
@@ -16,4 +14,13 @@ public class GetRecentSurveysResponse {
     private LocalDateTime startTime;
     private Boolean isActive;
     private LocalDateTime createdAt;
+
+    public GetRecentSurveysResponse(Long id, String title, String description, LocalDateTime startTime, Boolean isActive, LocalDateTime createdAt) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.startTime = startTime;
+        this.isActive = isActive;
+        this.createdAt = createdAt;
+    }
 }

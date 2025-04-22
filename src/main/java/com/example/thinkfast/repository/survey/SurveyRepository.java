@@ -2,7 +2,10 @@ package com.example.thinkfast.repository.survey;
 
 import com.example.thinkfast.domain.survey.Survey;
 import com.example.thinkfast.dto.survey.GetRecentSurveysResponse;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -19,11 +22,14 @@ public interface SurveyRepository extends JpaRepository<Survey, Long> {
     // - count()
     // - existsById(Long id)
 
-    // 활성화된 설문 조회
     List<Survey> findByIsActiveTrue();
 
-    // 종료 시간이 지난 활성화된 설문 조회
     List<Survey> findByIsActiveTrueAndEndTimeBefore(LocalDateTime endDate);
 
-    List<GetRecentSurveysResponse> findGetRecentSurveysResponseByCreatorIdOrderByCreatedAtDesc(Long creatorId);
-} 
+    @Query("SELECT new com.example.thinkfast.dto.survey.GetRecentSurveysResponse(" +
+            "s.id, s.title, s.description, s.startTime, s.isActive, s.createdAt) " +
+            "FROM Survey s " +
+            "WHERE s.creatorId = :creatorId " +
+            "ORDER BY s.createdAt DESC")
+    List<GetRecentSurveysResponse> getRecentSurveys(@Param("creatorId") Long creatorId);
+}

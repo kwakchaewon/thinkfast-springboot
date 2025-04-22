@@ -68,7 +68,7 @@ public class SurveyService {
     @Transactional(readOnly = true)
     public List<GetRecentSurveysResponse> getRecentSurveys(UserDetailImpl userDetail) {
         Long creatorId = userRepository.findIdByUsername(userDetail.getUsername());
-        List<GetRecentSurveysResponse> surveys = surveyRepository.findGetRecentSurveysResponseByCreatorIdOrderByCreatedAtDesc(creatorId);
+        List<GetRecentSurveysResponse> surveys = surveyRepository.getRecentSurveys(creatorId);
         return surveys;
     }
 }
