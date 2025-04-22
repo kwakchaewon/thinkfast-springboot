@@ -48,7 +48,7 @@ public class JwtTokenProvider {
     private String createToken(String username, long validityInSeconds) {
         Claims claims = Jwts.claims().setSubject(username);
         Date now = new Date();
-        Date validity = new Date(now.getTime() + validityInSeconds * 1000);
+        Date validity = new Date(now.getTime() + (validityInSeconds * 1000L));
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -81,11 +81,23 @@ public class JwtTokenProvider {
     }
 
     public boolean validateToken(String token) {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token);
             return true;
+        } catch (ExpiredJwtException e) {
+            log.warn("만료된 JWT 토큰입니다. 만료 시간: {}, 현재 시간: {}", 
+                    e.getClaims().getExpiration(), new Date());
+            return false;
+        } catch (JwtException | IllegalArgumentException e) {
+            log.warn("잘못된 JWT 토큰입니다.");
+            return false;
+        }
     }
 
-    public String extractBearerToken(String token){
+    public String extractBearerToken(String token) {
         return token.substring(7);
     }
 }
