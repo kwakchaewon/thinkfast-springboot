@@ -69,6 +69,8 @@ public class SurveyService {
     public List<GetRecentSurveysResponse> getRecentSurveys(UserDetailImpl userDetail) {
         Long creatorId = userRepository.findIdByUsername(userDetail.getUsername());
         List<GetRecentSurveysResponse> surveys = surveyRepository.getRecentSurveys(creatorId);
-        return surveys;
+
+        // 상위 5개 row 까지만 return
+        return surveys.subList(0, Math.min(5, surveys.size()));
     }
 }
