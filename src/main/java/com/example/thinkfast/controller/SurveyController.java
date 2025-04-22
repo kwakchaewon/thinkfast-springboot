@@ -2,7 +2,7 @@ package com.example.thinkfast.controller;
 
 import com.example.thinkfast.common.BaseResponseBody;
 import com.example.thinkfast.dto.survey.CreateSurveyRequest;
-import com.example.thinkfast.dto.survey.GetRecentSuveysResponse;
+import com.example.thinkfast.dto.survey.GetRecentSurveysResponse;
 import com.example.thinkfast.security.UserDetailImpl;
 
 import com.example.thinkfast.service.SurveyService;
@@ -35,8 +35,8 @@ public class SurveyController {
 
     @GetMapping("/recent")
     @PreAuthorize("hasRole('CREATOR')")
-    public ResponseEntity<List<GetRecentSuveysResponse>> getRecentSurveys(@AuthenticationPrincipal UserDetailImpl userDetail) {
-        List<GetRecentSuveysResponse> recentSurveys = surveyService.getRecentSurveys(userDetail);
+    public ResponseEntity<List<GetRecentSurveysResponse>> getRecentSurveys(@AuthenticationPrincipal UserDetailImpl userDetail) {
+        List<GetRecentSurveysResponse> recentSurveys = surveyService.getRecentSurveys(userDetail);
         return ResponseEntity.ok(recentSurveys);
     }
 }
