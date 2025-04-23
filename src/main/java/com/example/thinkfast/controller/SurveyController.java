@@ -11,7 +11,6 @@ import com.example.thinkfast.security.UserDetailImpl;
 
 import com.example.thinkfast.service.SurveyService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +21,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/survey")
 @RequiredArgsConstructor
+/**
+ * 개선 사항: 호출 전 본인 권한 확인 필요
+ */
 public class SurveyController {
     private final SurveyService surveyService;
     private final QuestionRepository questionRepository;
@@ -40,8 +42,7 @@ public class SurveyController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('CREATOR')")
-    public void deleteSurvey(@AuthenticationPrincipal UserDetailImpl userDetail,
-                             @PathVariable Long id){
+    public void deleteSurvey(@PathVariable Long id){
         surveyService.deleteSurvey(id);
     }
 
