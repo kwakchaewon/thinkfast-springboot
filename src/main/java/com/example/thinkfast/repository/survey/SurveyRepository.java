@@ -1,7 +1,9 @@
 package com.example.thinkfast.repository.survey;
 
+import com.example.thinkfast.domain.survey.Question;
 import com.example.thinkfast.domain.survey.Survey;
 import com.example.thinkfast.dto.survey.GetRecentSurveysResponse;
+import com.example.thinkfast.dto.survey.GetSurveyDetailResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -34,5 +36,5 @@ public interface SurveyRepository extends JpaRepository<Survey, Long> {
             "ORDER BY s.createdAt DESC")
     List<GetRecentSurveysResponse> getRecentSurveys(@Param("creatorId") Long creatorId);
 
-    Survey findByIdAndIsDeletedFalse(Long id);
+    GetSurveyDetailResponse findByIdAndIsDeletedFalse(Long id);
 }

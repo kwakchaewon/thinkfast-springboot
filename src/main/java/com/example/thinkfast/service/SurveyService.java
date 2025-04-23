@@ -5,6 +5,7 @@ import com.example.thinkfast.domain.survey.Question;
 import com.example.thinkfast.domain.survey.Survey;
 import com.example.thinkfast.dto.survey.CreateSurveyRequest;
 import com.example.thinkfast.dto.survey.GetRecentSurveysResponse;
+import com.example.thinkfast.dto.survey.GetSurveyDetailResponse;
 import com.example.thinkfast.repository.auth.UserRepository;
 import com.example.thinkfast.repository.survey.OptionRepository;
 import com.example.thinkfast.repository.survey.QuestionRepository;
@@ -84,7 +85,7 @@ public class SurveyService {
     }
 
     @Transactional(readOnly = true)
-    public Survey getSurveyDetail(Long id) {
+    public GetSurveyDetailResponse getSurveyDetail(Long id) {
         return surveyRepository.findByIdAndIsDeletedFalse(id);
     }
 }
