@@ -47,9 +47,8 @@ public class SurveyController {
 
     @GetMapping("/recent")
     @PreAuthorize("hasRole('CREATOR')")
-    public ResponseEntity<List<GetRecentSurveysResponse>> getRecentSurveys(@AuthenticationPrincipal UserDetailImpl userDetail) {
-        List<GetRecentSurveysResponse> recentSurveys = surveyService.getRecentSurveys(userDetail);
-        return ResponseEntity.ok(recentSurveys);
+    public List<GetRecentSurveysResponse> getRecentSurveys(@AuthenticationPrincipal UserDetailImpl userDetail) {
+        return surveyService.getRecentSurveys(userDetail);
     }
 
     /**
@@ -62,7 +61,6 @@ public class SurveyController {
     public GetSurveyDetailResponse getSurveyDetail(@PathVariable Long id) {
         Survey survey = surveyService.getSurveyDetail(id);
         List<Question> questions = questionRepository.findBySurveyId(survey.getId());
-        GetSurveyDetailResponse getSurveyDetailResponse = new GetSurveyDetailResponse(survey, questions);
-        return getSurveyDetailResponse;
+        return new GetSurveyDetailResponse(survey, questions);
     }
 }
