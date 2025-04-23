@@ -3,6 +3,7 @@ package com.example.thinkfast.dto.survey;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @NoArgsConstructor
@@ -13,7 +14,8 @@ public class GetRecentSurveysResponse {
     private String description;
     private LocalDateTime startTime;
     private Boolean isActive;
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
+    private int answerCount;
 
     public GetRecentSurveysResponse(Long id, String title, String description, LocalDateTime startTime, Boolean isActive, LocalDateTime createdAt) {
         this.id = id;
@@ -21,6 +23,9 @@ public class GetRecentSurveysResponse {
         this.description = description;
         this.startTime = startTime;
         this.isActive = isActive;
-        this.createdAt = createdAt;
+        this.createdAt = LocalDate.from(createdAt);
+
+        // 고정값: 추후 응답 갯수 수정 예정
+        this.answerCount = 5;
     }
 }
