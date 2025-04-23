@@ -73,4 +73,10 @@ public class SurveyService {
         // 상위 5개 row 까지만 return
         return surveys.subList(0, Math.min(5, surveys.size()));
     }
+
+    @Transactional(readOnly = true)
+    public Survey getSurveyDetail(Long id) {
+        return surveyRepository.findById(id).get();
+    }
+
 }

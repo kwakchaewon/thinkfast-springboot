@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface SurveyRepository extends JpaRepository<Survey, Long> {
@@ -32,4 +33,6 @@ public interface SurveyRepository extends JpaRepository<Survey, Long> {
             "WHERE s.creatorId = :creatorId " +
             "ORDER BY s.createdAt DESC")
     List<GetRecentSurveysResponse> getRecentSurveys(@Param("creatorId") Long creatorId);
+
+    Optional<Survey> findById(Long id);
 }
