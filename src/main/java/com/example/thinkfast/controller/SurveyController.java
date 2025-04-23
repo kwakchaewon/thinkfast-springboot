@@ -59,7 +59,7 @@ public class SurveyController {
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('CREATOR')")
-    public ResponseEntity<GetSurveyDetailResponse> getRecentSurveys(@PathVariable Long id) {
+    public ResponseEntity<GetSurveyDetailResponse> getSurveyDetail(@PathVariable Long id) {
         Survey survey = surveyService.getSurveyDetail(id);
         List<Question> questions = questionRepository.findBySurveyId(survey.getId());
         GetSurveyDetailResponse getSurveyDetailResponse = new GetSurveyDetailResponse(survey, questions);
