@@ -42,13 +42,10 @@ public class Survey {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-
     @PrePersist
     protected void onCreate() {
         if (isActive == null) {
             isActive = true;
         }
     }
-
-
 }
