@@ -1,5 +1,7 @@
 package com.example.thinkfast.dto.survey;
 
+import com.example.thinkfast.domain.survey.Question;
+import com.example.thinkfast.domain.survey.Survey;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -20,16 +22,6 @@ public class GetSurveyDetailResponse {
     private LocalDate createdAt;
     private List<Question> questions;
 
-    @NoArgsConstructor
-    @Getter
-    public static class Question {
-        private Long id;
-        private Long surveyId;
-        private String questionType;
-        private String content;
-        private int orderIndex;
-    }
-
     public GetSurveyDetailResponse(Long id, Long creatorId, String title, String description, LocalDateTime startTime, LocalDateTime endTime, Boolean isActive, LocalDateTime createdAt) {
         this.id = id;
         this.creatorId = creatorId;
@@ -39,5 +31,16 @@ public class GetSurveyDetailResponse {
         this.endTime = endTime;
         this.isActive = isActive;
         this.createdAt = LocalDate.from(createdAt);
+    }
+
+    public GetSurveyDetailResponse(Survey survey, List<Question> questions) {
+        this.id = survey.getId();
+        this.creatorId = survey.getCreatorId();
+        this.title = survey.getTitle();
+        this.description = survey.getDescription();
+        this.startTime = survey.getStartTime();
+        this.endTime = survey.getEndTime();
+        this.isActive = survey.getIsActive();
+        this.questions = questions;
     }
 }

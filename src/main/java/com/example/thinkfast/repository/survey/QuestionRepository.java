@@ -4,6 +4,8 @@ import com.example.thinkfast.domain.survey.Question;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface QuestionRepository extends JpaRepository<Question, Long> {
     // 기본 CRUD 메서드가 자동으로 제공됩니다:
@@ -14,4 +16,5 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     // - delete(Question entity)
     // - count()
     // - existsById(Long id)
+    List<Question> findBySurveyId(Long id);
 } 

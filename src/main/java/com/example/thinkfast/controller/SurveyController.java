@@ -1,9 +1,12 @@
 package com.example.thinkfast.controller;
 
 import com.example.thinkfast.common.BaseResponseBody;
+import com.example.thinkfast.domain.survey.Question;
 import com.example.thinkfast.domain.survey.Survey;
 import com.example.thinkfast.dto.survey.CreateSurveyRequest;
 import com.example.thinkfast.dto.survey.GetRecentSurveysResponse;
+import com.example.thinkfast.dto.survey.GetSurveyDetailResponse;
+import com.example.thinkfast.repository.survey.QuestionRepository;
 import com.example.thinkfast.security.UserDetailImpl;
 
 import com.example.thinkfast.service.SurveyService;
@@ -21,6 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SurveyController {
     private final SurveyService surveyService;
+    private final QuestionRepository questionRepository;
 
     /**
      * 개선 사항: 요청 데이터 유효성 검사, Bulk Insert 를 통한 성능 최적화, 트랜잭션 전파 설정 
@@ -43,8 +47,10 @@ public class SurveyController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('CREATOR')")
-    public ResponseEntity<Survey> getRecentSurveys(@PathVariable Long id) {
+    public ResponseEntity<GetSurveyDetailResponse> getRecentSurveys(@PathVariable Long id) {
         Survey survey = surveyService.getSurveyDetail(id);
-        return ResponseEntity.ok(survey);
+        List<Question> questions = questionRepository.findBySurveyId(survey.getId());
+        GetSurveyDetailResponse getSurveyDetailResponse = new GetSurveyDetailResponse(survey, questions);
+        return ResponseEntity.ok(getSurveyDetailResponse);
     }
 }
