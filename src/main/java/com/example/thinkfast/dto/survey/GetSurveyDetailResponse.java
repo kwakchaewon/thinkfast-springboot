@@ -38,9 +38,10 @@ public class GetSurveyDetailResponse {
         this.creatorId = survey.getCreatorId();
         this.title = survey.getTitle();
         this.description = survey.getDescription();
-        this.startTime = survey.getStartTime();
         this.endTime = survey.getEndTime();
         this.isActive = survey.getIsActive();
+        this.createdAt = LocalDate.from(survey.getCreatedAt());
+        this.startTime = survey.getStartTime();
         this.questions = questions;
     }
 }
