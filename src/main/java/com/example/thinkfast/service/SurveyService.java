@@ -47,6 +47,7 @@ public class SurveyService {
                     .surveyId(createdSurvey.getId())
                     .type(Question.QuestionType.valueOf(questionRequest.getType()))
                     .content(questionRequest.getContent())
+                    .orderIndex(questionRequest.getOrderIndex())
                     .build();
             Question createdQuestion = questionRepository.save(question);
 

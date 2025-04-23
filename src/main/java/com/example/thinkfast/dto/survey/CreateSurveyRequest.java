@@ -24,5 +24,6 @@ public class CreateSurveyRequest {
         private String type; // MULTIPLE_CHOICE, SUBJECTIVE, SCALE
         private boolean required;
         private List<String> options; // 객관식 질문의 경우 옵션 목록
+        private int orderIndex;
     }
 }
