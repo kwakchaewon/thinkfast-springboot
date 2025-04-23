@@ -38,6 +38,13 @@ public class SurveyController {
         surveyService.createSurvey(userDetail, createSurveyRequest);
     }
 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('CREATOR')")
+    public void deleteSurvey(@AuthenticationPrincipal UserDetailImpl userDetail,
+                             @PathVariable Long id){
+        surveyService.deleteSurvey(id);
+    }
+
     @GetMapping("/recent")
     @PreAuthorize("hasRole('CREATOR')")
     public ResponseEntity<List<GetRecentSurveysResponse>> getRecentSurveys(@AuthenticationPrincipal UserDetailImpl userDetail) {
@@ -45,6 +52,11 @@ public class SurveyController {
         return ResponseEntity.ok(recentSurveys);
     }
 
+    /**
+     * 개선사항: DELETED 설문에 대한 예외처리 필요
+     * @param id
+     * @return
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('CREATOR')")
     public ResponseEntity<GetSurveyDetailResponse> getRecentSurveys(@PathVariable Long id) {

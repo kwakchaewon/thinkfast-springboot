@@ -36,10 +36,12 @@ public class Survey {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private Boolean isActive;
+    private Boolean isDeleted;
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
 
     @PrePersist
     protected void onCreate() {

@@ -66,6 +66,13 @@ public class SurveyService {
         }
     }
 
+    @Transactional
+    public void deleteSurvey(Long id){
+        Survey survey = surveyRepository.findById(id).get();
+        survey.setIsDeleted(true);
+        surveyRepository.save(survey);
+    }
+
     @Transactional(readOnly = true)
     public List<GetRecentSurveysResponse> getRecentSurveys(UserDetailImpl userDetail) {
         Long creatorId = userRepository.findIdByUsername(userDetail.getUsername());
@@ -77,7 +84,6 @@ public class SurveyService {
 
     @Transactional(readOnly = true)
     public Survey getSurveyDetail(Long id) {
-        return surveyRepository.findById(id).get();
+        return surveyRepository.findByIdAndIsDeletedFalse(id);
     }
-
 }
