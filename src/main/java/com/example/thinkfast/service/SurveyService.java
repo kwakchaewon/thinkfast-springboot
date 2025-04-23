@@ -36,6 +36,7 @@ public class SurveyService {
                 .title(createSurveyRequest.getTitle())
                 .description(createSurveyRequest.getDescription())
                 .endTime(LocalDateTime.of(createSurveyRequest.getEndDate(), createSurveyRequest.getEndTime()))
+                .isDeleted(false)
                 .build();
         Survey createdSurvey = surveyRepository.save(survey);
 
