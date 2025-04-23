@@ -2,6 +2,7 @@ package com.example.thinkfast.dto.survey;
 
 import com.example.thinkfast.domain.survey.Question;
 import com.example.thinkfast.domain.survey.Survey;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -17,6 +18,7 @@ public class GetSurveyDetailResponse {
     private String title;
     private String description;
     private LocalDateTime startTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime endTime;
     private Boolean isActive;
     private LocalDate createdAt;
