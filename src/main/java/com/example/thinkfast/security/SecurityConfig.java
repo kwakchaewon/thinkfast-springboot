@@ -1,7 +1,5 @@
 package com.example.thinkfast.security;
 
-import com.example.thinkfast.security.JwtAuthenticationFilter;
-import com.example.thinkfast.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

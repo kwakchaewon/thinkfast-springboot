@@ -4,7 +4,6 @@ import com.example.thinkfast.domain.survey.Answer;
 import com.example.thinkfast.dto.survey.CreateAnswerRequest;
 import com.example.thinkfast.repository.survey.AnswerRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

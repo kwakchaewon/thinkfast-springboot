@@ -1,6 +1,5 @@
 package com.example.thinkfast.service.survey;
 
-import com.example.thinkfast.domain.survey.Option;
 import com.example.thinkfast.domain.survey.Question;
 import com.example.thinkfast.dto.survey.QuestionDto;
 import com.example.thinkfast.repository.survey.OptionRepository;

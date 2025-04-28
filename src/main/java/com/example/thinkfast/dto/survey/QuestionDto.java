@@ -1,13 +1,11 @@
 package com.example.thinkfast.dto.survey;
 
 import com.example.thinkfast.domain.survey.Question;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
-import com.example.thinkfast.domain.survey.Question.QuestionType;
 
 @Getter
 @Setter
