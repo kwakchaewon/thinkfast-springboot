@@ -98,12 +98,14 @@ public class SurveyController {
     /**
      * 응답 방식: 비회원, 무인증 참여 가능
      * 개선 사항1: 쿠키, 로컬 스토리지, IP, 디바이스 ID 등을 통한 중복 응답 방지 (추후 관련 칼럼 추가)
-     * 개선 사항2: 삭제 question 일 경우
      * @param createAnswerRequest
      */
     @PostMapping("/{surveyId}/answers")
-    public void createAnswer(@RequestBody CreateAnswerRequest createAnswerRequest) {
+    public BaseResponse createAnswer(@PathVariable Long surveyId,
+                                     @RequestBody CreateAnswerRequest createAnswerRequest) {
+        if (surveyService.isSurveyDeleted(surveyId)) return BaseResponse.fail("존재하지 않는 설문입니다.");
         answerService.createAnswer(createAnswerRequest);
+        return BaseResponse.success();
     }
 
 }

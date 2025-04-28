@@ -88,4 +88,9 @@ public class SurveyService {
     public GetSurveyDetailResponse getSurveyDetail(Long id) {
         return surveyRepository.findByIdAndIsDeletedFalse(id);
     }
+
+    @Transactional(readOnly = true)
+    public Boolean isSurveyDeleted(Long id){
+        return !surveyRepository.existsByIdAndIsDeleted(id ,false);
+    }
 }
