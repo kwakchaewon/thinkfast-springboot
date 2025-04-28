@@ -31,11 +31,11 @@ public class SecurityConfig {
             .authorizeRequests()
             .antMatchers("/test/**").permitAll()
             .antMatchers("/auth/**").permitAll()
+            .antMatchers("/survey/*/questions").permitAll()  // <= 이 줄 추가
             .antMatchers("/survey/**").permitAll()
             .antMatchers("/swagger-ui.html", "/swagger-resources/**", "/v2/api-docs", "/webjars/**").permitAll()
             .antMatchers("/admin/**").hasRole("ADMIN")
             .antMatchers("/creator/**").hasRole("CREATOR")
-            .antMatchers("/responder/**").hasRole("RESPONDER")
             .anyRequest().authenticated()
             .and()
             .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);

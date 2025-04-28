@@ -73,7 +73,6 @@ public class SurveyController {
      * @return
      */
     @GetMapping("/{surveyId}/questions")
-    @PreAuthorize("hasRole('CREATOR')")
     public BaseResponse<List<QuestionDto>> getQuestionsBySurveyId(@PathVariable Long surveyId) {
         // 1. 설문 기반 question 리스트 조회
 
@@ -92,4 +91,6 @@ public class SurveyController {
 
         return BaseResponse.success(questionDtos);
     }
+
+
 }
