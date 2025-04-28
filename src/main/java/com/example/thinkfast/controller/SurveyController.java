@@ -3,6 +3,7 @@ package com.example.thinkfast.controller;
 import com.example.thinkfast.common.BaseResponse;
 import com.example.thinkfast.common.BaseResponseBody;
 import com.example.thinkfast.domain.survey.Question;
+import com.example.thinkfast.dto.survey.CreateAnswerRequest;
 import com.example.thinkfast.dto.survey.CreateSurveyRequest;
 import com.example.thinkfast.dto.survey.GetRecentSurveysResponse;
 import com.example.thinkfast.dto.survey.GetSurveyDetailResponse;
@@ -10,6 +11,7 @@ import com.example.thinkfast.dto.survey.QuestionDto;
 import com.example.thinkfast.security.UserDetailImpl;
 
 import com.example.thinkfast.service.SurveyService;
+import com.example.thinkfast.service.survey.AnswerService;
 import com.example.thinkfast.service.survey.QuestionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,6 +31,7 @@ import java.util.List;
 public class SurveyController {
     private final SurveyService surveyService;
     private final QuestionService questionService;
+    private final AnswerService answerService;
 
     /**
      * 개선 사항: 요청 데이터 유효성 검사, Bulk Insert 를 통한 성능 최적화, 트랜잭션 전파 설정 
@@ -92,5 +95,15 @@ public class SurveyController {
         return BaseResponse.success(questionDtos);
     }
 
+    /**
+     * 응답 방식: 비회원, 무인증 참여 가능
+     * 개선 사항1: 쿠키, 로컬 스토리지, IP, 디바이스 ID 등을 통한 중복 응답 방지 (추후 관련 칼럼 추가)
+     * 개선 사항2: 삭제 question 일 경우
+     * @param createAnswerRequest
+     */
+    @PostMapping("/{surveyId}/answers")
+    public void createAnswer(@RequestBody CreateAnswerRequest createAnswerRequest) {
+        answerService.createAnswer(createAnswerRequest);
+    }
 
 }
