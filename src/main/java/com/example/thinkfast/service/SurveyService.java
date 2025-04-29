@@ -90,7 +90,7 @@ public class SurveyService {
     }
 
     @Transactional(readOnly = true)
-    public Boolean isSurveyDeleted(Long id){
-        return !surveyRepository.existsByIdAndIsDeleted(id ,false);
+    public Boolean isSurveyInactive(Long id){
+        return surveyRepository.existsByIdAndIsDeletedOrIsActive(id ,true, false);
     }
 }

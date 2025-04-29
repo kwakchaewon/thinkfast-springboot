@@ -103,7 +103,7 @@ public class SurveyController {
     @PostMapping("/{surveyId}/answers")
     public BaseResponse createAnswer(@PathVariable Long surveyId,
                                      @RequestBody CreateAnswerRequest createAnswerRequest) {
-        if (surveyService.isSurveyDeleted(surveyId)) return BaseResponse.fail("존재하지 않는 설문입니다.");
+        if (surveyService.isSurveyInactive(surveyId)) return BaseResponse.fail("존재하지 않는 설문입니다.");
         answerService.createAnswer(createAnswerRequest);
         return BaseResponse.success();
     }

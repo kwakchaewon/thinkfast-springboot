@@ -36,5 +36,5 @@ public interface SurveyRepository extends JpaRepository<Survey, Long> {
             "ORDER BY s.createdAt DESC")
     List<GetRecentSurveysResponse> getRecentSurveys(@Param("creatorId") Long creatorId);
     GetSurveyDetailResponse findByIdAndIsDeletedFalse(Long id);
-    Boolean existsByIdAndIsDeleted(Long id, Boolean isDeleted);
+    Boolean existsByIdAndIsDeletedOrIsActive(Long id, Boolean isDeleted, Boolean isActive);
 }
