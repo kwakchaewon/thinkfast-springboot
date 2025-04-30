@@ -9,6 +9,7 @@ AI 기반 인사이트 제공. 실시간 설문조사 플랫폼 **띵패스트**
 
 ### **Frontend**
 - Vue3, Typescript
+- [thinkfast-vue3 리포지토리로 이동하기](https://github.com/kwakchaewon/thinkfast-vue3)
 
 ### **Backend**
 - Spring boot, Spring Security, Redis, Web Socket
