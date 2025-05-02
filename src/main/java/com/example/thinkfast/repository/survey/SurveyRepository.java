@@ -32,9 +32,9 @@ public interface SurveyRepository extends JpaRepository<Survey, Long> {
     @Query("SELECT new com.example.thinkfast.dto.survey.GetRecentSurveysResponse(" +
             "s.id, s.title, s.description, s.startTime, s.isActive, s.createdAt) " +
             "FROM Survey s " +
-            "WHERE s.creatorId = :creatorId AND s.isDeleted = false " +
+            "WHERE s.userId = :userId AND s.isDeleted = false " +
             "ORDER BY s.createdAt DESC")
-    List<GetRecentSurveysResponse> getRecentSurveys(@Param("creatorId") Long creatorId);
+    List<GetRecentSurveysResponse> getRecentSurveys(@Param("userId") Long userId);
     GetSurveyDetailResponse findByIdAndIsDeletedFalse(Long id);
     Boolean existsByIdAndIsDeletedOrIsActive(Long id, Boolean isDeleted, Boolean isActive);
 }

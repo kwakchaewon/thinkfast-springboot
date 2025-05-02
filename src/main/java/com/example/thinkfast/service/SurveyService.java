@@ -28,12 +28,12 @@ public class SurveyService {
 
     @Transactional
     public void createSurvey(UserDetailImpl userDetail, CreateSurveyRequest createSurveyRequest) {
-        Long creatorId = userRepository.findIdByUsername(userDetail.getUsername());
+        Long userId = userRepository.findIdByUsername(userDetail.getUsername());
 
         // 1. survey 테이블 저장
         // show result 필드 현재 없음
         Survey survey = Survey.builder()
-                .creatorId(creatorId)
+                .userId(userId)
                 .title(createSurveyRequest.getTitle())
                 .description(createSurveyRequest.getDescription())
                 .endTime(LocalDateTime.of(createSurveyRequest.getEndDate(), createSurveyRequest.getEndTime()))
@@ -77,8 +77,8 @@ public class SurveyService {
 
     @Transactional(readOnly = true)
     public List<GetRecentSurveysResponse> getRecentSurveys(UserDetailImpl userDetail) {
-        Long creatorId = userRepository.findIdByUsername(userDetail.getUsername());
-        List<GetRecentSurveysResponse> surveys = surveyRepository.getRecentSurveys(creatorId);
+        Long userId = userRepository.findIdByUsername(userDetail.getUsername());
+        List<GetRecentSurveysResponse> surveys = surveyRepository.getRecentSurveys(userId);
 
         // 상위 5개 row 까지만 return
         return surveys.subList(0, Math.min(5, surveys.size()));

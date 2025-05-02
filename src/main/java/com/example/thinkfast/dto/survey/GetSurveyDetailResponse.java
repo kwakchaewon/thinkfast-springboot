@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 public interface GetSurveyDetailResponse {
     Long getId();
-    Long getCreatorId();
+    Long getUserId();
     String getTitle();
     String getDescription();
     LocalDateTime getStartTime();

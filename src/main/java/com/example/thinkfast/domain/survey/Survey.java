@@ -29,8 +29,8 @@ public class Survey {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "CREATOR_ID", nullable = false)
-    private Long creatorId; // USER.id FK 대신 단순 ID로 처리
+    @Column(name = "userId", nullable = false)
+    private Long userId; // USER.id FK 대신 단순 ID로 처리
     private String title;
     private String description;
     private LocalDateTime startTime;
