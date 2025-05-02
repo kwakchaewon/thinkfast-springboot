@@ -6,11 +6,11 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class CreateAnswerRequest {
-    List<CreateAnswerDto> answers;
+public class CreateResponseRequest {
+    List<CreateResponseDto> answers;
 
     @Getter
-    public static class CreateAnswerDto{
+    public static class CreateResponseDto{
         private Long questionId; // questionId
         private QuestionType type;
         private Long optionId; // 객관식 선택지 (nullable)

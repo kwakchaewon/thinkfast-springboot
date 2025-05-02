@@ -1,28 +1,28 @@
 package com.example.thinkfast.domain.survey;
 
-import org.hibernate.annotations.CreationTimestamp;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.time.LocalDateTime;
 
 @Entity
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // 하는 이유?
+@AllArgsConstructor
 @Table(name = "RESPONSES")
 public class Response {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "SURVEY_ID", nullable = false)
-    private Long surveyId;
-
-    @Column(name = "USER_ID", nullable = false)
-    private Long userId;
-
-    @CreationTimestamp
-    private LocalDateTime submittedAt;
+    private Long questionId;
+    private String questionType;
+    private Long optionId;
+    private String subjectiveContent;
+    private Integer scaleValue;
 }
