@@ -51,6 +51,11 @@ public class SurveyController {
         surveyService.deleteSurvey(id);
     }
 
+    /**
+     * 개선사항: 설문 응답 count 인덱싱 적용
+     * @param userDetail
+     * @return
+     */
     @GetMapping("/recent")
     @PreAuthorize("hasRole('CREATOR')")
     public List<GetRecentSurveysResponse> getRecentSurveys(@AuthenticationPrincipal UserDetailImpl userDetail) {
