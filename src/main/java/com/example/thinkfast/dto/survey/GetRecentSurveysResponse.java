@@ -15,9 +15,9 @@ public class GetRecentSurveysResponse {
     private LocalDateTime startTime;
     private Boolean isActive;
     private LocalDate createdAt;
-    private int responseCount;
+    private Long responseCount;
 
-    public GetRecentSurveysResponse(Long id, String title, String description, LocalDateTime startTime, Boolean isActive, LocalDateTime createdAt) {
+    public GetRecentSurveysResponse(Long id, String title, String description, LocalDateTime startTime, Boolean isActive, LocalDateTime createdAt, Long responseCount) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -26,6 +26,6 @@ public class GetRecentSurveysResponse {
         this.createdAt = LocalDate.from(createdAt);
 
         // 고정값: 추후 응답 갯수 수정 예정
-        this.responseCount = 5;
+        this.responseCount = responseCount;
     }
 }

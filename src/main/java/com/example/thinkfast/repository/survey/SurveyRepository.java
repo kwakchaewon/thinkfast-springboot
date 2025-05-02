@@ -30,9 +30,13 @@ public interface SurveyRepository extends JpaRepository<Survey, Long> {
     List<Survey> findByIsActiveTrueAndEndTimeBefore(LocalDateTime endDate);
 
     @Query("SELECT new com.example.thinkfast.dto.survey.GetRecentSurveysResponse(" +
-            "s.id, s.title, s.description, s.startTime, s.isActive, s.createdAt) " +
+            "s.id, s.title, s.description, s.startTime, s.isActive, s.createdAt, " +
+            "COUNT(DISTINCT r.responseSessionId)) " +
             "FROM Survey s " +
+            "LEFT JOIN Question q on s.id = q.surveyId " +
+            "LEFT JOIN Response r ON q.id = r.questionId " +
             "WHERE s.userId = :userId AND s.isDeleted = false " +
+            "GROUP BY s.id, s.title, s.description, s.startTime, s.isActive, s.createdAt " +
             "ORDER BY s.createdAt DESC")
     List<GetRecentSurveysResponse> getRecentSurveys(@Param("userId") Long userId);
     GetSurveyDetailResponse findByIdAndIsDeletedFalse(Long id);
