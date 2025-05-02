@@ -100,11 +100,11 @@ public class SurveyController {
      * 개선 사항1: 쿠키, 로컬 스토리지, IP, 디바이스 ID 등을 통한 중복 응답 방지 (추후 관련 칼럼 추가)
      * @param createResponseRequest
      */
-    @PostMapping("/{surveyId}/answers")
-    public BaseResponse createResponse(@PathVariable Long surveyId,
+    @PostMapping("/{surveyId}/responses")
+    public BaseResponse createResponse(@PathVariable Long surveyId, @AuthenticationPrincipal UserDetailImpl userDetail,
                                      @RequestBody CreateResponseRequest createResponseRequest) {
         if (surveyService.isSurveyInactive(surveyId)) return BaseResponse.fail("존재하지 않는 설문입니다.");
-        responseService.createResponse(createResponseRequest);
+        responseService.createResponse(userDetail, createResponseRequest);
         return BaseResponse.success();
     }
 
