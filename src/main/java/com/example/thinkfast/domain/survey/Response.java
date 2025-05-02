@@ -20,7 +20,7 @@ public class Response {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long userId;
+    private String responseSessionId; // 추후 응답자 전략 수립 이후 지정 예정
     private Long questionId;
     private String questionType;
     private Long optionId;

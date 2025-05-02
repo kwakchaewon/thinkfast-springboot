@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class ResponseService {
@@ -17,10 +19,12 @@ public class ResponseService {
 
     @Transactional
     public void createResponse(UserDetailImpl userDetail , CreateResponseRequest createResponseRequest){
-        Long userId = userRepository.findIdByUsername(userDetail.getUsername());
+//        Long userId = userRepository.findIdByUsername(userDetail.getUsername());
+        String responseSessionId = getRandomUuid();
+
         for (CreateResponseRequest.CreateResponseDto createResponseDto : createResponseRequest.getAnswers()){
             Response response = Response.builder()
-                    .userId(userId)
+                    .responseSessionId(responseSessionId)
                     .questionId(createResponseDto.getQuestionId())
                     .optionId(createResponseDto.getOptionId())
                     .subjectiveContent(createResponseDto.getContent())
@@ -28,6 +32,10 @@ public class ResponseService {
                     .build();
             Response result =  responseRepository.save(response);
         }
+    }
+
+    public String getRandomUuid(){
+        return UUID.randomUUID().toString();
     }
 
 }
