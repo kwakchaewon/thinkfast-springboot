@@ -1,4 +1,4 @@
-package com.example.thinkfast.service;
+package com.example.thinkfast.service.auth;
 
 import com.example.thinkfast.domain.auth.RefreshToken;
 import com.example.thinkfast.repository.auth.RefreshTokenRepository;

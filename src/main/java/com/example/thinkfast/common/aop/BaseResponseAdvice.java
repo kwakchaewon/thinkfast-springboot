@@ -1,4 +1,4 @@
-package com.example.thinkfast.common;
+package com.example.thinkfast.common.aop;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;

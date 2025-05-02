@@ -1,7 +1,7 @@
 package com.example.thinkfast.controller;
 
-import com.example.thinkfast.common.BaseResponse;
-import com.example.thinkfast.common.BaseResponseBody;
+import com.example.thinkfast.common.aop.BaseResponse;
+import com.example.thinkfast.common.aop.BaseResponseBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

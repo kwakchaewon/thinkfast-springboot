@@ -1,4 +1,4 @@
-package com.example.thinkfast.service;
+package com.example.thinkfast.service.survey;
 
 import com.example.thinkfast.domain.survey.Option;
 import com.example.thinkfast.domain.survey.Question;

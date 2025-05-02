@@ -1,4 +1,4 @@
-package com.example.thinkfast.common;
+package com.example.thinkfast.common.aop;
 
 import lombok.Builder;
 import lombok.Getter;

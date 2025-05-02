@@ -1,7 +1,7 @@
 package com.example.thinkfast.controller;
 
-import com.example.thinkfast.common.BaseResponse;
-import com.example.thinkfast.common.BaseResponseBody;
+import com.example.thinkfast.common.aop.BaseResponse;
+import com.example.thinkfast.common.aop.BaseResponseBody;
 import com.example.thinkfast.domain.survey.Question;
 import com.example.thinkfast.dto.survey.CreateResponseRequest;
 import com.example.thinkfast.dto.survey.CreateSurveyRequest;
@@ -10,7 +10,7 @@ import com.example.thinkfast.dto.survey.GetSurveyDetailResponse;
 import com.example.thinkfast.dto.survey.QuestionDto;
 import com.example.thinkfast.security.UserDetailImpl;
 
-import com.example.thinkfast.service.SurveyService;
+import com.example.thinkfast.service.survey.SurveyService;
 import com.example.thinkfast.service.survey.ResponseService;
 import com.example.thinkfast.service.survey.QuestionService;
 import lombok.RequiredArgsConstructor;

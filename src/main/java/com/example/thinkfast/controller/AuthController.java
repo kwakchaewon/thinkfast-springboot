@@ -1,20 +1,12 @@
 package com.example.thinkfast.controller;
 
-import com.example.thinkfast.common.BaseResponse;
-import com.example.thinkfast.common.BaseResponseBody;
-import com.example.thinkfast.domain.auth.RefreshToken;
+import com.example.thinkfast.common.aop.BaseResponse;
+import com.example.thinkfast.common.aop.BaseResponseBody;
 import com.example.thinkfast.dto.auth.LoginRequest;
 import com.example.thinkfast.dto.auth.SignUpRequest;
 import com.example.thinkfast.dto.auth.TokenResponse;
-import com.example.thinkfast.security.JwtTokenProvider;
-import com.example.thinkfast.service.AuthService;
-import com.example.thinkfast.service.RefreshTokenService;
+import com.example.thinkfast.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 
