@@ -27,10 +27,11 @@ public class SecurityConfig {
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .authorizeRequests()
+                .antMatchers("/public/**").permitAll()
             .antMatchers("/test/**").permitAll()
             .antMatchers("/auth/**").permitAll()
             .antMatchers("/survey/*/questions").permitAll()  // <= 이 줄 추가
-            .antMatchers("/survey/**").permitAll()
+            .antMatchers("/survey/*").permitAll()
             .antMatchers("/swagger-ui.html", "/swagger-resources/**", "/v2/api-docs", "/webjars/**").permitAll()
             .antMatchers("/admin/**").hasRole("ADMIN")
             .antMatchers("/creator/**").hasRole("CREATOR")
