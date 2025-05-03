@@ -91,6 +91,6 @@ public class SurveyService {
 
     @Transactional(readOnly = true)
     public Boolean isSurveyInactive(Long id){
-        return surveyRepository.existsByIdAndIsDeletedOrIsActive(id ,true, false);
+        return surveyRepository.chekcIsInactiveOrDeleted(id ,true, false);
     }
 }
