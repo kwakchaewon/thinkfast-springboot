@@ -8,6 +8,7 @@ import com.example.thinkfast.dto.survey.CreateSurveyRequest;
 import com.example.thinkfast.dto.survey.GetRecentSurveysResponse;
 import com.example.thinkfast.dto.survey.GetSurveyDetailResponse;
 import com.example.thinkfast.dto.survey.QuestionDto;
+import com.example.thinkfast.realtime.RedisPublisher;
 import com.example.thinkfast.security.UserDetailImpl;
 
 import com.example.thinkfast.service.survey.SurveyService;
@@ -16,6 +17,7 @@ import com.example.thinkfast.service.survey.QuestionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -32,6 +34,7 @@ public class SurveyController {
     private final SurveyService surveyService;
     private final QuestionService questionService;
     private final ResponseService responseService;
+    private final RedisPublisher redisPublisher;
 
     /**
      * 개선 사항: 요청 데이터 유효성 검사, Bulk Insert 를 통한 성능 최적화, 트랜잭션 전파 설정 
@@ -103,13 +106,16 @@ public class SurveyController {
     /**
      * 응답 방식: 비회원, 무인증 참여 가능
      * 개선 사항1: 쿠키, 로컬 스토리지, IP, 디바이스 ID 등을 통한 중복 응답 방지 (추후 관련 칼럼 추가)
+     * 개선 사항2: 알람 메시지 DB 저장 후 read, unread 등 status 관리
      * @param createResponseRequest
      */
     @PostMapping("/{surveyId}/responses")
+    @Transactional
     public BaseResponse createResponse(@PathVariable Long surveyId, @AuthenticationPrincipal UserDetailImpl userDetail,
                                      @RequestBody CreateResponseRequest createResponseRequest) {
         if (surveyService.isSurveyInactive(surveyId)) return BaseResponse.fail("존재하지 않는 설문입니다.");
         responseService.createResponse(userDetail, createResponseRequest);
+        redisPublisher.sendAlarm(surveyId);
         return BaseResponse.success();
     }
 

@@ -35,6 +35,7 @@ public class SecurityConfig {
             .antMatchers("/swagger-ui.html", "/swagger-resources/**", "/v2/api-docs", "/webjars/**").permitAll()
             .antMatchers("/admin/**").hasRole("ADMIN")
             .antMatchers("/creator/**").hasRole("CREATOR")
+            .antMatchers("/alarm/**").permitAll()
             .anyRequest().authenticated()
             .and()
             .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);

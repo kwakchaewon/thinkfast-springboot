@@ -41,4 +41,6 @@ public interface SurveyRepository extends JpaRepository<Survey, Long> {
     List<GetRecentSurveysResponse> getRecentSurveys(@Param("userId") Long userId);
     GetSurveyDetailResponse findByIdAndIsDeletedFalse(Long id);
     Boolean existsByIdAndIsDeletedOrIsActive(Long id, Boolean isDeleted, Boolean isActive);
+    @Query("SELECT s.userId FROM Survey s WHERE s.id = :id")
+    Long findUserIdById(@Param("id") Long id);
 }
