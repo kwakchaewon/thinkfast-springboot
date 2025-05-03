@@ -40,7 +40,14 @@ public interface SurveyRepository extends JpaRepository<Survey, Long> {
             "ORDER BY s.createdAt DESC")
     List<GetRecentSurveysResponse> getRecentSurveys(@Param("userId") Long userId);
     GetSurveyDetailResponse findByIdAndIsDeletedFalse(Long id);
-    Boolean existsByIdAndIsDeletedOrIsActive(Long id, Boolean isDeleted, Boolean isActive);
+    @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END " +
+            "FROM Survey s " +
+            "WHERE s.id = :id AND (s.isDeleted = :isDeleted OR s.isActive = :isActive)")
+    Boolean chekcIsInactiveOrDeleted(
+            @Param("id") Long id,
+            @Param("isDeleted") Boolean isDeleted,
+            @Param("isActive") Boolean isActive
+    );
     @Query("SELECT s.userId FROM Survey s WHERE s.id = :id")
     Long findUserIdById(@Param("id") Long id);
 }
