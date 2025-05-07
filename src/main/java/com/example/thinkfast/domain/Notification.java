@@ -26,10 +26,11 @@ public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long userId;
-    private Long surveyId;
-    private String message;
-    private String status;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String type; // 알람 유형 (예: SURVEY_RESPONSE)
+    private Long recipentId; // 수신자 (회원 ID)
+    private String message; // 알람 내용
+    private Long referenceId; // 연관된 설문 ID 등
+    private Boolean isRead; // 읽음 여부
+    private LocalDateTime createdAt; // 생성일
+    private LocalDateTime expiresAt; // 만료일
 }
