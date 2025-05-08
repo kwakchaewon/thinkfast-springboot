@@ -37,6 +37,8 @@ public class SecurityConfig {
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/creator/**").hasRole("CREATOR")
                 .antMatchers("/alarm/**").permitAll()
+                .antMatchers("/notification").permitAll()
+                .antMatchers("/notification/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);

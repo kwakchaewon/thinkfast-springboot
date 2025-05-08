@@ -118,5 +118,4 @@ public class SurveyController {
         redisPublisher.sendAlarm(surveyId);
         return BaseResponse.success();
     }
-
 }

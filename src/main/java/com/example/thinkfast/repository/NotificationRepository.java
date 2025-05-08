@@ -3,6 +3,7 @@ package com.example.thinkfast.repository;
 import com.example.thinkfast.domain.Notification;
 import com.example.thinkfast.realtime.ResponseCreatedAlarm;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -23,4 +24,12 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             "GROUP BY n.referenceId " +
             "ORDER BY MAX(n.createdAt) DESC")
     List<ResponseCreatedAlarm> findNotificationSummariesByRecipient(@Param("recipientId") Long recipientId);
+
+    @Modifying
+    @Query("UPDATE Notification n SET n.isRead = true " +
+            "WHERE n.type = 'SURVEY_RESPONSE' " +
+            "AND n.recipientId = :recipientId " +
+            "AND n.referenceId IN :surveyIds")
+    int updateSurveyNotificationAsRead(@Param("recipientId") Long recipientId,
+                                  @Param("surveyIds") List<Long> surveyIds);
 }
