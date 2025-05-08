@@ -17,5 +17,5 @@ public class ResponseCreatedAlarm {
     private String surveyTitle;
     private Boolean isRead;
     private LocalDateTime createdAt;
-    private Long alarmCount;
+    private long alarmCount;
 }
