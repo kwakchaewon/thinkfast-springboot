@@ -8,9 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -40,9 +39,12 @@ public class RedisPublisher {
 
         Notification createdNotification = notificationRepository.save(notification);
 
+        List<ResponseCreatedAlarm> newResponseCreatedAlarms = notificationRepository.findNotificationSummariesByRecipient(userId);
+        AlarmMessage alarmMessage = new AlarmMessage(username, newResponseCreatedAlarms);
+
         try {
-            AlarmMessage alarmMessage = new AlarmMessage(username, createdNotification.getMessage(), createdNotification.getCreatedAt());
             String json = objectMapper.writeValueAsString(alarmMessage);
+
             // 레디스 채널에 매시지 전달
             redisTemplate.convertAndSend(CHANNEL, json);
         } catch (Exception e) {

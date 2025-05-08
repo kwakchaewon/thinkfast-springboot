@@ -1,6 +1,8 @@
 package com.example.thinkfast.realtime;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -21,6 +23,8 @@ public class AlarmHandler extends TextWebSocketHandler {
     // 여러 개의 브라우저나 여러 기기에서 동일한 userId 로 접속하기 때문에 각각 세션을 독립적으로 관리
     // 세션 종료 시 세션을 식별하여 세션 제거
     // userId를 key로, 해당 userId에 대한 모든 세션을 관리하는 구조
+    @Autowired
+    private ObjectMapper objectMapper;
     private Map<String, Set<WebSocketSession>> alarmSessions = new ConcurrentHashMap<>();  // userId -> Set<WebSocketSession>
 
     // /ws/alarm 으로 웹소켓 연결 시도 시, 호출. 연결된 알람 세션을 저장
@@ -50,14 +54,15 @@ public class AlarmHandler extends TextWebSocketHandler {
     }
 
     // Redis로부터 이벤트가 오면 해당 이벤트를 모든 세션에 전송
-    public void sendToUser(String userId, String message) {
+    public void sendToUser(String userId, Object message) {
         // 해당 userId에 연결된 모든 세션에 메시지 전송
         Set<WebSocketSession> sessions = alarmSessions.get(userId);
         if (sessions != null) {
             for (WebSocketSession session : sessions) {
                 if (session.isOpen()) {
                     try {
-                        session.sendMessage(new TextMessage(message));
+                        String json = objectMapper.writeValueAsString(message);
+                        session.sendMessage(new TextMessage(json));
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
