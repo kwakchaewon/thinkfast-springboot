@@ -28,17 +28,18 @@ public class SecurityConfig {
             .and()
             .authorizeRequests()
                 .antMatchers("/public/**").permitAll()
-            .antMatchers("/test/**").permitAll()
-            .antMatchers("/auth/**").permitAll()
-            .antMatchers("/survey/*/questions").permitAll()  // <= 이 줄 추가
-            .antMatchers("/survey/*").permitAll()
-            .antMatchers("/swagger-ui.html", "/swagger-resources/**", "/v2/api-docs", "/webjars/**").permitAll()
-            .antMatchers("/admin/**").hasRole("ADMIN")
-            .antMatchers("/creator/**").hasRole("CREATOR")
-            .antMatchers("/alarm/**").permitAll()
-            .anyRequest().authenticated()
-            .and()
-            .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+                .antMatchers("/test/**").permitAll()
+                .antMatchers("/auth/**").permitAll()
+                .antMatchers("/survey/*/questions").permitAll()
+                .antMatchers("/survey/*/responses").permitAll()
+                .antMatchers("/survey/*").permitAll()
+                .antMatchers("/swagger-ui.html", "/swagger-resources/**", "/v2/api-docs", "/webjars/**").permitAll()
+                .antMatchers("/admin/**").hasRole("ADMIN")
+                .antMatchers("/creator/**").hasRole("CREATOR")
+                .antMatchers("/alarm/**").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
