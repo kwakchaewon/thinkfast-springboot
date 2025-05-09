@@ -30,6 +30,7 @@ public class RedisPublisher {
         Long userId = surveyRepository.findUserIdById(surveyId);
         String username = userRepository.findUsernameById(userId);
 
+        // 1. 알람 객체 생성
         Notification notification = Notification.builder()
                 .type("SURVEY_RESPONSE")
                 .recipientId(userId)
@@ -37,15 +38,17 @@ public class RedisPublisher {
                 .referenceId(surveyId)
                 .build();
 
+        // 2. 알람 저장
         Notification createdNotification = notificationRepository.save(notification);
 
-        List<ResponseCreatedAlarm> newResponseCreatedAlarms = notificationRepository.findNotificationSummariesByRecipient(userId);
-        AlarmMessage alarmMessage = new AlarmMessage(username, newResponseCreatedAlarms);
+        // 3. 알람 저장 후 웹소켓에 전달할 메시지 (알람 리스트) 조회
+        List<ResponseCreatedAlarm> responseCreatedAlarms = notificationRepository.findNotificationSummariesByRecipient(userId);
+        AlarmMessage alarmMessage = new AlarmMessage(username, responseCreatedAlarms);
 
         try {
             String json = objectMapper.writeValueAsString(alarmMessage);
 
-            // 레디스 채널에 매시지 전달
+            // 4. 구독된 채널에 매시지 전달
             redisTemplate.convertAndSend(CHANNEL, json);
         } catch (Exception e) {
             e.printStackTrace();

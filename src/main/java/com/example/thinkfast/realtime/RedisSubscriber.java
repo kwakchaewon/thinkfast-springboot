@@ -15,8 +15,7 @@ public class RedisSubscriber implements MessageListener {
     private final AlarmHandler alarmHandler;
     private final ObjectMapper objectMapper;
 
-    // 메시지 수신 후
-    // Redis 발행된 (publish) 메시지를 받아서 websocket 을 통해 알림 전송하는 역할
+    // publisher 로부터 받은 메시지를 웹 소켓을 통해 실시간 알림 전송 (알림 전송)
     public void onMessage(Message message, byte[] pattern) {
         try {
             String json = new String(message.getBody(), StandardCharsets.UTF_8);
@@ -24,7 +23,7 @@ public class RedisSubscriber implements MessageListener {
             AlarmMessage alarmMessage = objectMapper.readValue(json, AlarmMessage.class);
             List<ResponseCreatedAlarm> responseCreatedAlarms = alarmMessage.getNewResponseCreatedAlarms();
 
-            // WebSocket을 통해 해당 userId에게 메시지 전송
+            // 1. WebSocket을 통해 해당 username 기반 세션에 메시지 전송
             alarmHandler.sendToUser(alarmMessage.getUsername(), responseCreatedAlarms);
 
         } catch (Exception e) {
