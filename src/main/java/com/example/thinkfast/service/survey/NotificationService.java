@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -24,6 +25,9 @@ public class NotificationService {
 
     public List<ResponseCreatedAlarm> getNotificationSummaries(UserDetailImpl userDetail){
         Long userId = userRepository.findIdByUsername(userDetail.getUsername());
-        return notificationRepository.findNotificationSummariesByRecipient(userId);
+        
+        // 최신 30일 알람 리스트 조회. 추후 7일로 변경 예정
+        LocalDateTime monthAgo = LocalDateTime.now().minusDays(30);
+        return notificationRepository.findNotificationSummariesByRecipient(userId, monthAgo);
     }
 }

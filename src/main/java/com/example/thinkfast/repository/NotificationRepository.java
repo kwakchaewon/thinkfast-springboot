@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
@@ -25,10 +27,10 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             "AND s.isDeleted = false " +
             "AND n.createdAt = (" +
             "    SELECT MAX(n3.createdAt) FROM Notification n3 " +
-            "    WHERE n3.referenceId = n.referenceId" +
+            "    WHERE n3.referenceId = n.referenceId AND n3.createdAt > :monthAgo" +
             ") " +
             "ORDER BY n.createdAt DESC")
-    List<ResponseCreatedAlarm> findNotificationSummariesByRecipient(@Param("recipientId") Long recipientId);
+    List<ResponseCreatedAlarm> findNotificationSummariesByRecipient(@Param("recipientId") Long recipientId, @Param("monthAgo") LocalDateTime monthAgo);
 
     @Modifying
     @Query("UPDATE Notification n SET n.isRead = true " +

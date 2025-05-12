@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -41,8 +42,9 @@ public class RedisPublisher {
         // 2. 알람 저장
         Notification createdNotification = notificationRepository.save(notification);
 
-        // 3. 알람 저장 후 웹소켓에 전달할 메시지 (알람 리스트) 조회
-        List<ResponseCreatedAlarm> responseCreatedAlarms = notificationRepository.findNotificationSummariesByRecipient(userId);
+        // 3. 알람 저장 후 웹소켓에 전달할 메시지 (최신 30일 알람 리스트. 추후 7일로 변경 예정) 조회
+        LocalDateTime monthAgo = LocalDateTime.now().minusDays(30);
+        List<ResponseCreatedAlarm> responseCreatedAlarms = notificationRepository.findNotificationSummariesByRecipient(userId, monthAgo);
         AlarmMessage alarmMessage = new AlarmMessage(username, responseCreatedAlarms);
 
         try {
