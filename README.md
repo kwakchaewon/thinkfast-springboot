@@ -42,8 +42,8 @@ AI 기반 인사이트 제공. 실시간 설문조사 플랫폼 **띵패스트**
 ## 💻 상세 개발 내역
 ### ✅ 로그인/회원가입
 ✔️ **Spring Securiyt + JWT 기반 인증 인가**
-- 회원가입 시 각 필드별 유효성 검사
-- 로그인 시 `AccessToken` 과 `RefreshToken` 발급
+- 회원가입 시 각 필드별 유효성 검사.
+- 로그인 시 `AccessToken` 과 `RefreshToken` 발급.
 
 |회원 가입 화면|로그인 화면|
 |---|---|
@@ -52,16 +52,35 @@ AI 기반 인사이트 제공. 실시간 설문조사 플랫폼 **띵패스트**
 
 ### ✅ 설문 CRUD
 ✔️ **설문 생성**
-- 설문 생성 시, 질문 유형(객관식/주관식) 및 응답 종료 시간 설정 가정 가능
+- 설문 생성 시, 질문 유형(객관식/주관식) 및 응답 종료 시간 설정 가정 가능.
 
 |설문 생성 화면|설문 생성 화면|
 |---|---|
 |![image](https://github.com/AIVLE-School-Third-Big-Project/Team11-Project/assets/76936390/ea45c4c8-2a2a-4c51-bb27-4bf21f1f8c64)|![image](https://github.com/AIVLE-School-Third-Big-Project/Team11-Project/assets/76936390/2899f85b-1dea-4f25-b664-033b187f4f4f)|
 <br/>
 
+✔️ **설문 조회**
+- 전체 설문 조회 및 설문 상세 기능 제공.
+- 삭제 설문 조회 시, 예외 처리.
 
-### ✅ 설문 참여 및 실시간 업데이트
-- (~ing)
+|설문 상세|삭제 설문 조회 화면|
+|---|---|
+|![image](https://github.com/AIVLE-School-Third-Big-Project/Team11-Project/assets/76936390/ea45c4c8-2a2a-4c51-bb27-4bf21f1f8c64)|![image](https://github.com/AIVLE-School-Third-Big-Project/Team11-Project/assets/76936390/2899f85b-1dea-4f25-b664-033b187f4f4f)|
+<br/>
+
+
+### ✅ 설문 참여
+✔️ **설문 응답**
+- 모바일 환경에 최적화된 UI/UX
+- QR 코드를 통한 쉬운 응답 참여. 번거로운 회원가입 절차 없이 응답 가능.
+- 중복 응답 방지를 위한 설문별 쿠키 + 스토리지 + IP 제한.
+- 삭제, 만료 설문, 중복 참여 예외 처리
+
+|응답 참여 화면|삭제 설문 조회 화면|
+|---|---|
+|![image](https://github.com/AIVLE-School-Third-Big-Project/Team11-Project/assets/76936390/ea45c4c8-2a2a-4c51-bb27-4bf21f1f8c64)|![image](https://github.com/AIVLE-School-Third-Big-Project/Team11-Project/assets/76936390/2899f85b-1dea-4f25-b664-033b187f4f4f)|
+<br/>
+
 
 **✔ Hospital 광고 API**
 - 메인 화면에 답변 작성이 우수한 병원 광고.<br/>
