@@ -6,9 +6,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -16,7 +18,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws IOException {
+            throws IOException, ServletException {
+
+        String requestURI = request.getRequestURI();
+
+        // 필터링 제외 URI 설정
+        if (isExcludedUrl(requestURI)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String token = jwtTokenProvider.resolveToken(request);
 
         try {
@@ -37,6 +48,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Authentication error: " + e.getMessage());
         }
+    }
+
+    private boolean isExcludedUrl(String requestURI) {
+        return Arrays.asList(JwtExcludeUrl.getUrls()).contains(requestURI);
     }
 
 } 

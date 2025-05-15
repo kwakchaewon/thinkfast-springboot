@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -99,7 +100,9 @@ public class AuthService {
         String newRefreshToken = jwtTokenProvider.createRefreshToken(authentication.getName());
 
         // 기존 리프레시 토큰 삭제
-        refreshTokenRepository.delete(storedToken);
+        if(refreshTokenRepository.existsById(storedToken.getId())) {
+            refreshTokenRepository.delete(storedToken);
+        }
 
         // 새로운 리프레시 토큰 저장
         RefreshToken newStoredToken = RefreshToken.builder()
@@ -108,7 +111,21 @@ public class AuthService {
                 .expiryDate(LocalDateTime.now().plusDays(7))
                 .build();
 
-        refreshTokenRepository.save(newStoredToken);
+        Optional<RefreshToken> existingToken = refreshTokenRepository.findByToken(newRefreshToken);
+        if (existingToken.isPresent()) {
+            // 이미 저장되어 있다면 업데이트하거나 무시
+            RefreshToken token = existingToken.get();
+            token.setExpiryDate(LocalDateTime.now().plusDays(7));
+            refreshTokenRepository.save(token);
+        } else {
+            // 새로 저장
+            RefreshToken newStoredToken2 = RefreshToken.builder()
+                    .username(username)
+                    .token(newRefreshToken)
+                    .expiryDate(LocalDateTime.now().plusDays(7))
+                    .build();
+            refreshTokenRepository.save(newStoredToken2);
+        }
 
         return TokenResponse.builder()
                 .accessToken(newAccessToken)

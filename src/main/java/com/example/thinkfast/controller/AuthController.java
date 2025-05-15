@@ -3,6 +3,7 @@ package com.example.thinkfast.controller;
 import com.example.thinkfast.common.aop.BaseResponse;
 import com.example.thinkfast.common.aop.BaseResponseBody;
 import com.example.thinkfast.dto.auth.LoginRequest;
+import com.example.thinkfast.dto.auth.RefreshTokenRequest;
 import com.example.thinkfast.dto.auth.SignUpRequest;
 import com.example.thinkfast.dto.auth.TokenResponse;
 import com.example.thinkfast.service.auth.AuthService;
@@ -40,8 +41,8 @@ public class AuthController {
      * @return
      */
     @PostMapping("/refresh")
-    public TokenResponse refreshToken(@RequestHeader("Authorization") String refreshToken) {
-        return authService.refreshToken(refreshToken);
+    public TokenResponse refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
+        return authService.refreshToken(refreshTokenRequest.getRefreshToken());
     }
 
     @PostMapping("/logout")
