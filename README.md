@@ -88,11 +88,14 @@ AI 기반 인사이트 제공. 실시간 설문조사 플랫폼 **띵패스트**
 
 
 ### ✅ 알림 및 로깅 시스템
-- (~ing) <br/>
+- WebSocket + Redis 기반 응답 생성.
+- 설문 응답 생성, 설문 종료 시 멀티 쓰레드 환경 사용자에게 알림.
+- 
+ <br/>
 
 ### ✅ AI 요약 및 인사이트
 - Python 서버(LangChain + Hugging Face) 연동 <br/>
-- 주관식 응답 요약 및 감정 분석 API 개발<br/>
+- 주관식 응답 요약 및 감정 분석<br/>
 - 설문 응답 기반 요약 리포트 자동 생성<br/>
 
 **✔ 비동기적 gpt 답변 등록**
@@ -104,8 +107,6 @@ AI 기반 인사이트 제공. 실시간 설문조사 플랫폼 **띵패스트**
 - LangChain RetrievalQAChain 기반 질의응답 API 개발<br/>
 
 ### ✅ 배포 및 취약점 개선 
+- Redis Sentinel 기반 이중화
 - HttpOnly Cookie 저장 방식 적용
-- Redis Pub/Sub
-- DB 이중화
-- 중복 로그인 방지
 <br/><br/>
