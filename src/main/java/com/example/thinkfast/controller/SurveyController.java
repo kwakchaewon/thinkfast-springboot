@@ -2,6 +2,7 @@ package com.example.thinkfast.controller;
 
 import com.example.thinkfast.common.aop.BaseResponse;
 import com.example.thinkfast.common.aop.BaseResponseBody;
+import com.example.thinkfast.common.aop.ResponseMessage;
 import com.example.thinkfast.domain.survey.Question;
 import com.example.thinkfast.dto.survey.CreateResponseRequest;
 import com.example.thinkfast.dto.survey.CreateSurveyRequest;
@@ -80,7 +81,7 @@ public class SurveyController {
     @PreAuthorize("hasRole('CREATOR')")
     public BaseResponse<GetSurveyDetailResponse> getSurveyDetail(@PathVariable Long id) {
         GetSurveyDetailResponse getSurveyDetailResponse = surveyService.getSurveyDetail(id);
-        if (getSurveyDetailResponse == null) return BaseResponse.fail("존재하지 않는 설문입니다.");
+        if (getSurveyDetailResponse == null) return BaseResponse.fail(ResponseMessage.SURVEY_NOT_FOUND);
         return BaseResponse.success(getSurveyDetailResponse);
     }
 
@@ -95,7 +96,7 @@ public class SurveyController {
 
         List<Question> questions = questionService.getIdsBySurveyId(surveyId);
         if (questions.isEmpty()){
-            return BaseResponse.fail("존재하지 않는 설문입니다.");
+            return BaseResponse.fail(ResponseMessage.SURVEY_NOT_FOUND);
         }
 
         List<QuestionDto> questionDtos = new ArrayList<>();;
@@ -119,7 +120,7 @@ public class SurveyController {
     @Transactional
     public BaseResponse createResponse(@PathVariable Long surveyId, @AuthenticationPrincipal UserDetailImpl userDetail,
                                      @RequestBody CreateResponseRequest createResponseRequest) {
-        if (surveyService.isSurveyInactive(surveyId)) return BaseResponse.fail("존재하지 않는 설문입니다.");
+        if (surveyService.isSurveyInactive(surveyId)) return BaseResponse.fail(ResponseMessage.SURVEY_UNAVAILABLE);
         responseService.createResponse(userDetail, createResponseRequest);
         redisPublisher.sendAlarm(surveyId);
         return BaseResponse.success();

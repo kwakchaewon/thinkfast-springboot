@@ -48,4 +48,13 @@ public class BaseResponse<T> {
                 .timestamp(LocalDateTime.now())
                 .build();
     }
+
+    public static <T> BaseResponse<T> fail(ResponseMessage responseMessage) {
+        return BaseResponse.<T>builder()
+                .success(false)
+                .message(responseMessage.name())
+                .data(null)
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
 } 
