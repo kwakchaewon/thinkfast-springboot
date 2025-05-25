@@ -52,7 +52,7 @@ public class BaseResponse<T> {
     public static <T> BaseResponse<T> fail(ResponseMessage responseMessage) {
         return BaseResponse.<T>builder()
                 .success(false)
-                .message(responseMessage.name())
+                .message(responseMessage.getMessage())
                 .data(null)
                 .timestamp(LocalDateTime.now())
                 .build();
