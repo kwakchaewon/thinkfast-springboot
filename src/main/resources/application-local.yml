@@ -1,4 +1,6 @@
 spring:
+  address: 0.0.0.0
+  port: 8080
   datasource:
     url: jdbc:mariadb://localhost:3306/thinkfast
     username: root
