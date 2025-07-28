@@ -1,5 +1,6 @@
 package com.example.thinkfast.service.survey;
 
+import com.example.thinkfast.common.utils.HashUtil;
 import com.example.thinkfast.domain.survey.Option;
 import com.example.thinkfast.domain.survey.Question;
 import com.example.thinkfast.domain.survey.Survey;
@@ -10,6 +11,7 @@ import com.example.thinkfast.repository.auth.UserRepository;
 import com.example.thinkfast.repository.survey.OptionRepository;
 import com.example.thinkfast.repository.survey.QuestionRepository;
 import com.example.thinkfast.repository.survey.SurveyRepository;
+import com.example.thinkfast.repository.survey.SurveyResponseHistoryRepository;
 import com.example.thinkfast.security.UserDetailImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ public class SurveyService {
     private final OptionRepository optionRepository;
     private final QuestionRepository questionRepository;
     private final SurveyRepository surveyRepository;
+    private final SurveyResponseHistoryRepository surveyResponseHistoryRepository;
 
     @Transactional
     public void createSurvey(UserDetailImpl userDetail, CreateSurveyRequest createSurveyRequest) {
@@ -98,5 +101,15 @@ public class SurveyService {
     @Transactional(readOnly = true)
     public Boolean isSurveyInactive(Long id){
         return surveyRepository.chekcIsInactiveOrDeleted(id ,true, false);
+    }
+
+    public Boolean isDuplicateResponse(Long surveyId, String deviceId, String ipAddress){
+        String deviceIdHash = HashUtil.sha256(deviceId);
+        String ipAddressHash = HashUtil.sha256(ipAddress);
+
+        boolean byDevice = surveyResponseHistoryRepository.existsBySurveyIdAndDeviceIdHash(surveyId, deviceIdHash);
+        boolean byIp = surveyResponseHistoryRepository.existsBySurveyIdAndIpAddressHash(surveyId, ipAddressHash);
+
+        return byDevice || byIp;
     }
 }
