@@ -13,6 +13,7 @@ import com.example.thinkfast.repository.survey.QuestionRepository;
 import com.example.thinkfast.repository.survey.SurveyRepository;
 import com.example.thinkfast.repository.survey.SurveyResponseHistoryRepository;
 import com.example.thinkfast.security.UserDetailImpl;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -104,12 +105,13 @@ public class SurveyService {
     }
 
     public Boolean isDuplicateResponse(Long surveyId, String deviceId, String ipAddress){
-        String deviceIdHash = HashUtil.sha256(deviceId);
-        String ipAddressHash = HashUtil.sha256(ipAddress);
+        String deviceIdHash = HashUtil.encodeSha256(deviceId);
+        String ipAddressHash = HashUtil.encodeSha256(ipAddress);
 
         boolean byDevice = surveyResponseHistoryRepository.existsBySurveyIdAndDeviceIdHash(surveyId, deviceIdHash);
         boolean byIp = surveyResponseHistoryRepository.existsBySurveyIdAndIpAddressHash(surveyId, ipAddressHash);
 
-        return byDevice || byIp;
+        Boolean result = byDevice || byIp;
+        return result;
     }
 }

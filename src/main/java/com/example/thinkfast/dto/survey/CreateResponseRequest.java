@@ -7,6 +7,7 @@ import java.util.List;
 
 @Getter
 public class CreateResponseRequest {
+    ClientInfoDto clientInfo;
     List<CreateResponseDto> answers;
 
     @Getter
@@ -15,5 +16,10 @@ public class CreateResponseRequest {
         private QuestionType type;
         private Long optionId; // 객관식 선택지 (nullable)
         private String content; // 주관식 선택지 (nullable)
+    }
+
+    @Getter
+    public static class ClientInfoDto{
+        private String deviceId;
     }
 }

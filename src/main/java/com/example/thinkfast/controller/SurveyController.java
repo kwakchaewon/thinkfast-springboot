@@ -3,6 +3,7 @@ package com.example.thinkfast.controller;
 import com.example.thinkfast.common.aop.BaseResponse;
 import com.example.thinkfast.common.aop.BaseResponseBody;
 import com.example.thinkfast.common.aop.ResponseMessage;
+import com.example.thinkfast.common.utils.IpUtil;
 import com.example.thinkfast.domain.survey.Question;
 import com.example.thinkfast.dto.survey.CreateResponseRequest;
 import com.example.thinkfast.dto.survey.CreateSurveyRequest;
@@ -21,6 +22,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -119,9 +121,13 @@ public class SurveyController {
     @PostMapping("/{surveyId}/responses")
     @Transactional
     public BaseResponse createResponse(@PathVariable Long surveyId, @AuthenticationPrincipal UserDetailImpl userDetail,
-                                     @RequestBody CreateResponseRequest createResponseRequest) {
+                                       @RequestBody CreateResponseRequest createResponseRequest, HttpServletRequest request) {
+        String clientIpAddress = IpUtil.getClientIp(request);
+
         if (surveyService.isSurveyInactive(surveyId)) return BaseResponse.fail(ResponseMessage.SURVEY_UNAVAILABLE);
-        responseService.createResponse(userDetail, createResponseRequest);
+        if (surveyService.isDuplicateResponse(surveyId, createResponseRequest.getClientInfo().getDeviceId(), clientIpAddress))
+            return BaseResponse.fail(ResponseMessage.RESPONSE_DUPLICATED);
+        responseService.createResponse(userDetail, surveyId, clientIpAddress, createResponseRequest);
         redisPublisher.sendAlarm(surveyId);
         return BaseResponse.success();
     }
