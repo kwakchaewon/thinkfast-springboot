@@ -1,13 +1,12 @@
 package com.example.thinkfast.repository;
 
 import com.example.thinkfast.domain.Notification;
-import com.example.thinkfast.realtime.ResponseCreatedAlarm;
+import com.example.thinkfast.realtime.dto.ResponseCreatedAlarm;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 

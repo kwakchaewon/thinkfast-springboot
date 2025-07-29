@@ -1,6 +1,6 @@
 package com.example.thinkfast.service.survey;
 
-import com.example.thinkfast.realtime.ResponseCreatedAlarm;
+import com.example.thinkfast.realtime.dto.ResponseCreatedAlarm;
 import com.example.thinkfast.repository.NotificationRepository;
 import com.example.thinkfast.repository.auth.UserRepository;
 import com.example.thinkfast.security.UserDetailImpl;

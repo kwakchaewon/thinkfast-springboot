@@ -1,9 +1,7 @@
 package com.example.thinkfast.controller;
 
 import com.example.thinkfast.common.aop.BaseResponseBody;
-import com.example.thinkfast.dto.survey.CreateSurveyRequest;
-import com.example.thinkfast.realtime.ResponseCreatedAlarm;
-import com.example.thinkfast.repository.NotificationRepository;
+import com.example.thinkfast.realtime.dto.ResponseCreatedAlarm;
 import com.example.thinkfast.security.UserDetailImpl;
 import com.example.thinkfast.service.survey.NotificationService;
 import lombok.RequiredArgsConstructor;

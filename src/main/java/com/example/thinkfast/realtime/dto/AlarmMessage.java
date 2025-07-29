@@ -1,4 +1,4 @@
-package com.example.thinkfast.realtime;
+package com.example.thinkfast.realtime.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
