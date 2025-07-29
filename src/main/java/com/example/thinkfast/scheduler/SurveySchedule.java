@@ -19,7 +19,7 @@ public class SurveySchedule {
     private final SurveyRepository surveyRepository;
     @Scheduled(fixedRate = 60000)
     @Transactional
-    public void checkSurveyStatus() {
+    public void updateExpiredSurvey() {
         log.info("[SCHEDULER] SURVEY CHECK");
         try {
             // 현재 시간
