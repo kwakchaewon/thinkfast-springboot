@@ -17,7 +17,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
      * @param recipientId
      * @return
      */
-    @Query("SELECT new com.example.thinkfast.realtime.ResponseCreatedAlarm(" +
+    @Query("SELECT new com.example.thinkfast.realtime.dto.ResponseCreatedAlarm(" +
             "n.type, s.id, s.title, n.isRead, n.createdAt, " +
             "(SELECT COUNT(n2) FROM Notification n2 WHERE n2.referenceId = n.referenceId)) " +
             "FROM Notification n " +
