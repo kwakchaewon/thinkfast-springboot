@@ -2,6 +2,7 @@ package com.example.thinkfast.realtime;
 
 import com.example.thinkfast.domain.Notification;
 import com.example.thinkfast.realtime.dto.AlarmMessage;
+import com.example.thinkfast.realtime.dto.NotificationMessage;
 import com.example.thinkfast.realtime.dto.ResponseCreatedAlarm;
 import com.example.thinkfast.repository.NotificationRepository;
 import com.example.thinkfast.repository.auth.UserRepository;
@@ -29,15 +30,17 @@ public class RedisPublisher {
      * 개선 사항: 알람 저장 및 확인된 알람 status 변경 로직
      * @param surveyId
      */
-    public void sendAlarm(Long surveyId) {
+    public void sendAlarm(Long surveyId, String type) {
         Long userId = surveyRepository.findUserIdById(surveyId);
         String username = userRepository.findUsernameById(userId);
 
+        String message = String.valueOf(NotificationMessage.valueOf(type));
+
         // 1. 알람 객체 생성
         Notification notification = Notification.builder()
-                .type("SURVEY_RESPONSE")
+                .type(type)
                 .recipientId(userId)
-                .message("새 응답이 도착했습니다.")
+                .message(message)
                 .referenceId(surveyId)
                 .build();
 

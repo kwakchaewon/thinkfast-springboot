@@ -128,7 +128,7 @@ public class SurveyController {
         if (surveyService.isDuplicateResponse(surveyId, createResponseRequest.getClientInfo().getDeviceId(), clientIpAddress))
             return BaseResponse.fail(ResponseMessage.RESPONSE_DUPLICATED);
         responseService.createResponse(userDetail, surveyId, clientIpAddress, createResponseRequest);
-        redisPublisher.sendAlarm(surveyId);
+        redisPublisher.sendAlarm(surveyId, "SURVEY_RESPONSE");
         return BaseResponse.success();
     }
 }
