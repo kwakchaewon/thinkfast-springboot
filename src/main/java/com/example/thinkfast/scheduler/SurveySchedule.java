@@ -1,6 +1,7 @@
 package com.example.thinkfast.scheduler;
 
 import com.example.thinkfast.domain.survey.Survey;
+import com.example.thinkfast.realtime.RedisPublisher;
 import com.example.thinkfast.repository.survey.SurveyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,8 @@ import java.util.List;
 public class SurveySchedule {
 
     private final SurveyRepository surveyRepository;
+    private final RedisPublisher redisPublisher;
+
     @Scheduled(fixedRate = 60000)
     @Transactional
     public void updateExpiredSurvey() {
@@ -39,6 +42,10 @@ public class SurveySchedule {
             
             // 변경사항 저장
             surveyRepository.saveAll(expiredSurveys);
+
+            expiredSurveys.forEach(survey -> {
+                redisPublisher.sendAlarm(survey.getId(), "SURVEY_EXPIRED");
+            });
         } catch (Exception e) {
             log.error("스케줄러 실행 중 오류 발생", e);
         }
