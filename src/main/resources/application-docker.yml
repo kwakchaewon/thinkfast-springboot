@@ -1,0 +1,32 @@
+spring:
+  address: 0.0.0.0
+  port: 8080
+  datasource:
+    url: jdbc:mariadb://localhost:3306/thinkfast
+    username: root
+    password: root
+    driver-class-name: org.mariadb.jdbc.Driver
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    url: jdbc:mariadb://localhost:3306/thinkfast?characterEncoding=UTF-8&serverTimezone=UTC
+    user: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+jwt:
+  secret: your-secret-key-should-be-very-long-and-secure-at-least-256-bits
+  token-validity-in-seconds: 3600 # 1 hour (3600)
+  refresh-token-validity-in-seconds: 604800 # 7 days  (604800)
