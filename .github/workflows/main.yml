@@ -1,0 +1,16 @@
+name: Build and Trigger Jenkins
+
+on:
+  push:
+    branches:
+      - main  # 원하는 브랜치
+
+jobs:
+  trigger-jenkins:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Jenkins Build
+        run: |
+          curl -X POST \
+            -u "${{ secrets.thinkfast-jenkins-userid }}:${{ secrets.thinnkfast_jenkins_token }}" \
+            "${{ secrets.thinkfast-jenkins-server }}:8080/job/thinkfast-backend-build/build"
