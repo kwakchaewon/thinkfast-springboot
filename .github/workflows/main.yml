@@ -3,7 +3,7 @@ name: Build and Trigger Jenkins
 on:
   push:
     branches:
-      - main  # 원하는 브랜치
+      - master  # 원하는 브랜치
 
 jobs:
   trigger-jenkins:
