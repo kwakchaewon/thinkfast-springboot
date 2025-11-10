@@ -13,4 +13,4 @@ jobs:
         run: |
           curl -X POST \
             -u "${{ secrets.thinkfast_jenkins_userid }}:${{ secrets.thinnkfast_jenkins_token }}" \
-            "${{ secrets.thinkfast_jenkins_server }}:8080/job/thinkfast-backend-build/build"
+            "${{ secrets.thinkfast_jenkins_server }}:8080/job/thinkfast-backend-prod-deploy/build"
