@@ -12,5 +12,5 @@ jobs:
       - name: Trigger Jenkins Build
         run: |
           curl -X POST \
-            -u "${{ secrets.JENKINS_USER }}:${{ secrets.thinnkfast_jenkins_token }}" \
-            "http://<jenkins-server>:8080/job/thinkfast-backend-build/build"
+            -u "${{ secrets.thinkfast-jenkins-userid }}:${{ secrets.thinnkfast_jenkins_token }}" \
+            "${{ secrets.thinkfast-jenkins-server }}:8080/job/thinkfast-backend-build/build"
