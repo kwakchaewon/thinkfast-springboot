@@ -31,3 +31,11 @@ jobs:
           
           # 필요 시 버전 태그 추가 예시:
           # tags: ${{ secrets.DOCKERHUB_USERNAME }}/thinkfast_backend:latest,${{ secrets.DOCKERHUB_USERNAME }}/thinkfast_backend:${{ github.run_number }}
+
+
+      # 3️⃣ Jenkins 빌드 트리거
+      - name: Trigger Jenkins build
+        run: |
+          curl -X POST \
+            "${{ secrets.THINKFAST_JENKINS_SERVER }}/job/thinkfast-backend-prod-deploy/build?token=thinnkfast-jenkins-token" \
+            --user "${{ secrets.THINKFAST_JENKINS_USERID }}:${{ secrets.THINNKFAST_JENKINS_TOKEN }}"
