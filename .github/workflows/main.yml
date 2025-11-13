@@ -19,11 +19,15 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      # 2️⃣ Docker 이미지 빌드
-      - name: Build Docker Image
-        run: |
-          IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/thinkfast-backend
-          VERSION=$(date +%Y%m%d%H%M)
-          echo "Building image: $IMAGE_NAME:$VERSION"
-          docker build -t $IMAGE_NAME:latest -t $IMAGE_NAME:$VERSION .
+          
+      # 2️⃣ Docker 이미지 빌드 및 푸시
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/thinkfast_backend:latest
+          
+          # 필요 시 버전 태그 추가 예시:
+          # tags: ${{ secrets.DOCKERHUB_USERNAME }}/thinkfast_backend:latest,${{ secrets.DOCKERHUB_USERNAME }}/thinkfast_backend:${{ github.run_number }}
