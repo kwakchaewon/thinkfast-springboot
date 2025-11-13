@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master  # 트리거할 브랜치
+  workflow_dispatch:
 
 jobs:
   build-and-trigger:
