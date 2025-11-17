@@ -29,16 +29,22 @@ public class Survey {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "userId", nullable = false)
+    @Column(name = "USER_ID", nullable = false)
     private Long userId; // USER.id FK 대신 단순 ID로 처리
     private String title;
     private String description;
+    @Column(name = "START_TIME")
     private LocalDateTime startTime;
+    @Column(name = "END_TIME")
     private LocalDateTime endTime;
+    @Column(name = "IS_ACTIVE")
     private Boolean isActive;
+    @Column(name = "IS_DELETED")
     private Boolean isDeleted;
+    @Column(name = "CREATED_AT", updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
+    @Column(name = "UPDATED_AT")
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
