@@ -50,3 +50,20 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+// plain JAR 생성 비활성화 (실행 가능한 fat JAR만 생성)
+jar {
+	enabled = false
+	archiveClassifier = '' // plain classifier 제거
+}
+
+// bootJar가 실행 가능한 JAR를 생성하도록 보장
+bootJar {
+	enabled = true
+	archiveClassifier = '' // classifier 제거하여 기본 이름 사용
+}
+
+// 메인 클래스 명시적 지정 (자동 감지보다 명확하고 빠름)
+springBoot {
+	mainClass = 'com.example.thinkfast.ThinkfastApplication'
+}
