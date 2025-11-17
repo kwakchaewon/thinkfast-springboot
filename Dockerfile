@@ -1,4 +1,4 @@
-FROM openjdk:8-jre-slim
+FROM eclipse-temurin:8-jre-jammy
 ENV JAR_FILE "thinkfast-0.0.1-SNAPSHOT.jar"
 ENV RUN_TYPE "prod"
 ADD ./build/libs/${JAR_FILE} /
