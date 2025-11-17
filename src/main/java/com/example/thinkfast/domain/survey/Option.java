@@ -25,5 +25,6 @@ public class Option {
     private Long id;
     @Column(name = "QUESTION_ID", nullable = false)
     private Long questionId;
+    @Column(name = "CONTENT", nullable = false)
     private String content;
 }

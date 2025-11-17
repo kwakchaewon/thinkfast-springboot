@@ -30,10 +30,13 @@ public class Question {
     private Long surveyId;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "TYPE", nullable = false)
     private QuestionType type;
 
+    @Column(name = "CONTENT", nullable = false)
     private String content;
 
+    @Column(name = "ORDER_INDEX", nullable = false)
     private int orderIndex;
 
     @Getter

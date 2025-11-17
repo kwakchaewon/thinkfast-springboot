@@ -28,16 +28,16 @@ public class SurveyResponseHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "SURVEY_ID", nullable = false)
     private Long surveyId;
 
-    @Column(nullable = false, length = 255)
+    @Column(name = "DEVICE_ID_HASH", nullable = false, length = 255)
     private String deviceIdHash;
 
-    @Column(length = 255)
+    @Column(name = "IP_ADDRESS_HASH", length = 255)
     private String ipAddressHash;
 
-    @Column
+    @Column(name = "RESPONDED_AT")
     private LocalDateTime respondedAt;
 
     @PrePersist

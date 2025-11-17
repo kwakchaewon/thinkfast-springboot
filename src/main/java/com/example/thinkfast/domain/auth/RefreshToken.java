@@ -18,10 +18,10 @@ public class RefreshToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "TOKEN", nullable = false, unique = true)
     private String token;
 
-    @Column(nullable = false)
+    @Column(name = "USERNAME", nullable = false)
     private String username;
 
     @Column(nullable = false, name = "EXPIRES_AT")
