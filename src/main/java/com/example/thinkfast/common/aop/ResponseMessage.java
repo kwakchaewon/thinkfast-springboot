@@ -8,7 +8,10 @@ public enum ResponseMessage {
     INTERNAL_ERROR("서버 내부 오류가 발생했습니다."),
     UNAUTHORIZED("인증이 필요합니다."),
     ACCOUNT_ALREADY_EXISTS("이미 가입된 계정입니다."),
-    RESPONSE_DUPLICATED("이미 제출한 응답입니다.");
+    RESPONSE_DUPLICATED("이미 제출한 응답입니다."),
+    INVALID_CREDENTIALS("아이디 또는 비밀번호가 올바르지 않습니다."),
+    INVALID_USERNAME("아이디가 올바르지 않습니다."),
+    INVALID_PASSWORD("비밀번호가 올바르지 않습니다.");
 
     private final String message;
 
