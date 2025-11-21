@@ -3,9 +3,11 @@ package com.example.thinkfast.security;
 import com.example.thinkfast.domain.auth.Role;
 import com.example.thinkfast.domain.auth.User;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Collections;
 
 public class UserDetailImpl implements UserDetails {
     private String username;
@@ -15,7 +17,7 @@ public class UserDetailImpl implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + this.roles.name()));
     }
 
     @Override
