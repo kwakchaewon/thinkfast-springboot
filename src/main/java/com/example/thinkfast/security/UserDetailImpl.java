@@ -57,6 +57,6 @@ public class UserDetailImpl implements UserDetails {
     }
 
     public static UserDetailImpl responderBuild(User user){
-        return new UserDetailImpl(user.getUsername(), user.getPassword(), Role.RESPONDER);
+        return new UserDetailImpl(user.getUsername(), user.getPassword(), user.getRole());
     }
 }

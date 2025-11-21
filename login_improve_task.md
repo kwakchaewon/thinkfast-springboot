@@ -2,7 +2,7 @@
 
 ## 🔴 Critical (즉시 수정 필요)
 
-### 1. UserDetailImpl.getAuthorities() null 반환 문제 수정
+### 1. UserDetailImpl.getAuthorities() null 반환 문제 수정 ✅
 - **파일**: `src/main/java/com/example/thinkfast/security/UserDetailImpl.java`
 - **문제**: `getAuthorities()` 메서드가 null을 반환하여 Spring Security의 권한 기반 접근 제어가 작동하지 않음
 - **수정 내용**: 
@@ -13,8 +13,9 @@
   }
   ```
 - **영향**: 권한 기반 접근 제어가 전혀 작동하지 않음
+- **상태**: ✅ 개선 완료
 
-### 2. UserDetailImpl.responderBuild() 하드코딩된 역할 수정
+### 2. UserDetailImpl.responderBuild() 하드코딩된 역할 수정 ✅
 - **파일**: `src/main/java/com/example/thinkfast/security/UserDetailImpl.java`
 - **문제**: 모든 사용자를 `Role.RESPONDER`로 하드코딩하여 실제 사용자 역할이 반영되지 않음
 - **수정 내용**:
@@ -24,6 +25,7 @@
   }
   ```
 - **영향**: 역할 기반 접근 제어가 올바르게 작동하지 않음
+- **상태**: ✅ 개선 완료
 
 ### 3. RefreshToken 만료 검증 추가
 - **파일**: `src/main/java/com/example/thinkfast/service/auth/AuthService.java`
@@ -148,8 +150,8 @@
 
 ## 작업 체크리스트
 
-- [ ] 1. UserDetailImpl.getAuthorities() null 반환 문제 수정
-- [ ] 2. UserDetailImpl.responderBuild() 하드코딩된 역할 수정
+- [x] 1. UserDetailImpl.getAuthorities() null 반환 문제 수정 ✅
+- [x] 2. UserDetailImpl.responderBuild() 하드코딩된 역할 수정 ✅
 - [ ] 3. RefreshToken 만료 검증 추가
 - [ ] 4. 인증 예외 처리 추가
 - [ ] 5. 로그아웃 시 토큰 검증 추가
