@@ -27,7 +27,7 @@
 - **영향**: 역할 기반 접근 제어가 올바르게 작동하지 않음
 - **상태**: ✅ 개선 완료
 
-### 3. RefreshToken 만료 검증 추가
+### 3. RefreshToken 만료 검증 추가 ✅
 - **파일**: `src/main/java/com/example/thinkfast/service/auth/AuthService.java`
 - **문제**: `refreshToken()` 메서드에서 DB의 `expiryDate`를 확인하지 않음
 - **수정 내용**: 
@@ -39,6 +39,8 @@
   ```
 - **위치**: `refreshToken()` 메서드 내부, `storedToken` 검증 후
 - **영향**: 만료된 토큰으로도 새 토큰을 발급받을 수 있는 보안 취약점
+- **상태**: ✅ 개선 완료
+- **프론트엔드 가이드**: `FRONTEND_TOKEN_REFRESH_GUIDE.md` 참고
 
 ---
 
@@ -152,7 +154,7 @@
 
 - [x] 1. UserDetailImpl.getAuthorities() null 반환 문제 수정 ✅
 - [x] 2. UserDetailImpl.responderBuild() 하드코딩된 역할 수정 ✅
-- [ ] 3. RefreshToken 만료 검증 추가
+- [x] 3. RefreshToken 만료 검증 추가 ✅
 - [ ] 4. 인증 예외 처리 추가
 - [ ] 5. 로그아웃 시 토큰 검증 추가
 - [ ] 6. refreshToken 메서드 중복 코드 정리

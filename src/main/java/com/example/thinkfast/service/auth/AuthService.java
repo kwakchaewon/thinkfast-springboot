@@ -91,6 +91,12 @@ public class AuthService {
         RefreshToken storedToken = refreshTokenRepository.findByToken(refreshToken)
                 .orElseThrow(() -> new RuntimeException("저장된 리프레시 토큰이 없습니다."));
 
+        // DB에 저장된 만료 시간 확인
+        if (storedToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            refreshTokenRepository.delete(storedToken);
+            throw new RuntimeException("만료된 리프레시 토큰입니다.");
+        }
+
         if (!storedToken.getUsername().equals(username)) {
             throw new RuntimeException("토큰의 사용자 정보가 일치하지 않습니다.");
         }
