@@ -155,7 +155,7 @@
 - [x] 1. UserDetailImpl.getAuthorities() null 반환 문제 수정 ✅
 - [x] 2. UserDetailImpl.responderBuild() 하드코딩된 역할 수정 ✅
 - [x] 3. RefreshToken 만료 검증 추가 ✅
-- [ ] 4. 인증 예외 처리 추가
+- [x] 4. 인증 예외 처리 추가 ✅
 - [ ] 5. 로그아웃 시 토큰 검증 추가
 - [ ] 6. refreshToken 메서드 중복 코드 정리
 - [ ] 7. SecurityConfig의 deprecated 메서드 교체
