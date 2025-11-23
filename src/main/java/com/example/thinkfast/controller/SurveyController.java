@@ -26,6 +26,7 @@ import com.example.thinkfast.repository.auth.UserRepository;
 import com.example.thinkfast.repository.survey.SurveyRepository;
 import com.example.thinkfast.repository.survey.QuestionRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @BaseResponseBody
 @RestController
 @RequestMapping("/survey")
@@ -139,12 +141,45 @@ public class SurveyController {
     public BaseResponse createResponse(@PathVariable Long surveyId, @AuthenticationPrincipal UserDetailImpl userDetail,
                                        @RequestBody CreateResponseRequest createResponseRequest, HttpServletRequest request) {
         String clientIpAddress = IpUtil.getClientIp(request);
+        
+        String deviceId = createResponseRequest.getClientInfo() != null 
+            ? createResponseRequest.getClientInfo().getDeviceId() 
+            : null;
+        
+        log.info("[응답 생성 요청] surveyId={}, deviceId={}, ipAddress={}, clientInfo={}", 
+            surveyId,
+            deviceId != null ? (deviceId.length() > 20 ? deviceId.substring(0, 20) + "..." : deviceId) : "null",
+            clientIpAddress,
+            createResponseRequest.getClientInfo() != null ? "존재" : "null");
 
-        if (surveyService.isSurveyInactive(surveyId)) return BaseResponse.fail(ResponseMessage.SURVEY_UNAVAILABLE);
-        if (surveyService.isDuplicateResponse(surveyId, createResponseRequest.getClientInfo().getDeviceId(), clientIpAddress))
+        if (surveyService.isSurveyInactive(surveyId)) {
+            log.warn("[응답 생성 실패] surveyId={}, 사유=설문 비활성화 또는 삭제됨", surveyId);
+            return BaseResponse.fail(ResponseMessage.SURVEY_UNAVAILABLE);
+        }
+        
+        // 중복 응답 방지: 같은 설문에 대해 같은 deviceId/IP로는 한 번만 응답 가능
+        // deviceId나 ipAddress가 null/빈 값이면 중복 체크를 건너뜀
+        if (surveyService.isDuplicateResponse(surveyId, deviceId, clientIpAddress)) {
+            log.warn("[응답 생성 실패] surveyId={}, deviceId={}, ipAddress={}, 사유=중복 응답", 
+                surveyId,
+                deviceId != null ? (deviceId.length() > 20 ? deviceId.substring(0, 20) + "..." : deviceId) : "null",
+                clientIpAddress);
             return BaseResponse.fail(ResponseMessage.RESPONSE_DUPLICATED);
+        }
+        
+        log.info("[응답 생성 시작] surveyId={}, deviceId={}, ipAddress={}", 
+            surveyId,
+            deviceId != null ? (deviceId.length() > 20 ? deviceId.substring(0, 20) + "..." : deviceId) : "null",
+            clientIpAddress);
+        
         responseService.createResponse(userDetail, surveyId, clientIpAddress, createResponseRequest);
         redisPublisher.sendAlarm(surveyId, "SURVEY_RESPONSE");
+        
+        log.info("[응답 생성 완료] surveyId={}, deviceId={}, ipAddress={}", 
+            surveyId,
+            deviceId != null ? (deviceId.length() > 20 ? deviceId.substring(0, 20) + "..." : deviceId) : "null",
+            clientIpAddress);
+        
         return BaseResponse.success();
     }
 

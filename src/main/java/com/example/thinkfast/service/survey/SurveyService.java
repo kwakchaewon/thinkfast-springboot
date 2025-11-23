@@ -14,12 +14,14 @@ import com.example.thinkfast.repository.survey.SurveyRepository;
 import com.example.thinkfast.repository.survey.SurveyResponseHistoryRepository;
 import com.example.thinkfast.security.UserDetailImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SurveyService {
@@ -104,13 +106,39 @@ public class SurveyService {
     }
 
     public Boolean isDuplicateResponse(Long surveyId, String deviceId, String ipAddress){
-        String deviceIdHash = HashUtil.encodeSha256(deviceId);
-        String ipAddressHash = HashUtil.encodeSha256(ipAddress);
-
-        boolean byDevice = surveyResponseHistoryRepository.existsBySurveyIdAndDeviceIdHash(surveyId, deviceIdHash);
-        boolean byIp = surveyResponseHistoryRepository.existsBySurveyIdAndIpAddressHash(surveyId, ipAddressHash);
+        log.info("[중복 응답 체크 시작] surveyId={}, deviceId={}, ipAddress={}", 
+            surveyId, 
+            deviceId != null ? (deviceId.length() > 20 ? deviceId.substring(0, 20) + "..." : deviceId) : "null",
+            ipAddress != null ? ipAddress : "null");
+        
+        // deviceId나 ipAddress가 null이거나 빈 값이면 중복 체크를 건너뜀
+        // (null/빈 값은 항상 같은 해시값을 생성하므로 중복으로 잘못 판단될 수 있음)
+        boolean byDevice = false;
+        boolean byIp = false;
+        String deviceIdHash = null;
+        String ipAddressHash = null;
+        
+        if (deviceId != null && !deviceId.trim().isEmpty()) {
+            deviceIdHash = HashUtil.encodeSha256(deviceId);
+            byDevice = surveyResponseHistoryRepository.existsBySurveyIdAndDeviceIdHash(surveyId, deviceIdHash);
+            log.info("[중복 응답 체크 - DeviceId] surveyId={}, deviceIdHash={}, 중복여부={}", 
+                surveyId, deviceIdHash, byDevice);
+        } else {
+            log.warn("[중복 응답 체크 - DeviceId] surveyId={}, deviceId가 null이거나 빈 값이어서 체크 건너뜀", surveyId);
+        }
+        
+        if (ipAddress != null && !ipAddress.trim().isEmpty()) {
+            ipAddressHash = HashUtil.encodeSha256(ipAddress);
+            byIp = surveyResponseHistoryRepository.existsBySurveyIdAndIpAddressHash(surveyId, ipAddressHash);
+            log.info("[중복 응답 체크 - IP] surveyId={}, ipAddressHash={}, 중복여부={}", 
+                surveyId, ipAddressHash, byIp);
+        } else {
+            log.warn("[중복 응답 체크 - IP] surveyId={}, ipAddress가 null이거나 빈 값이어서 체크 건너뜀", surveyId);
+        }
 
         Boolean result = byDevice || byIp;
+        log.info("[중복 응답 체크 결과] surveyId={}, 최종결과={} (byDevice={}, byIp={})", 
+            surveyId, result, byDevice, byIp);
         return result;
     }
 }
