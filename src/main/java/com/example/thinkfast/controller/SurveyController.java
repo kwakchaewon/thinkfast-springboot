@@ -20,6 +20,7 @@ import com.example.thinkfast.service.ai.SummaryService;
 import com.example.thinkfast.dto.ai.SummaryReportDto;
 import com.example.thinkfast.service.ai.WordCloudService;
 import com.example.thinkfast.dto.ai.WordCloudResponseDto;
+import com.example.thinkfast.service.ai.InsightService;
 import com.example.thinkfast.domain.survey.Survey;
 import com.example.thinkfast.repository.auth.UserRepository;
 import com.example.thinkfast.repository.survey.SurveyRepository;
@@ -49,6 +50,7 @@ public class SurveyController {
     private final RedisPublisher redisPublisher;
     private final SummaryService summaryService;
     private final WordCloudService wordCloudService;
+    private final InsightService insightService;
     private final UserRepository userRepository;
     private final SurveyRepository surveyRepository;
     private final QuestionRepository questionRepository;
@@ -224,5 +226,53 @@ public class SurveyController {
         WordCloudResponseDto wordCloud = wordCloudService.getWordCloud(questionId);
         
         return BaseResponse.success(wordCloud);
+    }
+
+    /**
+     * 인사이트 텍스트 조회
+     * 설문 소유자만 조회 가능
+     * 객관식 및 주관식 질문에 적용 (척도형 제외)
+     *
+     * @param surveyId 설문 ID
+     * @param questionId 질문 ID
+     * @param userDetail 현재 사용자 정보
+     * @return 인사이트 텍스트
+     */
+    @GetMapping("/{surveyId}/questions/{questionId}/insight")
+    @PreAuthorize("hasRole('CREATOR')")
+    public BaseResponse<String> getInsight(
+            @PathVariable Long surveyId,
+            @PathVariable Long questionId,
+            @AuthenticationPrincipal UserDetailImpl userDetail) {
+        
+        // 1. 설문 존재 여부 및 소유자 확인
+        Optional<Survey> surveyOpt = surveyRepository.findById(surveyId);
+        if (!surveyOpt.isPresent() || surveyOpt.get().getIsDeleted()) {
+            return BaseResponse.fail(ResponseMessage.SURVEY_NOT_FOUND);
+        }
+        
+        Survey survey = surveyOpt.get();
+        Long currentUserId = userRepository.findIdByUsername(userDetail.getUsername());
+        if (!survey.getUserId().equals(currentUserId)) {
+            return BaseResponse.fail(ResponseMessage.UNAUTHORIZED);
+        }
+        
+        // 2. 질문 존재 여부 확인
+        Optional<Question> questionOpt = questionRepository.findById(questionId);
+        if (!questionOpt.isPresent()) {
+            return BaseResponse.fail(ResponseMessage.SURVEY_NOT_FOUND);
+        }
+        
+        Question question = questionOpt.get();
+        
+        // 3. 질문이 해당 설문에 속하는지 확인
+        if (!question.getSurveyId().equals(surveyId)) {
+            return BaseResponse.fail(ResponseMessage.INVALID_REQUEST);
+        }
+        
+        // 4. 인사이트 조회 (DB 우선, 없으면 실시간 생성)
+        String insight = insightService.getInsight(questionId);
+        
+        return BaseResponse.success(insight);
     }
 }

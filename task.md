@@ -145,36 +145,30 @@
   - [x] Flyway 마이그레이션 스크립트 생성 (`V8__create_question_insights_table.sql`)
   - [x] 설문 종료 시 시점에서 인사이트 질문별 텍스트 생성 (`SurveySchedule` 통합)
   - [x] API 구현 및 호출 시 API 조회 로직을 통해 질문별 인사이트 조회 (`InsightService.getInsight()`)
+  - [x] 인사이트 텍스트 조회 API 구현 (`GET /survey/{surveyId}/questions/{questionId}/insight`)
+  - [x] API 명세서 작성 (`API_SPEC_INSIGHT.md`)
 
-#### 다음 작업 상세 가이드: 인사이트 텍스트 DB 저장 로직 구현 완료
+#### 다음 작업 상세 가이드: 인사이트 텍스트 조회 API 구현 완료
 
 **구현 완료 내용:**
-1. **QuestionInsight 엔티티** (`domain/ai/QuestionInsight.java`)
-   - `QUESTION_ID` (UNIQUE)
-   - `INSIGHT_TEXT` (TEXT)
-   - `CREATED_AT` (TIMESTAMP)
+1. **SurveyController에 인사이트 조회 API 추가**
+   - 엔드포인트: `GET /survey/{surveyId}/questions/{questionId}/insight`
+   - `@PreAuthorize("hasRole('CREATOR')")` 권한 확인
+   - 설문 소유자 확인 로직 (`Survey.userId` == 현재 사용자 ID)
+   - 질문 존재 여부 및 소유권 확인 (`Question.surveyId` == `surveyId`)
+   - `InsightService.getInsight()` 호출 (DB 조회 우선, 없으면 실시간 생성)
 
-2. **QuestionInsightRepository** (`repository/ai/QuestionInsightRepository.java`)
-   - `findByQuestionId(Long questionId)`: 질문별 인사이트 조회
-   - `existsByQuestionId(Long questionId)`: 인사이트 존재 여부 확인
-
-3. **InsightService 확장**
-   - `getInsight(Long questionId)`: DB 조회 우선, 없으면 실시간 생성
-   - `saveInsightAsync(Long questionId)`: 비동기 인사이트 생성 및 저장
-   - `saveInsightsForSurveyAsync(Long surveyId)`: 설문의 모든 질문에 대해 인사이트 생성 및 저장
-
-4. **SurveySchedule 통합**
-   - 설문 종료 시 `insightService.saveInsightsForSurveyAsync(survey.getId())` 호출
-   - 객관식 및 주관식 질문에 대해서만 인사이트 생성 (척도형 제외)
-
-5. **Flyway 마이그레이션**
-   - `V8__create_question_insights_table.sql`: `QUESTION_INSIGHTS` 테이블 생성
+2. **API 명세서 작성**
+   - `API_SPEC_INSIGHT.md`: 인사이트 텍스트 조회 API 명세서
+   - 요청/응답 형식, 에러 처리, 비즈니스 로직 상세 설명
+   - `API_SPEC_SUMMARY_REPORT.md` 형식 참고
 
 **다음 작업:**
 - 질문별 통계 API 구현 (`GET /survey/{id}/questions/{questionId}/statistics`)
-  - `SurveyStatisticsService.getQuestionStatistics()` 활용
-  - `InsightService.getInsight()` 활용하여 인사이트 포함
-  - 응답 DTO에 `insight` 필드 추가
+  - 통계 데이터와 인사이트를 함께 반환하는 통합 API
+  - `QuestionStatisticsDto`에 `insight` 필드 추가 또는 별도 DTO 생성
+  - `SurveyStatisticsService.getQuestionStatistics()` + `InsightService.getInsight()` 활용
+  - API 명세서 작성 (통계 + 인사이트 통합 응답)
 - [x] 인사이트 텍스트 저장 및 관리
   - [x] 인사이트 텍스트 캐싱 (DB 저장을 통한 재계산 방지)
   - [x] `QuestionInsight` 엔티티 생성 (`domain/ai/QuestionInsight.java`)
@@ -185,24 +179,32 @@
   - [ ] 수동 수정 기능 (선택사항)
 
 ### Backend API 개발
-- [ ] 요약 리포트 조회 API (`GET /survey/:id/summary`)
-  - [ ] 설문 소유자 확인 로직 구현 (userId 기반 권한 검증)
-  - [ ] `SummaryService.getSummaryReport()` 호출 (DB 조회 우선)
-  - [ ] 응답 데이터 반환
+- [x] 요약 리포트 조회 API (`GET /survey/:id/summary`)
+  - [x] 설문 소유자 확인 로직 구현 (userId 기반 권한 검증)
+  - [x] `SummaryService.getSummaryReport()` 호출 (DB 조회 우선)
+  - [x] 응답 데이터 반환
   - [x] DB 저장 로직 구현 완료 (설문 종료 시 비동기 생성)
+  - [x] API 명세서 작성 (`API_SPEC_SUMMARY_REPORT.md`)
+- [x] 인사이트 텍스트 조회 API (`GET /survey/:id/questions/:questionId/insight`)
+  - [x] 설문 소유자 확인 로직 구현
+  - [x] 질문 존재 여부 및 소유권 확인
+  - [x] `InsightService.getInsight()` 호출 (DB 조회 우선)
+  - [x] 응답 데이터 반환
+  - [x] API 명세서 작성 (`API_SPEC_INSIGHT.md`)
 - [ ] 질문별 응답 통계 API 구현 및 인사이트 추가
   - [ ] `GET /survey/:id/questions/:questionId/statistics` API 구현 (현재 미구현 상태)
   - [ ] 설문 소유자 확인 로직 구현
   - [ ] 객관식/주관식 질문별 통계 집계 로직 구현
-  - [ ] 인사이트 텍스트 생성 로직 통합
+  - [x] 인사이트 텍스트 생성 로직 통합 (`InsightService.getInsight()` 활용)
   - [ ] 응답에 `insight` 필드 추가
   - [ ] 페이징 처리 (대용량 응답 데이터 고려)
-- [ ] 워드클라우드 조회 API (`GET /survey/:id/questions/:questionId/wordcloud`)
-  - [ ] 설문 소유자 확인 로직 구현
-  - [ ] 주관식 질문 검증 (워드클라우드는 주관식 질문에만 적용)
-  - [ ] 키워드 분석 및 집계 로직 호출
-  - [ ] 워드클라우드 데이터 반환
-  - [ ] 캐싱 처리 (Redis 활용, 데이터 변경 시에만 재계산)
+- [x] 워드클라우드 조회 API (`GET /survey/:id/questions/:questionId/wordcloud`)
+  - [x] 설문 소유자 확인 로직 구현
+  - [x] 주관식 질문 검증 (워드클라우드는 주관식 질문에만 적용)
+  - [x] 키워드 분석 및 집계 로직 호출
+  - [x] 워드클라우드 데이터 반환
+  - [x] DB 저장 로직 구현 완료 (설문 종료 시 비동기 생성)
+  - [x] API 명세서 작성 (`API_SPEC_WORD_CLOUD.md`)
 
 ### 데이터베이스 스키마
 - [ ] 기존 테이블 확인 및 활용
