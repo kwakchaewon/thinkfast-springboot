@@ -111,34 +111,45 @@ public class SurveyService {
             deviceId != null ? (deviceId.length() > 20 ? deviceId.substring(0, 20) + "..." : deviceId) : "null",
             ipAddress != null ? ipAddress : "null");
         
-        // deviceId나 ipAddress가 null이거나 빈 값이면 중복 체크를 건너뜀
-        // (null/빈 값은 항상 같은 해시값을 생성하므로 중복으로 잘못 판단될 수 있음)
-        boolean byDevice = false;
-        boolean byIp = false;
+        // deviceId와 IP를 모두 사용하여 중복 체크 (둘 다 같아야 중복으로 판단)
+        // 이렇게 하면 같은 브라우저(User-Agent 기반 deviceId)를 사용하더라도 다른 IP에서는 응답 가능
         String deviceIdHash = null;
         String ipAddressHash = null;
+        boolean isDuplicate = false;
         
-        if (deviceId != null && !deviceId.trim().isEmpty()) {
+        // deviceId와 IP가 모두 존재하는 경우에만 조합으로 체크
+        if (deviceId != null && !deviceId.trim().isEmpty() && 
+            ipAddress != null && !ipAddress.trim().isEmpty()) {
             deviceIdHash = HashUtil.encodeSha256(deviceId);
-            byDevice = surveyResponseHistoryRepository.existsBySurveyIdAndDeviceIdHash(surveyId, deviceIdHash);
-            log.info("[중복 응답 체크 - DeviceId] surveyId={}, deviceIdHash={}, 중복여부={}", 
-                surveyId, deviceIdHash, byDevice);
-        } else {
-            log.warn("[중복 응답 체크 - DeviceId] surveyId={}, deviceId가 null이거나 빈 값이어서 체크 건너뜀", surveyId);
-        }
-        
-        if (ipAddress != null && !ipAddress.trim().isEmpty()) {
             ipAddressHash = HashUtil.encodeSha256(ipAddress);
-            byIp = surveyResponseHistoryRepository.existsBySurveyIdAndIpAddressHash(surveyId, ipAddressHash);
-            log.info("[중복 응답 체크 - IP] surveyId={}, ipAddressHash={}, 중복여부={}", 
-                surveyId, ipAddressHash, byIp);
-        } else {
-            log.warn("[중복 응답 체크 - IP] surveyId={}, ipAddress가 null이거나 빈 값이어서 체크 건너뜀", surveyId);
+            isDuplicate = surveyResponseHistoryRepository.existsBySurveyIdAndDeviceIdHashAndIpAddressHash(
+                surveyId, deviceIdHash, ipAddressHash);
+            log.info("[중복 응답 체크 - DeviceId+IP 조합] surveyId={}, deviceIdHash={}, ipAddressHash={}, 중복여부={}", 
+                surveyId, deviceIdHash, ipAddressHash, isDuplicate);
+        } 
+        // deviceId만 있는 경우 (IP가 없는 경우)
+        else if (deviceId != null && !deviceId.trim().isEmpty()) {
+            deviceIdHash = HashUtil.encodeSha256(deviceId);
+            isDuplicate = surveyResponseHistoryRepository.existsBySurveyIdAndDeviceIdHash(surveyId, deviceIdHash);
+            log.info("[중복 응답 체크 - DeviceId만] surveyId={}, deviceIdHash={}, 중복여부={}", 
+                surveyId, deviceIdHash, isDuplicate);
+            log.warn("[중복 응답 체크] surveyId={}, IP가 없어서 DeviceId만으로 체크", surveyId);
+        }
+        // IP만 있는 경우 (deviceId가 없는 경우)
+        else if (ipAddress != null && !ipAddress.trim().isEmpty()) {
+            ipAddressHash = HashUtil.encodeSha256(ipAddress);
+            isDuplicate = surveyResponseHistoryRepository.existsBySurveyIdAndIpAddressHash(surveyId, ipAddressHash);
+            log.info("[중복 응답 체크 - IP만] surveyId={}, ipAddressHash={}, 중복여부={}", 
+                surveyId, ipAddressHash, isDuplicate);
+            log.warn("[중복 응답 체크] surveyId={}, deviceId가 없어서 IP만으로 체크", surveyId);
+        }
+        // 둘 다 없는 경우
+        else {
+            log.warn("[중복 응답 체크] surveyId={}, deviceId와 IP가 모두 없어서 중복 체크 불가 (허용)", surveyId);
+            isDuplicate = false;
         }
 
-        Boolean result = byDevice || byIp;
-        log.info("[중복 응답 체크 결과] surveyId={}, 최종결과={} (byDevice={}, byIp={})", 
-            surveyId, result, byDevice, byIp);
-        return result;
+        log.info("[중복 응답 체크 결과] surveyId={}, 최종결과={}", surveyId, isDuplicate);
+        return isDuplicate;
     }
 }
