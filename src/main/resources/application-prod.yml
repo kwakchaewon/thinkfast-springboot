@@ -34,6 +34,6 @@ jwt:
   refresh-token-validity-in-seconds: 604800 # 7 days  (604800)
 
 gemini:
-  api-key: ${GEMINI_API_KEY:}
+  api-key: GEMINI_API_KEY
   api-url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
   timeout-seconds: 30
