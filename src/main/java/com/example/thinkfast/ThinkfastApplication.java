@@ -3,7 +3,6 @@ package com.example.thinkfast;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -11,7 +10,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableAsync
 @SpringBootApplication
 @EntityScan("com.example.thinkfast.domain")
-@ComponentScan(basePackages = "com.example.thinkfast")
 public class ThinkfastApplication {
 
 	public static void main(String[] args) {
