@@ -35,18 +35,29 @@
   - [x] **외부 AI API 사용** - Java에서 직접 호출하여 응답 저장 (Gemini 무료 API 사용)
   - [x] **Python 서버 구축 안함** - 우선 구축하지 않기로 결정 (형태소 분석 등 고급 기능은 Java 템플릿으로 대체)
   - [x] 하이브리드 방식 (기본은 Java 자체, 고급은 무료 AI API) - **채택됨 (무료 중심, Java 우선)**
-- [ ] AI API 통신 모듈 개발 (Phase 2 선택사항)
-  - [ ] HTTP 클라이언트 설정 (WebClient) - Java에서 직접 구현
-  - [ ] **Gemini API 클라이언트 구현** - Java에서 직접 호출
-    - [ ] Gemini API 엔드포인트: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`
-    - [ ] 요청 헤더: `Content-Type: application/json`, `X-goog-api-key: {API_KEY}`
-    - [ ] 요청 본문 구조: `{"contents": [{"parts": [{"text": "..."}]}]}`
-    - [ ] 응답 파싱 로직 구현
+- [x] AI API 통신 모듈 개발 (Phase 2 선택사항)
+  - [x] HTTP 클라이언트 설정 (WebClient) - Java에서 직접 구현
+    - [x] `WebClientConfig` 클래스 생성 (`common/config/WebClientConfig.java`)
+    - [x] 타임아웃 설정 (기본 30초)
+    - [x] `build.gradle`에 `spring-boot-starter-webflux` 의존성 추가
+  - [x] **Gemini API 클라이언트 구현** - Java에서 직접 호출
+    - [x] Gemini API 엔드포인트: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`
+    - [x] 요청 헤더: `Content-Type: application/json`, `X-goog-api-key: {API_KEY}`
+    - [x] 요청 본문 구조: `{"contents": [{"parts": [{"text": "..."}]}]}`
+    - [x] 응답 파싱 로직 구현
+    - [x] `GeminiApiService` 클래스 생성 (`service/ai/GeminiApiService.java`)
+    - [x] DTO 클래스 생성 (`dto/ai/GeminiRequest.java`, `GeminiResponse.java`)
+    - [x] 동기/비동기 메서드 제공 (`generateText`, `generateTextAsync`)
   - [ ] AI API 응답 저장 로직 구현 (분석 결과를 DB 또는 Redis에 저장)
-  - [ ] API 키 관리 및 보안 처리 (application.yml 환경변수 활용)
-    - [ ] `gemini.api-key` 설정 추가 (application-local.yml, application-prod.yml)
-  - [ ] 요청/응답 타임아웃 및 재시도 로직
-  - [ ] 에러 핸들링 및 폴백 처리 (무료 티어 한도 초과 시 Java 템플릿으로 폴백)
+  - [x] API 키 관리 및 보안 처리 (application.yml 환경변수 활용)
+    - [x] `gemini.api-key` 설정 추가 (application-local.yml, application-prod.yml)
+    - [x] 환경변수 `GEMINI_API_KEY` 지원
+  - [x] 요청/응답 타임아웃 및 재시도 로직
+    - [x] 타임아웃 설정 (30초, 설정 가능)
+    - [x] 재시도 로직 (429, 503 에러 시 최대 2회 재시도)
+  - [x] 에러 핸들링 및 폴백 처리 (무료 티어 한도 초과 시 Java 템플릿으로 폴백)
+    - [x] `AiServiceException` 예외 클래스 생성
+    - [x] `GlobalExceptionHandler`에 AI 예외 처리 추가
   - [ ] 무료 티어 한도 모니터링
 - [ ] AI 서비스 비용 및 사용량 모니터링 시스템 구축
   - [ ] API 호출 횟수 추적
@@ -232,6 +243,11 @@
   - [x] **외부 AI API 직접 호출 방식 채택** - Java에서 외부 AI API 호출하여 응답 저장
   - [x] Phase별 구현 전략 수립 (Phase 1: Java 자체, Phase 2: 무료 AI API Java에서 직접 호출)
   - [x] 결정 사항 문서화 (`AI_SERVICE_DECISION.md` 생성)
+- [x] Gemini API 통신 모듈 구현 완료
+  - [x] WebClient 설정 및 의존성 추가
+  - [x] Gemini API 클라이언트 서비스 구현
+  - [x] DTO 클래스 및 예외 처리 구현
+  - [x] API 키 관리 및 설정 파일 업데이트
 
 ---
 
@@ -693,4 +709,98 @@ Gemini API는 JSON 형식으로 응답하며, 생성된 텍스트는 `candidates
    - **에러 처리**: 기존 `GlobalExceptionHandler`에 AI 관련 예외 추가
    - **로깅**: 기존 로깅 시스템(`LoggingInterceptor`, `ExceptionLoggingFilter`) 활용
    - **키워드 추출**: 정규식 기반으로 구현 (`Pattern.compile("[가-힣]+")`), 형태소 분석 없이 진행
+
+---
+
+## 다음 작업 가이드
+
+### ✅ 완료된 작업
+- [x] WebClient 설정 및 Gemini API 클라이언트 구현
+- [x] API 키 관리 및 예외 처리
+
+### 📋 다음 작업 (우선순위 순)
+
+#### 1. **AI API 응답 저장 로직 구현**
+- **목적**: Gemini API 호출 결과를 Redis에 캐싱하여 재사용
+- **구현 위치**: `service/ai/GeminiApiService` 또는 별도 서비스
+- **캐시 키 형식**: `ai:gemini:{promptHash}` 또는 `ai:survey:{surveyId}:{type}`
+- **TTL**: 1시간 (설정 가능)
+- **Redis 사용**: 기존 `StringRedisTemplate` 활용
+- **필요한 작업**:
+  - [ ] 캐시 키 생성 로직 (프롬프트 해시 또는 설문 ID 기반)
+  - [ ] Redis 캐시 저장/조회 메서드 추가
+  - [ ] 캐시 미스 시에만 API 호출하도록 수정
+
+#### 2. **텍스트 분석 모듈 개발 (Java 자체 구현)**
+- **목적**: 주관식 응답에서 키워드 추출 및 빈도수 집계
+- **구현 위치**: `service/ai/TextAnalysisService` (새로 생성)
+- **주요 기능**:
+  - [ ] 한국어 텍스트 전처리 (특수문자, 이모지 제거)
+  - [ ] 정규식 기반 단어 추출 (`Pattern.compile("[가-힣]+")`)
+  - [ ] 불용어 필터링 (하드코딩된 리스트)
+  - [ ] 키워드 빈도수 계산 및 정렬
+- **참고**: 형태소 분석 없이 정규식 기반으로 구현
+
+#### 3. **인사이트 텍스트 생성 로직**
+- **목적**: 통계 데이터를 기반으로 자연어 인사이트 생성
+- **구현 위치**: `service/ai/InsightService` (새로 생성)
+- **Phase 1 (템플릿 기반)**:
+  - [ ] 객관식 인사이트 템플릿 (옵션별 분포 설명)
+  - [ ] 주관식 인사이트 템플릿 (주요 키워드 기반)
+- **Phase 2 (AI 기반)**:
+  - [ ] `GeminiApiService.generateText()` 활용
+  - [ ] 프롬프트 템플릿 작성 (통계 데이터를 자연어로 변환)
+  - [ ] 폴백 로직 (API 실패 시 템플릿 기반으로 전환)
+
+#### 4. **요약 리포트 생성 로직**
+- **목적**: 설문 전체 데이터 분석 및 요약 리포트 생성
+- **구현 위치**: `service/ai/SummaryService` (새로 생성)
+- **주요 기능**:
+  - [ ] 설문 데이터 집계 (객관식/주관식 질문별 통계)
+  - [ ] 주요 인사이트 추출
+  - [ ] 개선 사항 추출 (주관식 질문에서 키워드 기반)
+  - [ ] AI 기반 요약 생성 (선택사항)
+
+### 🔧 구현 시 참고사항
+
+#### Gemini API 사용 예시
+```java
+@Autowired
+private GeminiApiService geminiApiService;
+
+// 동기 호출
+String insight = geminiApiService.generateText("설문 통계를 분석해주세요: ...");
+
+// 비동기 호출
+Mono<String> insightMono = geminiApiService.generateTextAsync("...");
+```
+
+#### Redis 캐싱 예시
+```java
+@Autowired
+private StringRedisTemplate redisTemplate;
+
+// 저장
+redisTemplate.opsForValue().set("ai:survey:1:summary", result, 1, TimeUnit.HOURS);
+
+// 조회
+String cached = redisTemplate.opsForValue().get("ai:survey:1:summary");
+```
+
+#### 텍스트 전처리 예시
+```java
+// 특수문자, 이모지 제거
+String cleaned = text.replaceAll("[^가-힣\\s]", "");
+
+// 한글 단어 추출
+Pattern pattern = Pattern.compile("[가-힣]+");
+Matcher matcher = pattern.matcher(cleaned);
+```
+
+### 📝 다음 작업 체크리스트
+- [ ] `GeminiApiService`에 캐싱 로직 추가
+- [ ] `TextAnalysisService` 생성 및 키워드 추출 구현
+- [ ] `InsightService` 생성 및 템플릿 기반 인사이트 생성
+- [ ] `SummaryService` 생성 및 요약 리포트 생성
+- [ ] 각 서비스 단위 테스트 작성
 

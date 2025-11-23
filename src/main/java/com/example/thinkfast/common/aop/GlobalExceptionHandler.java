@@ -1,5 +1,6 @@
 package com.example.thinkfast.common.aop;
 
+import com.example.thinkfast.exception.AiServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,13 @@ public class GlobalExceptionHandler {
         log.warn("비밀번호가 올바르지 않습니다.: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(BaseResponse.fail(ResponseMessage.INVALID_PASSWORD));
+    }
+
+    @ExceptionHandler(AiServiceException.class)
+    public ResponseEntity<BaseResponse> handleAiServiceException(AiServiceException e) {
+        log.error("AI 서비스 오류: {}", e.getMessage(), e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(BaseResponse.fail("AI 서비스 처리 중 오류가 발생했습니다."));
     }
 
     @ExceptionHandler(Exception.class)

@@ -32,3 +32,8 @@ jwt:
   secret: your-secret-key-should-be-very-long-and-secure-at-least-256-bits
   token-validity-in-seconds: 3600 # 1 hour (3600)
   refresh-token-validity-in-seconds: 604800 # 7 days  (604800)
+
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+  api-url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
+  timeout-seconds: 30
