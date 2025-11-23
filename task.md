@@ -85,9 +85,12 @@
   - [ ] TF-IDF 기반 중요도 계산 (선택사항 - Java 라이브러리 활용 가능)
 
 ### 요약 리포트 생성 로직
-- [ ] 설문 데이터 집계 및 분석
-  - [ ] 객관식 질문별 주요 응답 옵션 추출
-  - [ ] 비율이 가장 높은 옵션 식별
+- [x] 설문 데이터 집계 및 분석
+  - [x] 객관식 질문별 주요 응답 옵션 추출
+  - [x] 비율이 가장 높은 옵션 식별
+  - [x] `SurveyStatisticsService` 클래스 생성 (`service/ai/SurveyStatisticsService.java`)
+  - [x] 통계 집계 DTO 클래스 생성 (`OptionStatisticsDto`, `QuestionStatisticsDto`)
+  - [x] `ResponseRepository`에 통계 집계 쿼리 메서드 추가
   - [ ] 트렌드 패턴 분석 (선택사항)
 - [ ] 개선 사항 추출 로직
   - [ ] 주관식 질문에서 개선 관련 키워드 추출 (Java - 정규식 기반)
@@ -263,6 +266,12 @@
   - [x] 반복 문자 정규화
   - [x] 비속어 필터링 기능 추가
   - [x] 인터넷 축약어 필터링 (초성 축약어 처리)
+- [x] 설문 데이터 집계 및 분석 기능 구현 완료
+  - [x] SurveyStatisticsService 클래스 생성
+  - [x] 객관식 질문별 통계 집계 (옵션별 응답 수, 비율 계산)
+  - [x] 비율이 가장 높은 옵션 식별 기능
+  - [x] 통계 집계 DTO 클래스 생성 (OptionStatisticsDto, QuestionStatisticsDto)
+  - [x] ResponseRepository 통계 쿼리 메서드 추가
 
 ---
 
@@ -854,10 +863,12 @@ String cleaned = textAnalysisService.preprocessText(
 
 ### 📝 다음 작업 체크리스트
 - [x] `TextAnalysisService` 생성 및 키워드 추출 구현 ✅
+- [x] `SurveyStatisticsService` 생성 및 통계 집계 구현 ✅
 - [ ] `GeminiApiService`에 캐싱 로직 추가
 - [ ] `InsightService` 생성 및 템플릿 기반 인사이트 생성
 - [ ] `SummaryService` 생성 및 요약 리포트 생성
 - [ ] 워드클라우드 집계 API 구현
+- [ ] 질문별 통계 API 구현 (`GET /survey/:id/questions/:questionId/statistics`)
 - [ ] 각 서비스 단위 테스트 작성
 
 ### 🎯 다음 작업 상세 가이드
@@ -897,6 +908,7 @@ String cleaned = textAnalysisService.preprocessText(
 - **구현 위치**: `service/ai/InsightService`
 - **Phase 1 (템플릿 기반)**:
   - [ ] 객관식 인사이트 템플릿
+    - `SurveyStatisticsService`의 통계 데이터 활용
     - 옵션별 분포 분석
     - "A 옵션이 전체 응답의 60%를 차지하며 압도적으로 선호되고 있습니다."
     - "정글과 미드가 응답자의 절반 이상을 차지하며..."
@@ -905,16 +917,64 @@ String cleaned = textAnalysisService.preprocessText(
     - "응답자들은 '매칭 시스템'에 대한 개선 요청이 가장 많았으며..."
 - **Phase 2 (AI 기반)**:
   - [ ] `GeminiApiService.generateText()` 활용
-  - [ ] 프롬프트 템플릿 작성
+  - [ ] 프롬프트 템플릿 작성 (통계 데이터를 자연어로 변환)
   - [ ] 폴백 로직 (API 실패 시 템플릿 기반으로 전환)
+
+#### 2-1. **SurveyStatisticsService 사용 예시**
+```java
+@Autowired
+private SurveyStatisticsService statisticsService;
+
+// 질문별 통계 조회
+QuestionStatisticsDto statistics = statisticsService.getQuestionStatistics(questionId);
+
+// 비율이 가장 높은 옵션 추출
+OptionStatisticsDto topOption = statisticsService.getTopOption(questionId);
+
+// 설문의 모든 객관식 질문 통계 조회
+List<QuestionStatisticsDto> surveyStatistics = 
+    statisticsService.getSurveyStatistics(surveyId);
+
+// 첫 번째 질문의 최고 옵션 (요약 리포트용)
+OptionStatisticsDto mainPosition = 
+    statisticsService.getFirstQuestionTopOption(surveyId);
+```
 
 #### 3. **질문별 통계 API 구현**
 - **목적**: 질문별 응답 통계 및 인사이트 제공
 - **구현 위치**: `SurveyController` 또는 별도 `StatisticsController`
 - **API 엔드포인트**: `GET /survey/:id/questions/:questionId/statistics`
 - **필요한 작업**:
-  - [ ] 설문 소유자 확인 로직
-  - [ ] 객관식/주관식/척도형 질문별 통계 집계
-  - [ ] `InsightService`를 통한 인사이트 생성
+  - [ ] 설문 소유자 확인 로직 (`Survey.userId`와 현재 사용자 비교)
+  - [ ] `SurveyStatisticsService.getQuestionStatistics()` 활용
+  - [ ] `InsightService`를 통한 인사이트 생성 (통계 데이터 기반)
   - [ ] 응답에 `insight` 필드 추가
+  - [ ] DTO 변환 및 응답 포맷 정의
+- **응답 예시**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "questionId": 1,
+      "type": "MULTIPLE_CHOICE",
+      "questionContent": "주 포지션은?",
+      "totalResponses": 70,
+      "optionStatistics": [
+        {
+          "optionId": 1,
+          "optionContent": "정글",
+          "count": 20,
+          "percent": 28.57
+        }
+      ],
+      "topOption": {
+        "optionId": 1,
+        "optionContent": "정글",
+        "count": 20,
+        "percent": 28.57
+      },
+      "insight": "정글과 미드가 응답자의 절반 이상을 차지하며..."
+    }
+  }
+  ```
 

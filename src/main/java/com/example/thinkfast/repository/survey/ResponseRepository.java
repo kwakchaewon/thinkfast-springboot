@@ -2,6 +2,41 @@ package com.example.thinkfast.repository.survey;
 
 import com.example.thinkfast.domain.survey.Response;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
 
 public interface ResponseRepository extends JpaRepository<Response, Long> {
+    
+    /**
+     * 질문별 모든 응답 조회
+     */
+    List<Response> findByQuestionId(Long questionId);
+    
+    /**
+     * 객관식 질문의 옵션별 응답 수 집계
+     */
+    @Query("SELECT r.optionId, COUNT(r) as count " +
+           "FROM Response r " +
+           "WHERE r.questionId = :questionId " +
+           "AND r.optionId IS NOT NULL " +
+           "GROUP BY r.optionId")
+    List<Object[]> countByQuestionIdAndOptionId(@Param("questionId") Long questionId);
+    
+    /**
+     * 질문별 전체 응답 수 조회
+     */
+    @Query("SELECT COUNT(DISTINCT r.responseSessionId) " +
+           "FROM Response r " +
+           "WHERE r.questionId = :questionId")
+    Long countDistinctResponseSessionsByQuestionId(@Param("questionId") Long questionId);
+    
+    /**
+     * 설문의 모든 질문별 응답 조회
+     */
+    @Query("SELECT r FROM Response r " +
+           "WHERE r.questionId IN " +
+           "(SELECT q.id FROM Question q WHERE q.surveyId = :surveyId)")
+    List<Response> findBySurveyId(@Param("surveyId") Long surveyId);
 }
