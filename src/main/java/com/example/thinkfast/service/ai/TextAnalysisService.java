@@ -16,96 +16,6 @@ import java.util.stream.Collectors;
 @Service
 public class TextAnalysisService {
 
-    // 한글 단어 추출을 위한 정규식 패턴
-    private static final Pattern KOREAN_WORD_PATTERN = Pattern.compile("[가-힣]+");
-    
-    // 이모지 및 특수문자 제거를 위한 패턴
-    private static final Pattern EMOJI_AND_SPECIAL_CHAR_PATTERN = Pattern.compile("[^가-힣\\s]");
-    
-    // 초성 축약어 패턴 (2개 이상의 연속된 초성)
-    private static final Pattern INITIAL_CONSONANT_PATTERN = Pattern.compile("[ㄱ-ㅎ]{2,}");
-    
-    // 한국어 불용어 리스트 (하드코딩)
-    private static final Set<String> STOP_WORDS = new HashSet<>(Arrays.asList(
-            // 조사
-            "이", "가", "을", "를", "의", "에", "에서", "로", "으로", "와", "과", "도", "만", "부터", "까지",
-            // 대명사
-            "그", "그것", "이것", "저것", "그들", "이들", "저들", "나", "너", "우리", "당신",
-            // 접속사
-            "그리고", "또한", "또", "그러나", "하지만", "그런데", "그래서", "따라서", "그러므로",
-            // 부사
-            "매우", "아주", "너무", "정말", "진짜", "완전", "꽤", "조금", "좀", "많이", "적게",
-            // 일반적인 불용어
-            "것", "수", "때", "곳", "일", "등", "및", "등등", "등의", "같은", "다른", "같이",
-            "있", "없", "하", "되", "되다", "하다", "있다", "없다", "되다", "하다", "이다",
-            "되도록", "하도록", "이렇게", "그렇게", "저렇게", "어떻게", "왜", "언제", "어디",
-            "이런", "그런", "저런", "어떤", "무엇", "누구", "어느"
-    ));
-
-    // 비속어 및 부적절한 표현 사전 (필터링용)
-    private static final Set<String> PROFANITY_WORDS = new HashSet<>(Arrays.asList(
-            // 비속어 (일부 예시 - 실제로는 더 많은 단어가 필요)
-            "시발", "개새끼", "병신", "좆", "지랄", "미친", "미친놈", "미친년",
-            "개같은", "개새", "새끼", "씨발", "좆같은", "지랄", "개지랄",
-            "병신", "멍청이", "바보", "등신", "호구", "찐따"
-    ));
-
-    // 인터넷 초성 축약어 사전 (필터링용)
-    // 대부분 비속어나 부적절한 표현이므로 필터링 대상
-    private static final Set<String> INTERNET_SLANG_INITIALS = new HashSet<>(Arrays.asList(
-            // 비속어 초성 축약어
-            "ㅅㅂ", "시발",
-            "ㅈㄴ", "존나", "진짜나",
-            "ㅈㄹ", "지랄",
-            "ㅂㅅ", "병신",
-            "ㅁㅊ", "미친",
-            "ㄱㅅㄲ", "개새끼",
-            "ㄱㅅ", "개새",
-            "ㅆㄱ", "새끼",
-            "ㅈㄱ", "좆같",
-            "ㄱㅈㄹ", "개지랄",
-            "ㅈㅅ", "좆새",
-            "ㄷㅅ", "등신",
-            "ㅎㄱ", "호구",
-            "ㅉㄷ", "찐따",
-            "ㅁㅊㄴ", "미친놈",
-            "ㅁㅊㄴ", "미친년",
-            // 기타 부적절한 표현
-            "ㅇㅈ", "인정", // 일부는 정상적이지만 맥락에 따라 부적절할 수 있음
-            "ㄱㄷ", "개돼",
-            "ㅂㄹ", "병렬",
-            "ㅇㅂ", "엿바꿔"
-    ));
-
-    // 구어체 정규화 맵 (구어체 -> 표준어)
-    private static final Map<String, String> COLLOQUIAL_NORMALIZATION = new HashMap<String, String>() {{
-        // 축약형 대명사
-        put("그거", "그것");
-        put("이거", "이것");
-        put("저거", "저것");
-        put("그게", "그것이");
-        put("이게", "이것이");
-        put("저게", "저것이");
-        
-        // 구어체 동사/형용사
-        put("됐어", "되었다");
-        put("했어", "했다");
-        put("있어", "있다");
-        put("없어", "없다");
-        put("좋아", "좋다");
-        put("나빠", "나쁘다");
-        put("많아", "많다");
-        put("적어", "적다");
-        
-        // 구어체 부사/형용사
-        put("안됨", "안됨"); // 그대로 유지
-        put("안됐어", "안되었다");
-        put("안했어", "안했다");
-        
-        // 줄임말
-        put("됨", "됨"); // 그대로 유지
-        put("안됨", "안됨");
-    }};
 
     /**
      * 반복 문자 정규화 (예: "너무너무너무" -> "너무")
@@ -129,7 +39,7 @@ public class TextAnalysisService {
         String normalized = text;
         
         // 구어체 정규화 맵을 사용하여 변환
-        for (Map.Entry<String, String> entry : COLLOQUIAL_NORMALIZATION.entrySet()) {
+        for (Map.Entry<String, String> entry : TextAnalysisConstants.COLLOQUIAL_NORMALIZATION.entrySet()) {
             normalized = normalized.replace(entry.getKey(), entry.getValue());
         }
         
@@ -146,13 +56,13 @@ public class TextAnalysisService {
         String filtered = text;
         
         // 1. 초성 축약어 사전에 있는 것들을 필터링
-        for (String slang : INTERNET_SLANG_INITIALS) {
+        for (String slang : TextAnalysisConstants.INTERNET_SLANG_INITIALS) {
             filtered = filtered.replace(slang, " ");
         }
         
         // 2. 일반적인 초성 패턴 감지 및 필터링 (2개 이상 연속된 초성)
         // 대부분의 초성 축약어는 비속어이므로 필터링
-        filtered = INITIAL_CONSONANT_PATTERN.matcher(filtered).replaceAll(" ");
+        filtered = TextAnalysisConstants.INITIAL_CONSONANT_PATTERN.matcher(filtered).replaceAll(" ");
         
         return filtered;
     }
@@ -166,7 +76,7 @@ public class TextAnalysisService {
     private String filterProfanity(String text) {
         String filtered = text;
         
-        for (String profanity : PROFANITY_WORDS) {
+        for (String profanity : TextAnalysisConstants.PROFANITY_WORDS) {
             // 비속어를 공백으로 대체 (대소문자 구분 없이)
             filtered = filtered.replaceAll("(?i)" + Pattern.quote(profanity), " ");
         }
@@ -232,7 +142,7 @@ public class TextAnalysisService {
         }
 
         // 5. 이모지 및 특수문자 제거 (한글과 공백만 남김)
-        cleaned = EMOJI_AND_SPECIAL_CHAR_PATTERN.matcher(cleaned).replaceAll(" ");
+        cleaned = TextAnalysisConstants.EMOJI_AND_SPECIAL_CHAR_PATTERN.matcher(cleaned).replaceAll(" ");
 
         // 6. 연속된 공백을 하나로 통합
         cleaned = cleaned.replaceAll("\\s+", " ");
@@ -255,7 +165,7 @@ public class TextAnalysisService {
         }
 
         List<String> words = new ArrayList<>();
-        Matcher matcher = KOREAN_WORD_PATTERN.matcher(text);
+        Matcher matcher = TextAnalysisConstants.KOREAN_WORD_PATTERN.matcher(text);
         
         while (matcher.find()) {
             String word = matcher.group();
@@ -293,11 +203,11 @@ public class TextAnalysisService {
         return words.stream()
                 .filter(word -> {
                     // 불용어 제거
-                    if (STOP_WORDS.contains(word)) {
+                    if (TextAnalysisConstants.STOP_WORDS.contains(word)) {
                         return false;
                     }
                     // 비속어 필터링 (옵션)
-                    if (filterProfanity && PROFANITY_WORDS.contains(word)) {
+                    if (filterProfanity && TextAnalysisConstants.PROFANITY_WORDS.contains(word)) {
                         return false;
                     }
                     return true;
