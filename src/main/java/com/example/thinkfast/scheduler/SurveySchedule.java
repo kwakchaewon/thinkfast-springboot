@@ -6,6 +6,7 @@ import com.example.thinkfast.repository.ai.InsightReportRepository;
 import com.example.thinkfast.repository.survey.SurveyRepository;
 import com.example.thinkfast.service.ai.SummaryService;
 import com.example.thinkfast.service.ai.WordCloudService;
+import com.example.thinkfast.service.ai.InsightService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,6 +25,7 @@ public class SurveySchedule {
     private final RedisPublisher redisPublisher;
     private final SummaryService summaryService;
     private final WordCloudService wordCloudService;
+    private final InsightService insightService;
     private final InsightReportRepository insightReportRepository;
 
     @Scheduled(fixedRate = 60000)
@@ -57,6 +59,9 @@ public class SurveySchedule {
                 
                 // 설문 종료 후 워드클라우드 비동기 생성
                 wordCloudService.saveWordCloudsForSurveyAsync(survey.getId());
+                
+                // 설문 종료 후 인사이트 텍스트 비동기 생성
+                insightService.saveInsightsForSurveyAsync(survey.getId());
             });
         } catch (Exception e) {
             log.error("스케줄러 실행 중 오류 발생", e);

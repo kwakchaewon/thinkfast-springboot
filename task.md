@@ -129,11 +129,6 @@
   - [x] 설문 종료 시 비동기적으로 워드 클라우드 집계 로직 호출 (`SurveySchedule`)
   - [x] DB 조회 우선 로직 (`getWordCloud` 메서드)
   - [x] Flyway 마이그레이션 스크립트 생성
-- [x] 인사이트 텍스트 생성 로직 구현 완료
-  - [x] InsightService 클래스 생성
-  - [x] 객관식 인사이트 생성 (옵션별 분포 분석, 패턴 인식, 템플릿 기반 문장 생성)
-  - [x] 주관식 인사이트 생성 (주요 키워드 기반 문장 생성)
-  - [x] 질문 타입별 자동 인사이트 생성 (generateInsight 메서드) (`V7__create_word_clouds_table.sql`)
 
 ### 인사이트 텍스트 생성 로직
 - [x] 객관식 인사이트 생성
@@ -146,8 +141,47 @@
   - [x] 주요 키워드 기반 문장 생성 (Java - 템플릿 기반)
   - [x] 트렌드 설명 텍스트 생성 (Java)
   - [ ] AI 기반 자연어 생성 (Phase 2 선택사항 - Java에서 무료 AI API 직접 호출)
-- [ ] 인사이트 텍스트 저장 및 관리
-  - [ ] 인사이트 텍스트 캐싱 (동일한 통계에 대해 재계산 방지)
+- [x] 인사이트 텍스트 DB 저장 로직 구현
+  - [x] Flyway 마이그레이션 스크립트 생성 (`V8__create_question_insights_table.sql`)
+  - [x] 설문 종료 시 시점에서 인사이트 질문별 텍스트 생성 (`SurveySchedule` 통합)
+  - [x] API 구현 및 호출 시 API 조회 로직을 통해 질문별 인사이트 조회 (`InsightService.getInsight()`)
+
+#### 다음 작업 상세 가이드: 인사이트 텍스트 DB 저장 로직 구현 완료
+
+**구현 완료 내용:**
+1. **QuestionInsight 엔티티** (`domain/ai/QuestionInsight.java`)
+   - `QUESTION_ID` (UNIQUE)
+   - `INSIGHT_TEXT` (TEXT)
+   - `CREATED_AT` (TIMESTAMP)
+
+2. **QuestionInsightRepository** (`repository/ai/QuestionInsightRepository.java`)
+   - `findByQuestionId(Long questionId)`: 질문별 인사이트 조회
+   - `existsByQuestionId(Long questionId)`: 인사이트 존재 여부 확인
+
+3. **InsightService 확장**
+   - `getInsight(Long questionId)`: DB 조회 우선, 없으면 실시간 생성
+   - `saveInsightAsync(Long questionId)`: 비동기 인사이트 생성 및 저장
+   - `saveInsightsForSurveyAsync(Long surveyId)`: 설문의 모든 질문에 대해 인사이트 생성 및 저장
+
+4. **SurveySchedule 통합**
+   - 설문 종료 시 `insightService.saveInsightsForSurveyAsync(survey.getId())` 호출
+   - 객관식 및 주관식 질문에 대해서만 인사이트 생성 (척도형 제외)
+
+5. **Flyway 마이그레이션**
+   - `V8__create_question_insights_table.sql`: `QUESTION_INSIGHTS` 테이블 생성
+
+**다음 작업:**
+- 질문별 통계 API 구현 (`GET /survey/{id}/questions/{questionId}/statistics`)
+  - `SurveyStatisticsService.getQuestionStatistics()` 활용
+  - `InsightService.getInsight()` 활용하여 인사이트 포함
+  - 응답 DTO에 `insight` 필드 추가
+- [x] 인사이트 텍스트 저장 및 관리
+  - [x] 인사이트 텍스트 캐싱 (DB 저장을 통한 재계산 방지)
+  - [x] `QuestionInsight` 엔티티 생성 (`domain/ai/QuestionInsight.java`)
+  - [x] `QuestionInsightRepository` 생성
+  - [x] 설문 종료 시 비동기 인사이트 생성 로직 (`SurveySchedule`)
+  - [x] DB 조회 우선 로직 (`getInsight` 메서드)
+  - [x] Flyway 마이그레이션 스크립트 생성 (`V8__create_question_insights_table.sql`)
   - [ ] 수동 수정 기능 (선택사항)
 
 ### Backend API 개발
@@ -1045,6 +1079,9 @@ String subjectiveInsight = insightService.generateSubjectiveInsight(questionId);
 
 // 질문 타입에 따라 자동 인사이트 생성
 String insight = insightService.generateInsight(questionId);
+
+// DB 조회 우선 인사이트 조회 (없으면 실시간 생성)
+String insightFromDb = insightService.getInsight(questionId);
 ```
 
 #### 2-4. **SummaryService 사용 예시**
@@ -1065,8 +1102,8 @@ SummaryReportDto summary2 = summaryService.generateSummaryReport(surveyId, 10);
 - **API 엔드포인트**: `GET /survey/:id/questions/:questionId/statistics`
 - **필요한 작업**:
   - [ ] 설문 소유자 확인 로직 (`Survey.userId`와 현재 사용자 비교)
-  - [ ] `SurveyStatisticsService.getQuestionStatistics()` 활용
-  - [x] `InsightService`를 통한 인사이트 생성 (통계 데이터 기반) ✅
+  - [x] `SurveyStatisticsService.getQuestionStatistics()` 활용 ✅
+  - [x] `InsightService.getInsight()` 활용 (DB 조회 우선) ✅
   - [ ] 응답에 `insight` 필드 추가
   - [ ] DTO 변환 및 응답 포맷 정의
 - **응답 예시**:

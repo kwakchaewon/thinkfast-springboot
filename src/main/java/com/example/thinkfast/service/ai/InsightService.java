@@ -1,13 +1,16 @@
 package com.example.thinkfast.service.ai;
 
+import com.example.thinkfast.domain.ai.QuestionInsight;
 import com.example.thinkfast.domain.survey.Question;
 import com.example.thinkfast.dto.ai.OptionStatisticsDto;
 import com.example.thinkfast.dto.ai.QuestionStatisticsDto;
 import com.example.thinkfast.dto.ai.WordCloudDto;
 import com.example.thinkfast.dto.ai.WordCloudResponseDto;
+import com.example.thinkfast.repository.ai.QuestionInsightRepository;
 import com.example.thinkfast.repository.survey.QuestionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +29,7 @@ public class InsightService {
     private final SurveyStatisticsService statisticsService;
     private final WordCloudService wordCloudService;
     private final QuestionRepository questionRepository;
+    private final QuestionInsightRepository questionInsightRepository;
 
     /**
      * 객관식 질문 인사이트 생성
@@ -216,6 +220,99 @@ public class InsightService {
             return generateSubjectiveInsight(questionId);
         } else {
             return "척도형 질문은 아직 인사이트를 제공하지 않습니다.";
+        }
+    }
+
+    /**
+     * 질문별 인사이트 조회 (DB에서 먼저 조회, 없으면 생성)
+     *
+     * @param questionId 질문 ID
+     * @return 인사이트 텍스트
+     */
+    @Transactional(readOnly = true)
+    public String getInsight(Long questionId) {
+        // 1. DB에서 기존 인사이트 조회
+        Optional<QuestionInsight> existingInsight = questionInsightRepository.findByQuestionId(questionId);
+        
+        if (existingInsight.isPresent()) {
+            String insightText = existingInsight.get().getInsightText();
+            if (insightText != null && !insightText.isEmpty()) {
+                return insightText;
+            }
+        }
+        
+        // 2. DB에 없으면 새로 생성 (실시간 계산)
+        return generateInsight(questionId);
+    }
+
+    /**
+     * 인사이트 텍스트를 DB에 저장 (비동기 처리용)
+     *
+     * @param questionId 질문 ID
+     */
+    @Async("taskExecutor")
+    @Transactional
+    public void saveInsightAsync(Long questionId) {
+        try {
+            log.info("인사이트 텍스트 생성 시작: questionId={}", questionId);
+            
+            // 인사이트 생성
+            String insightText = generateInsight(questionId);
+            
+            // DB에 저장 또는 업데이트
+            Optional<QuestionInsight> existing = questionInsightRepository.findByQuestionId(questionId);
+            
+            QuestionInsight questionInsight;
+            if (existing.isPresent()) {
+                // 기존 인사이트 업데이트
+                questionInsight = existing.get();
+                questionInsight.setInsightText(insightText);
+            } else {
+                // 새 인사이트 생성
+                questionInsight = QuestionInsight.builder()
+                        .questionId(questionId)
+                        .insightText(insightText)
+                        .build();
+            }
+            
+            questionInsightRepository.save(questionInsight);
+            log.info("인사이트 텍스트 저장 완료: questionId={}", questionId);
+            
+        } catch (Exception e) {
+            log.error("인사이트 텍스트 저장 실패: questionId={}", questionId, e);
+        }
+    }
+
+    /**
+     * 설문의 모든 질문에 대해 인사이트 생성 및 저장
+     *
+     * @param surveyId 설문 ID
+     */
+    @Async("taskExecutor")
+    @Transactional
+    public void saveInsightsForSurveyAsync(Long surveyId) {
+        try {
+            log.info("설문의 모든 질문 인사이트 생성 시작: surveyId={}", surveyId);
+            
+            // 설문의 모든 질문 조회
+            List<Question> questions = questionRepository.findBySurveyId(surveyId);
+            
+            // 객관식과 주관식 질문만 필터링 (척도형 제외)
+            List<Question> targetQuestions = questions.stream()
+                    .filter(q -> q.getType() == Question.QuestionType.MULTIPLE_CHOICE || 
+                               q.getType() == Question.QuestionType.SUBJECTIVE)
+                    .collect(Collectors.toList());
+            
+            // 각 질문에 대해 인사이트 생성 및 저장
+            for (Question question : targetQuestions) {
+                saveInsightAsync(question.getId());
+            }
+            
+            log.info("설문의 모든 질문 인사이트 생성 완료: surveyId={}, 질문 수={}", 
+                    surveyId, targetQuestions.size());
+            
+        } catch (Exception e) {
+            log.error("설문 인사이트 저장 실패: surveyId={}", surveyId, e);
         }
     }
 }
