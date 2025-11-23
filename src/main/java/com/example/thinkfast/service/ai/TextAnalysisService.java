@@ -22,6 +22,9 @@ public class TextAnalysisService {
     // 이모지 및 특수문자 제거를 위한 패턴
     private static final Pattern EMOJI_AND_SPECIAL_CHAR_PATTERN = Pattern.compile("[^가-힣\\s]");
     
+    // 초성 축약어 패턴 (2개 이상의 연속된 초성)
+    private static final Pattern INITIAL_CONSONANT_PATTERN = Pattern.compile("[ㄱ-ㅎ]{2,}");
+    
     // 한국어 불용어 리스트 (하드코딩)
     private static final Set<String> STOP_WORDS = new HashSet<>(Arrays.asList(
             // 조사
@@ -45,6 +48,33 @@ public class TextAnalysisService {
             "시발", "개새끼", "병신", "좆", "지랄", "미친", "미친놈", "미친년",
             "개같은", "개새", "새끼", "씨발", "좆같은", "지랄", "개지랄",
             "병신", "멍청이", "바보", "등신", "호구", "찐따"
+    ));
+
+    // 인터넷 초성 축약어 사전 (필터링용)
+    // 대부분 비속어나 부적절한 표현이므로 필터링 대상
+    private static final Set<String> INTERNET_SLANG_INITIALS = new HashSet<>(Arrays.asList(
+            // 비속어 초성 축약어
+            "ㅅㅂ", "시발",
+            "ㅈㄴ", "존나", "진짜나",
+            "ㅈㄹ", "지랄",
+            "ㅂㅅ", "병신",
+            "ㅁㅊ", "미친",
+            "ㄱㅅㄲ", "개새끼",
+            "ㄱㅅ", "개새",
+            "ㅆㄱ", "새끼",
+            "ㅈㄱ", "좆같",
+            "ㄱㅈㄹ", "개지랄",
+            "ㅈㅅ", "좆새",
+            "ㄷㅅ", "등신",
+            "ㅎㄱ", "호구",
+            "ㅉㄷ", "찐따",
+            "ㅁㅊㄴ", "미친놈",
+            "ㅁㅊㄴ", "미친년",
+            // 기타 부적절한 표현
+            "ㅇㅈ", "인정", // 일부는 정상적이지만 맥락에 따라 부적절할 수 있음
+            "ㄱㄷ", "개돼",
+            "ㅂㄹ", "병렬",
+            "ㅇㅂ", "엿바꿔"
     ));
 
     // 구어체 정규화 맵 (구어체 -> 표준어)
@@ -107,6 +137,27 @@ public class TextAnalysisService {
     }
 
     /**
+     * 초성 축약어 필터링 (인터넷 슬랭 초성 축약어를 공백으로 대체)
+     *
+     * @param text 원본 텍스트
+     * @return 필터링된 텍스트
+     */
+    private String filterInternetSlangInitials(String text) {
+        String filtered = text;
+        
+        // 1. 초성 축약어 사전에 있는 것들을 필터링
+        for (String slang : INTERNET_SLANG_INITIALS) {
+            filtered = filtered.replace(slang, " ");
+        }
+        
+        // 2. 일반적인 초성 패턴 감지 및 필터링 (2개 이상 연속된 초성)
+        // 대부분의 초성 축약어는 비속어이므로 필터링
+        filtered = INITIAL_CONSONANT_PATTERN.matcher(filtered).replaceAll(" ");
+        
+        return filtered;
+    }
+
+    /**
      * 비속어 필터링 (비속어를 공백으로 대체)
      *
      * @param text 원본 텍스트
@@ -131,7 +182,7 @@ public class TextAnalysisService {
      * @return 정제된 텍스트
      */
     public String preprocessText(String text) {
-        return preprocessText(text, true, true);
+        return preprocessText(text, true, true, true);
     }
 
     /**
@@ -143,6 +194,19 @@ public class TextAnalysisService {
      * @return 정제된 텍스트
      */
     public String preprocessText(String text, boolean normalizeColloquial, boolean filterProfanity) {
+        return preprocessText(text, normalizeColloquial, filterProfanity, true);
+    }
+
+    /**
+     * 텍스트 전처리 (옵션 포함)
+     *
+     * @param text 원본 텍스트
+     * @param normalizeColloquial 구어체 정규화 여부
+     * @param filterProfanity 비속어 필터링 여부
+     * @param filterInternetSlang 인터넷 축약어 필터링 여부
+     * @return 정제된 텍스트
+     */
+    public String preprocessText(String text, boolean normalizeColloquial, boolean filterProfanity, boolean filterInternetSlang) {
         if (text == null || text.trim().isEmpty()) {
             return "";
         }
@@ -157,18 +221,23 @@ public class TextAnalysisService {
             cleaned = normalizeColloquial(cleaned);
         }
 
-        // 3. 비속어 필터링 (옵션)
+        // 3. 인터넷 축약어 필터링 (옵션) - 비속어 필터링 전에 수행
+        if (filterInternetSlang) {
+            cleaned = filterInternetSlangInitials(cleaned);
+        }
+
+        // 4. 비속어 필터링 (옵션)
         if (filterProfanity) {
             cleaned = filterProfanity(cleaned);
         }
 
-        // 4. 이모지 및 특수문자 제거 (한글과 공백만 남김)
+        // 5. 이모지 및 특수문자 제거 (한글과 공백만 남김)
         cleaned = EMOJI_AND_SPECIAL_CHAR_PATTERN.matcher(cleaned).replaceAll(" ");
 
-        // 5. 연속된 공백을 하나로 통합
+        // 6. 연속된 공백을 하나로 통합
         cleaned = cleaned.replaceAll("\\s+", " ");
 
-        // 6. 앞뒤 공백 제거
+        // 7. 앞뒤 공백 제거
         cleaned = cleaned.trim();
 
         return cleaned;
