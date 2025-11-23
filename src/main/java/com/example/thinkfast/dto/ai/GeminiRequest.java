@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -28,8 +30,8 @@ public class GeminiRequest {
 
     public static GeminiRequest create(String prompt) {
         Part part = new Part(prompt);
-        Content content = new Content(List.of(part));
-        return new GeminiRequest(List.of(content));
+        Content content = new Content(Collections.singletonList(part));
+        return new GeminiRequest(Collections.singletonList(content));
     }
 }
 
