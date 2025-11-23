@@ -18,9 +18,12 @@ import com.example.thinkfast.service.survey.ResponseService;
 import com.example.thinkfast.service.survey.QuestionService;
 import com.example.thinkfast.service.ai.SummaryService;
 import com.example.thinkfast.dto.ai.SummaryReportDto;
+import com.example.thinkfast.service.ai.WordCloudService;
+import com.example.thinkfast.dto.ai.WordCloudResponseDto;
 import com.example.thinkfast.domain.survey.Survey;
 import com.example.thinkfast.repository.auth.UserRepository;
 import com.example.thinkfast.repository.survey.SurveyRepository;
+import com.example.thinkfast.repository.survey.QuestionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -45,8 +48,10 @@ public class SurveyController {
     private final ResponseService responseService;
     private final RedisPublisher redisPublisher;
     private final SummaryService summaryService;
+    private final WordCloudService wordCloudService;
     private final UserRepository userRepository;
     private final SurveyRepository surveyRepository;
+    private final QuestionRepository questionRepository;
 
     /**
      * 개선 사항: 요청 데이터 유효성 검사, Bulk Insert 를 통한 성능 최적화, 트랜잭션 전파 설정 
@@ -173,5 +178,51 @@ public class SurveyController {
         SummaryReportDto summaryReport = summaryService.getSummaryReport(id);
         
         return BaseResponse.success(summaryReport);
+    }
+
+    /**
+     * 워드클라우드 조회
+     * 설문 소유자만 조회 가능
+     * 주관식 질문에만 적용
+     *
+     * @param surveyId 설문 ID
+     * @param questionId 질문 ID
+     * @param userDetail 현재 사용자 정보
+     * @return 워드클라우드 데이터
+     */
+    @GetMapping("/{surveyId}/questions/{questionId}/wordcloud")
+    @PreAuthorize("hasRole('CREATOR')")
+    public BaseResponse<WordCloudResponseDto> getWordCloud(
+            @PathVariable Long surveyId,
+            @PathVariable Long questionId,
+            @AuthenticationPrincipal UserDetailImpl userDetail) {
+        
+        // 1. 설문 존재 여부 및 소유자 확인
+        Optional<Survey> surveyOpt = surveyRepository.findById(surveyId);
+        if (!surveyOpt.isPresent() || surveyOpt.get().getIsDeleted()) {
+            return BaseResponse.fail(ResponseMessage.SURVEY_NOT_FOUND);
+        }
+        
+        Survey survey = surveyOpt.get();
+        Long currentUserId = userRepository.findIdByUsername(userDetail.getUsername());
+        if (!survey.getUserId().equals(currentUserId)) {
+            return BaseResponse.fail(ResponseMessage.UNAUTHORIZED);
+        }
+        
+        // 2. 질문 존재 여부 및 타입 확인
+        Optional<Question> questionOpt = questionRepository.findById(questionId);
+        if (!questionOpt.isPresent()) {
+            return BaseResponse.fail(ResponseMessage.SURVEY_NOT_FOUND);
+        }
+        
+        Question question = questionOpt.get();
+        if (question.getType() != Question.QuestionType.SUBJECTIVE) {
+            return BaseResponse.fail(ResponseMessage.INVALID_REQUEST);
+        }
+        
+        // 3. 워드클라우드 조회 (DB 우선, 없으면 실시간 생성)
+        WordCloudResponseDto wordCloud = wordCloudService.getWordCloud(questionId);
+        
+        return BaseResponse.success(wordCloud);
     }
 }

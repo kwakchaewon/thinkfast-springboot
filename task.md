@@ -111,17 +111,24 @@
   - [x] DB 조회 우선 로직 (`getSummaryReport` 메서드)
 
 ### 워드클라우드 집계 API
-- [ ] 주관식 질문 응답 데이터 수집
-  - [ ] 질문별 모든 응답 텍스트 조회
-  - [ ] 데이터 전처리
-- [ ] 키워드 분석 및 집계
-  - [ ] 텍스트 분석 모듈 호출
-  - [ ] 키워드 빈도수 집계
-  - [ ] 워드클라우드 데이터 포맷 생성
-- [ ] 워드클라우드 API 엔드포인트 구현
-  - [ ] `GET /survey/:id/questions/:questionId/wordcloud` API 개발
-  - [ ] 응답 데이터 구조 정의
-  - [ ] 캐싱 전략 구현 (선택사항 - 계산 비용 절감)
+- [x] 주관식 질문 응답 데이터 수집
+  - [x] 질문별 모든 응답 텍스트 조회
+  - [x] 데이터 전처리
+- [x] 키워드 분석 및 집계
+  - [x] 텍스트 분석 모듈 호출
+  - [x] 키워드 빈도수 집계
+  - [x] 워드클라우드 데이터 포맷 생성
+- [x] 워드클라우드 API 엔드포인트 구현
+  - [x] `GET /survey/:id/questions/:questionId/wordcloud` API 개발
+  - [x] 응답 데이터 구조 정의
+  - [x] `WordCloudService` 클래스 생성
+  - [x] `WordCloudDto`, `WordCloudResponseDto` 클래스 생성
+- [x] 워드 클라우드 집계 DB 저장 로직 구현
+  - [x] `WordCloud` 엔티티 생성 (`domain/ai/WordCloud.java`)
+  - [x] `WordCloudRepository` 생성
+  - [x] 설문 종료 시 비동기적으로 워드 클라우드 집계 로직 호출 (`SurveySchedule`)
+  - [x] DB 조회 우선 로직 (`getWordCloud` 메서드)
+  - [x] Flyway 마이그레이션 스크립트 생성 (`V7__create_word_clouds_table.sql`)
 
 ### 인사이트 텍스트 생성 로직
 - [ ] 객관식 인사이트 생성
