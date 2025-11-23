@@ -92,13 +92,17 @@
   - [x] 통계 집계 DTO 클래스 생성 (`OptionStatisticsDto`, `QuestionStatisticsDto`)
   - [x] `ResponseRepository`에 통계 집계 쿼리 메서드 추가
   - [ ] 트렌드 패턴 분석 (선택사항)
-- [ ] 개선 사항 추출 로직
-  - [ ] 주관식 질문에서 개선 관련 키워드 추출 (Java - 정규식 기반)
-  - [ ] 템플릿 기반 개선 사항 문장 생성 (Java - 기본 구현)
+- [x] 개선 사항 추출 로직
+  - [x] 주관식 질문에서 개선 관련 키워드 추출 (Java - 정규식 기반)
+  - [x] 템플릿 기반 개선 사항 문장 생성 (Java - 기본 구현)
+  - [x] `ImprovementExtractionService` 클래스 생성 (`service/ai/ImprovementExtractionService.java`)
+  - [x] 개선 관련 키워드 사전 구축 (하드코딩된 리스트)
   - [ ] AI 기반 요약 생성 (Phase 2 선택사항 - Java에서 무료 AI API 직접 호출)
-- [ ] 요약 리포트 응답 포맷 정의
-  - [ ] API 응답 구조 설계
-  - [ ] 데이터 타입 정의
+- [x] 요약 리포트 응답 포맷 정의
+  - [x] API 응답 구조 설계
+  - [x] 데이터 타입 정의
+  - [x] `SummaryReportDto` 클래스 생성
+  - [x] `SummaryService` 클래스 생성 (`service/ai/SummaryService.java`)
 
 ### 워드클라우드 집계 API
 - [ ] 주관식 질문 응답 데이터 수집
@@ -272,6 +276,12 @@
   - [x] 비율이 가장 높은 옵션 식별 기능
   - [x] 통계 집계 DTO 클래스 생성 (OptionStatisticsDto, QuestionStatisticsDto)
   - [x] ResponseRepository 통계 쿼리 메서드 추가
+- [x] 개선 사항 추출 및 요약 리포트 생성 기능 구현 완료
+  - [x] ImprovementExtractionService 클래스 생성
+  - [x] 주관식 질문에서 개선 관련 키워드 추출
+  - [x] 템플릿 기반 개선 사항 문장 생성
+  - [x] SummaryService 클래스 생성
+  - [x] SummaryReportDto 클래스 생성 (요약 리포트 응답 포맷)
 
 ---
 
@@ -776,14 +786,60 @@ Gemini API는 JSON 형식으로 응답하며, 생성된 텍스트는 `candidates
   - [ ] 프롬프트 템플릿 작성 (통계 데이터를 자연어로 변환)
   - [ ] 폴백 로직 (API 실패 시 템플릿 기반으로 전환)
 
-#### 4. **요약 리포트 생성 로직**
-- **목적**: 설문 전체 데이터 분석 및 요약 리포트 생성
-- **구현 위치**: `service/ai/SummaryService` (새로 생성)
-- **주요 기능**:
-  - [ ] 설문 데이터 집계 (객관식/주관식 질문별 통계)
-  - [ ] 주요 인사이트 추출
-  - [ ] 개선 사항 추출 (주관식 질문에서 키워드 기반)
-  - [ ] AI 기반 요약 생성 (선택사항)
+#### 4. **요약 리포트 조회 API 구현**
+- **목적**: 설문 전체 데이터 분석 및 요약 리포트 제공
+- **구현 위치**: `SurveyController`
+- **API 엔드포인트**: `GET /survey/:id/summary`
+- **필요한 작업**:
+  - [ ] 설문 소유자 확인 로직 (`Survey.userId`와 현재 사용자 비교)
+  - [ ] `SummaryService.generateSummaryReport()` 활용
+  - [ ] Redis 캐싱 적용 (캐시 키: `survey:{surveyId}:summary`)
+  - [ ] 캐시 무효화 로직 (설문 응답 추가 시)
+- **응답 예시**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "mainPosition": "정글",
+      "mainPositionPercent": 45.0,
+      "improvements": [
+        "매칭 시스템에 대한 개선이 필요합니다",
+        "클라이언트 관련 기능의 향상이 요청되었습니다",
+        "버그 부분의 수정이 필요합니다"
+      ]
+    }
+  }
+  ```
+
+#### 4-1. **SummaryService 사용 예시**
+```java
+@Autowired
+private SummaryService summaryService;
+
+// 요약 리포트 생성 (기본: 최대 5개 개선 사항)
+SummaryReportDto summary = summaryService.generateSummaryReport(surveyId);
+
+// 요약 리포트 생성 (옵션 지정)
+SummaryReportDto summary2 = summaryService.generateSummaryReport(surveyId, 10);
+```
+
+#### 4-2. **ImprovementExtractionService 사용 예시**
+```java
+@Autowired
+private ImprovementExtractionService improvementService;
+
+// 질문별 개선 키워드 추출
+List<Map.Entry<String, Integer>> keywords = 
+    improvementService.extractImprovementKeywords(questionId);
+
+// 설문 전체 개선 키워드 추출
+List<Map.Entry<String, Integer>> surveyKeywords = 
+    improvementService.extractImprovementKeywordsFromSurvey(surveyId);
+
+// 개선 사항 문장 생성
+List<String> improvements = 
+    improvementService.extractImprovements(surveyId, 5);
+```
 
 ### 🔧 구현 시 참고사항
 
@@ -938,6 +994,36 @@ List<QuestionStatisticsDto> surveyStatistics =
 // 첫 번째 질문의 최고 옵션 (요약 리포트용)
 OptionStatisticsDto mainPosition = 
     statisticsService.getFirstQuestionTopOption(surveyId);
+```
+
+#### 2-2. **ImprovementExtractionService 사용 예시**
+```java
+@Autowired
+private ImprovementExtractionService improvementService;
+
+// 질문별 개선 키워드 추출
+List<Map.Entry<String, Integer>> keywords = 
+    improvementService.extractImprovementKeywords(questionId);
+
+// 설문 전체 개선 키워드 추출
+List<Map.Entry<String, Integer>> surveyKeywords = 
+    improvementService.extractImprovementKeywordsFromSurvey(surveyId);
+
+// 개선 사항 문장 생성
+List<String> improvements = 
+    improvementService.extractImprovements(surveyId, 5);
+```
+
+#### 2-3. **SummaryService 사용 예시**
+```java
+@Autowired
+private SummaryService summaryService;
+
+// 요약 리포트 생성 (기본: 최대 5개 개선 사항)
+SummaryReportDto summary = summaryService.generateSummaryReport(surveyId);
+
+// 요약 리포트 생성 (옵션 지정)
+SummaryReportDto summary2 = summaryService.generateSummaryReport(surveyId, 10);
 ```
 
 #### 3. **질문별 통계 API 구현**
