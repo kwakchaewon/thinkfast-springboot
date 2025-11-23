@@ -16,6 +16,11 @@ import com.example.thinkfast.security.UserDetailImpl;
 import com.example.thinkfast.service.survey.SurveyService;
 import com.example.thinkfast.service.survey.ResponseService;
 import com.example.thinkfast.service.survey.QuestionService;
+import com.example.thinkfast.service.ai.SummaryService;
+import com.example.thinkfast.dto.ai.SummaryReportDto;
+import com.example.thinkfast.domain.survey.Survey;
+import com.example.thinkfast.repository.auth.UserRepository;
+import com.example.thinkfast.repository.survey.SurveyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @BaseResponseBody
 @RestController
@@ -38,6 +44,9 @@ public class SurveyController {
     private final QuestionService questionService;
     private final ResponseService responseService;
     private final RedisPublisher redisPublisher;
+    private final SummaryService summaryService;
+    private final UserRepository userRepository;
+    private final SurveyRepository surveyRepository;
 
     /**
      * 개선 사항: 요청 데이터 유효성 검사, Bulk Insert 를 통한 성능 최적화, 트랜잭션 전파 설정 
@@ -130,5 +139,39 @@ public class SurveyController {
         responseService.createResponse(userDetail, surveyId, clientIpAddress, createResponseRequest);
         redisPublisher.sendAlarm(surveyId, "SURVEY_RESPONSE");
         return BaseResponse.success();
+    }
+
+    /**
+     * 설문 요약 리포트 조회
+     * 설문 소유자만 조회 가능
+     *
+     * @param id 설문 ID
+     * @param userDetail 현재 사용자 정보
+     * @return 요약 리포트 (mainPosition, mainPositionPercent, improvements)
+     */
+    @GetMapping("/{id}/summary")
+    @PreAuthorize("hasRole('CREATOR')")
+    public BaseResponse<SummaryReportDto> getSummaryReport(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetailImpl userDetail) {
+        
+        // 1. 설문 존재 여부 확인
+        Optional<Survey> surveyOpt = surveyRepository.findById(id);
+        if (!surveyOpt.isPresent() || surveyOpt.get().getIsDeleted()) {
+            return BaseResponse.fail(ResponseMessage.SURVEY_NOT_FOUND);
+        }
+        
+        Survey survey = surveyOpt.get();
+        
+        // 2. 설문 소유자 확인
+        Long currentUserId = userRepository.findIdByUsername(userDetail.getUsername());
+        if (!survey.getUserId().equals(currentUserId)) {
+            return BaseResponse.fail(ResponseMessage.UNAUTHORIZED);
+        }
+        
+        // 3. 요약 리포트 조회 (DB 우선, 없으면 실시간 생성)
+        SummaryReportDto summaryReport = summaryService.getSummaryReport(id);
+        
+        return BaseResponse.success(summaryReport);
     }
 }
