@@ -128,17 +128,23 @@
   - [x] `WordCloudRepository` 생성
   - [x] 설문 종료 시 비동기적으로 워드 클라우드 집계 로직 호출 (`SurveySchedule`)
   - [x] DB 조회 우선 로직 (`getWordCloud` 메서드)
-  - [x] Flyway 마이그레이션 스크립트 생성 (`V7__create_word_clouds_table.sql`)
+  - [x] Flyway 마이그레이션 스크립트 생성
+- [x] 인사이트 텍스트 생성 로직 구현 완료
+  - [x] InsightService 클래스 생성
+  - [x] 객관식 인사이트 생성 (옵션별 분포 분석, 패턴 인식, 템플릿 기반 문장 생성)
+  - [x] 주관식 인사이트 생성 (주요 키워드 기반 문장 생성)
+  - [x] 질문 타입별 자동 인사이트 생성 (generateInsight 메서드) (`V7__create_word_clouds_table.sql`)
 
 ### 인사이트 텍스트 생성 로직
-- [ ] 객관식 인사이트 생성
-  - [ ] 옵션별 분포 분석 (Java)
-  - [ ] 패턴 인식 로직 (예: 특정 옵션이 과반수, 비슷한 비율 등) (Java)
-  - [ ] 템플릿 기반 문장 생성 (Java - 기본 구현)
+- [x] 객관식 인사이트 생성
+  - [x] 옵션별 분포 분석 (Java)
+  - [x] 패턴 인식 로직 (예: 특정 옵션이 과반수, 비슷한 비율 등) (Java)
+  - [x] 템플릿 기반 문장 생성 (Java - 기본 구현)
+  - [x] `InsightService` 클래스 생성 (`service/ai/InsightService.java`)
   - [ ] AI 기반 생성 (Phase 2 선택사항 - Java에서 무료 AI API 직접 호출)
-- [ ] 주관식 인사이트 생성
-  - [ ] 주요 키워드 기반 문장 생성 (Java - 템플릿 기반)
-  - [ ] 트렌드 설명 텍스트 생성 (Java)
+- [x] 주관식 인사이트 생성
+  - [x] 주요 키워드 기반 문장 생성 (Java - 템플릿 기반)
+  - [x] 트렌드 설명 텍스트 생성 (Java)
   - [ ] AI 기반 자연어 생성 (Phase 2 선택사항 - Java에서 무료 AI API 직접 호출)
 - [ ] 인사이트 텍스트 저장 및 관리
   - [ ] 인사이트 텍스트 캐싱 (동일한 통계에 대해 재계산 방지)
@@ -153,7 +159,7 @@
 - [ ] 질문별 응답 통계 API 구현 및 인사이트 추가
   - [ ] `GET /survey/:id/questions/:questionId/statistics` API 구현 (현재 미구현 상태)
   - [ ] 설문 소유자 확인 로직 구현
-  - [ ] 객관식/주관식/척도형 질문별 통계 집계 로직 구현
+  - [ ] 객관식/주관식 질문별 통계 집계 로직 구현
   - [ ] 인사이트 텍스트 생성 로직 통합
   - [ ] 응답에 `insight` 필드 추가
   - [ ] 페이징 처리 (대용량 응답 데이터 고려)
@@ -932,10 +938,10 @@ String cleaned = textAnalysisService.preprocessText(
 ### 📝 다음 작업 체크리스트
 - [x] `TextAnalysisService` 생성 및 키워드 추출 구현 ✅
 - [x] `SurveyStatisticsService` 생성 및 통계 집계 구현 ✅
+- [x] `InsightService` 생성 및 템플릿 기반 인사이트 생성 ✅
+- [x] `SummaryService` 생성 및 요약 리포트 생성 ✅
+- [x] 워드클라우드 집계 API 구현 ✅
 - [ ] `GeminiApiService`에 캐싱 로직 추가
-- [ ] `InsightService` 생성 및 템플릿 기반 인사이트 생성
-- [ ] `SummaryService` 생성 및 요약 리포트 생성
-- [ ] 워드클라우드 집계 API 구현
 - [ ] 질문별 통계 API 구현 (`GET /survey/:id/questions/:questionId/statistics`)
 - [ ] 각 서비스 단위 테스트 작성
 
@@ -1026,7 +1032,22 @@ List<String> improvements =
     improvementService.extractImprovements(surveyId, 5);
 ```
 
-#### 2-3. **SummaryService 사용 예시**
+#### 2-3. **InsightService 사용 예시**
+```java
+@Autowired
+private InsightService insightService;
+
+// 객관식 질문 인사이트 생성
+String multipleChoiceInsight = insightService.generateMultipleChoiceInsight(questionId);
+
+// 주관식 질문 인사이트 생성
+String subjectiveInsight = insightService.generateSubjectiveInsight(questionId);
+
+// 질문 타입에 따라 자동 인사이트 생성
+String insight = insightService.generateInsight(questionId);
+```
+
+#### 2-4. **SummaryService 사용 예시**
 ```java
 @Autowired
 private SummaryService summaryService;
@@ -1045,7 +1066,7 @@ SummaryReportDto summary2 = summaryService.generateSummaryReport(surveyId, 10);
 - **필요한 작업**:
   - [ ] 설문 소유자 확인 로직 (`Survey.userId`와 현재 사용자 비교)
   - [ ] `SurveyStatisticsService.getQuestionStatistics()` 활용
-  - [ ] `InsightService`를 통한 인사이트 생성 (통계 데이터 기반)
+  - [x] `InsightService`를 통한 인사이트 생성 (통계 데이터 기반) ✅
   - [ ] 응답에 `insight` 필드 추가
   - [ ] DTO 변환 및 응답 포맷 정의
 - **응답 예시**:
