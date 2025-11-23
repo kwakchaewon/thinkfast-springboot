@@ -64,19 +64,20 @@
   - [ ] 비용 계산 로직 (외부 API 사용 시)
 
 ### 텍스트 분석 모듈 개발 (Java 자체 구현)
-- [ ] 한국어 텍스트 전처리 모듈
-  - [ ] 특수문자, 이모지 제거 로직
-  - [ ] 기본 텍스트 정제 작업
-  - [ ] 불용어(stop words) 사전 구축 (하드코딩된 리스트)
-  - [ ] 형태소 분석 없이 정규식 기반 처리 (Python 서버 구축 안함)
-- [ ] 키워드 추출 모듈
-  - [ ] 정규식 기반 단어 추출 (`Pattern.compile("[가-힣]+")`)
-  - [ ] 키워드 빈도수 계산
-  - [ ] 키워드 필터링 로직 (최소 빈도수, 최대 개수 등)
-  - [ ] 상위 N개 키워드 선별
+- [x] 한국어 텍스트 전처리 모듈
+  - [x] 특수문자, 이모지 제거 로직
+  - [x] 기본 텍스트 정제 작업
+  - [x] 불용어(stop words) 사전 구축 (하드코딩된 리스트)
+  - [x] 형태소 분석 없이 정규식 기반 처리 (Python 서버 구축 안함)
+  - [x] `TextAnalysisService` 클래스 생성 (`service/ai/TextAnalysisService.java`)
+- [x] 키워드 추출 모듈
+  - [x] 정규식 기반 단어 추출 (`Pattern.compile("[가-힣]+")`)
+  - [x] 키워드 빈도수 계산
+  - [x] 키워드 필터링 로직 (최소 빈도수, 최대 개수 등)
+  - [x] 상위 N개 키워드 선별
   - [ ] 유사 키워드 그룹화 (정규식 기반으로 간단히 구현)
-- [ ] 키워드 랭킹 알고리즘
-  - [ ] 빈도수 기반 정렬 (기본 구현)
+- [x] 키워드 랭킹 알고리즘
+  - [x] 빈도수 기반 정렬 (기본 구현)
   - [ ] TF-IDF 기반 중요도 계산 (선택사항 - Java 라이브러리 활용 가능)
 
 ### 요약 리포트 생성 로직
@@ -248,6 +249,12 @@
   - [x] Gemini API 클라이언트 서비스 구현
   - [x] DTO 클래스 및 예외 처리 구현
   - [x] API 키 관리 및 설정 파일 업데이트
+- [x] 텍스트 분석 모듈 구현 완료
+  - [x] TextAnalysisService 클래스 생성
+  - [x] 한국어 텍스트 전처리 (특수문자, 이모지 제거)
+  - [x] 불용어 사전 구축 및 필터링
+  - [x] 정규식 기반 키워드 추출 및 빈도수 계산
+  - [x] 상위 N개 키워드 선별 기능
 
 ---
 
@@ -787,20 +794,89 @@ redisTemplate.opsForValue().set("ai:survey:1:summary", result, 1, TimeUnit.HOURS
 String cached = redisTemplate.opsForValue().get("ai:survey:1:summary");
 ```
 
-#### 텍스트 전처리 예시
+#### TextAnalysisService 사용 예시
 ```java
-// 특수문자, 이모지 제거
-String cleaned = text.replaceAll("[^가-힣\\s]", "");
+@Autowired
+private TextAnalysisService textAnalysisService;
 
-// 한글 단어 추출
-Pattern pattern = Pattern.compile("[가-힣]+");
-Matcher matcher = pattern.matcher(cleaned);
+// 텍스트 전처리
+String cleaned = textAnalysisService.preprocessText("원본 텍스트입니다! 😊");
+
+// 키워드 추출
+List<String> keywords = textAnalysisService.extractKeywords("매칭 시스템이 너무 불공정해요. 클라이언트가 자주 튕깁니다.");
+
+// 상위 N개 키워드 추출
+List<Map.Entry<String, Integer>> topKeywords = 
+    textAnalysisService.extractTopKeywords(text, 10);
+
+// 빈도수 계산
+Map<String, Integer> frequency = 
+    textAnalysisService.calculateWordFrequency(keywords);
 ```
 
 ### 📝 다음 작업 체크리스트
+- [x] `TextAnalysisService` 생성 및 키워드 추출 구현 ✅
 - [ ] `GeminiApiService`에 캐싱 로직 추가
-- [ ] `TextAnalysisService` 생성 및 키워드 추출 구현
 - [ ] `InsightService` 생성 및 템플릿 기반 인사이트 생성
 - [ ] `SummaryService` 생성 및 요약 리포트 생성
+- [ ] 워드클라우드 집계 API 구현
 - [ ] 각 서비스 단위 테스트 작성
+
+### 🎯 다음 작업 상세 가이드
+
+#### 1. **워드클라우드 집계 API 구현** (우선순위 높음)
+- **목적**: 주관식 질문의 응답을 분석하여 워드클라우드 데이터 생성
+- **구현 위치**: `service/ai/WordCloudService` 또는 `SurveyService`에 통합
+- **필요한 작업**:
+  - [ ] 주관식 질문의 모든 응답 텍스트 수집
+  - [ ] `TextAnalysisService.extractTopKeywords()` 활용
+  - [ ] 워드클라우드 DTO 생성 (`WordCloudDto` - word, count 필드)
+  - [ ] API 엔드포인트: `GET /survey/:id/questions/:questionId/wordcloud`
+  - [ ] Redis 캐싱 적용 (캐시 키: `survey:{surveyId}:question:{questionId}:wordcloud`)
+- **사용 예시**:
+  ```java
+  // 주관식 응답 리스트 수집
+  List<String> responses = responseRepository.findByQuestionId(questionId)
+      .stream()
+      .map(Response::getSubjectiveContent)
+      .collect(Collectors.toList());
+  
+  // 모든 응답을 하나의 텍스트로 합치기
+  String combinedText = String.join(" ", responses);
+  
+  // 상위 키워드 추출
+  List<Map.Entry<String, Integer>> topKeywords = 
+      textAnalysisService.extractTopKeywords(combinedText, 50);
+  
+  // DTO 변환
+  List<WordCloudDto> wordCloud = topKeywords.stream()
+      .map(entry -> new WordCloudDto(entry.getKey(), entry.getValue()))
+      .collect(Collectors.toList());
+  ```
+
+#### 2. **인사이트 텍스트 생성 로직**
+- **목적**: 통계 데이터를 기반으로 자연어 인사이트 생성
+- **구현 위치**: `service/ai/InsightService`
+- **Phase 1 (템플릿 기반)**:
+  - [ ] 객관식 인사이트 템플릿
+    - 옵션별 분포 분석
+    - "A 옵션이 전체 응답의 60%를 차지하며 압도적으로 선호되고 있습니다."
+    - "정글과 미드가 응답자의 절반 이상을 차지하며..."
+  - [ ] 주관식 인사이트 템플릿
+    - `TextAnalysisService`로 추출한 상위 키워드 활용
+    - "응답자들은 '매칭 시스템'에 대한 개선 요청이 가장 많았으며..."
+- **Phase 2 (AI 기반)**:
+  - [ ] `GeminiApiService.generateText()` 활용
+  - [ ] 프롬프트 템플릿 작성
+  - [ ] 폴백 로직 (API 실패 시 템플릿 기반으로 전환)
+
+#### 3. **질문별 통계 API 구현**
+- **목적**: 질문별 응답 통계 및 인사이트 제공
+- **구현 위치**: `SurveyController` 또는 별도 `StatisticsController`
+- **API 엔드포인트**: `GET /survey/:id/questions/:questionId/statistics`
+- **필요한 작업**:
+  - [ ] 설문 소유자 확인 로직
+  - [ ] 객관식/주관식/척도형 질문별 통계 집계
+  - [ ] `InsightService`를 통한 인사이트 생성
+  - [ ] 응답에 `insight` 필드 추가
 
