@@ -70,6 +70,9 @@
   - [x] 불용어(stop words) 사전 구축 (하드코딩된 리스트)
   - [x] 형태소 분석 없이 정규식 기반 처리 (Python 서버 구축 안함)
   - [x] `TextAnalysisService` 클래스 생성 (`service/ai/TextAnalysisService.java`)
+  - [x] 구어체 정규화 (축약형, 줄임말 처리)
+  - [x] 반복 문자 정규화 (예: "너무너무너무" -> "너무")
+  - [x] 비속어 필터링 (비속어 사전 구축 및 필터링 옵션)
 - [x] 키워드 추출 모듈
   - [x] 정규식 기반 단어 추출 (`Pattern.compile("[가-힣]+")`)
   - [x] 키워드 빈도수 계산
@@ -255,6 +258,9 @@
   - [x] 불용어 사전 구축 및 필터링
   - [x] 정규식 기반 키워드 추출 및 빈도수 계산
   - [x] 상위 N개 키워드 선별 기능
+  - [x] 구어체 정규화 (축약형, 줄임말 처리)
+  - [x] 반복 문자 정규화
+  - [x] 비속어 필터링 기능 추가
 
 ---
 
@@ -799,11 +805,20 @@ String cached = redisTemplate.opsForValue().get("ai:survey:1:summary");
 @Autowired
 private TextAnalysisService textAnalysisService;
 
-// 텍스트 전처리
+// 텍스트 전처리 (기본: 구어체 정규화 + 비속어 필터링)
 String cleaned = textAnalysisService.preprocessText("원본 텍스트입니다! 😊");
 
-// 키워드 추출
-List<String> keywords = textAnalysisService.extractKeywords("매칭 시스템이 너무 불공정해요. 클라이언트가 자주 튕깁니다.");
+// 텍스트 전처리 (옵션 지정)
+String cleaned2 = textAnalysisService.preprocessText(
+    "그거 너무너무너무 좋아!", 
+    true,  // 구어체 정규화
+    true   // 비속어 필터링
+);
+
+// 키워드 추출 (구어체, 비속어 자동 처리)
+List<String> keywords = textAnalysisService.extractKeywords(
+    "매칭 시스템이 너무 불공정해요. 클라이언트가 자주 튕깁니다."
+);
 
 // 상위 N개 키워드 추출
 List<Map.Entry<String, Integer>> topKeywords = 
@@ -812,6 +827,17 @@ List<Map.Entry<String, Integer>> topKeywords =
 // 빈도수 계산
 Map<String, Integer> frequency = 
     textAnalysisService.calculateWordFrequency(keywords);
+```
+
+#### 구어체 및 비속어 처리 예시
+```java
+// 구어체 정규화 예시
+// "그거" -> "그것", "이거" -> "이것"
+// "됐어" -> "되었다", "했어" -> "했다"
+// "너무너무너무" -> "너무" (반복 문자 정규화)
+
+// 비속어 필터링 예시
+// 비속어는 자동으로 공백으로 대체되어 키워드 추출에서 제외됨
 ```
 
 ### 📝 다음 작업 체크리스트
