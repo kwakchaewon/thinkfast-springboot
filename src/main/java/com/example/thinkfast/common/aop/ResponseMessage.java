@@ -11,7 +11,9 @@ public enum ResponseMessage {
     RESPONSE_DUPLICATED("이미 제출한 응답입니다."),
     INVALID_CREDENTIALS("아이디 또는 비밀번호가 올바르지 않습니다."),
     INVALID_USERNAME("아이디가 올바르지 않습니다."),
-    INVALID_PASSWORD("비밀번호가 올바르지 않습니다.");
+    INVALID_PASSWORD("비밀번호가 올바르지 않습니다."),
+    QUESTION_NOT_FOUND("질문을 찾을 수 없습니다."),
+    QUESTION_STATISTICS_ERROR("질문 통계를 불러오는데 실패했습니다.");
 
     private final String message;
 

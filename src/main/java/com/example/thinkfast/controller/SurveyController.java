@@ -21,6 +21,8 @@ import com.example.thinkfast.dto.ai.SummaryReportDto;
 import com.example.thinkfast.service.ai.WordCloudService;
 import com.example.thinkfast.dto.ai.WordCloudResponseDto;
 import com.example.thinkfast.service.ai.InsightService;
+import com.example.thinkfast.service.ai.SurveyStatisticsService;
+import com.example.thinkfast.dto.ai.QuestionStatisticsResponseDto;
 import com.example.thinkfast.domain.survey.Survey;
 import com.example.thinkfast.repository.auth.UserRepository;
 import com.example.thinkfast.repository.survey.SurveyRepository;
@@ -53,6 +55,7 @@ public class SurveyController {
     private final SummaryService summaryService;
     private final WordCloudService wordCloudService;
     private final InsightService insightService;
+    private final SurveyStatisticsService statisticsService;
     private final UserRepository userRepository;
     private final SurveyRepository surveyRepository;
     private final QuestionRepository questionRepository;
@@ -309,5 +312,74 @@ public class SurveyController {
         String insight = insightService.getInsight(questionId);
         
         return BaseResponse.success(insight);
+    }
+
+    /**
+     * 질문별 통계 조회
+     * 설문 소유자만 조회 가능
+     * 객관식 질문의 경우 각 선택지별 응답 수와 비율을 반환
+     * 주관식 질문의 경우 전체 응답 수만 반환
+     *
+     * @param surveyId 설문 ID
+     * @param questionId 질문 ID
+     * @param userDetail 현재 사용자 정보
+     * @return 질문별 통계 데이터
+     */
+    @GetMapping("/{surveyId}/questions/{questionId}/statistics")
+    @PreAuthorize("hasRole('CREATOR')")
+    public BaseResponse<QuestionStatisticsResponseDto> getQuestionStatistics(
+            @PathVariable Long surveyId,
+            @PathVariable Long questionId,
+            @AuthenticationPrincipal UserDetailImpl userDetail) {
+        
+        try {
+            // 1. 설문 존재 여부 및 소유자 확인
+            Optional<Survey> surveyOpt = surveyRepository.findById(surveyId);
+            if (!surveyOpt.isPresent() || surveyOpt.get().getIsDeleted()) {
+                return BaseResponse.fail(ResponseMessage.SURVEY_NOT_FOUND);
+            }
+            
+            Survey survey = surveyOpt.get();
+            Long currentUserId = userRepository.findIdByUsername(userDetail.getUsername());
+            if (!survey.getUserId().equals(currentUserId)) {
+                return BaseResponse.fail(ResponseMessage.UNAUTHORIZED);
+            }
+            
+            // 2. 질문 존재 여부 확인
+            Optional<Question> questionOpt = questionRepository.findById(questionId);
+            if (!questionOpt.isPresent()) {
+                return BaseResponse.fail(ResponseMessage.QUESTION_NOT_FOUND);
+            }
+            
+            Question question = questionOpt.get();
+            
+            // 3. 질문이 해당 설문에 속하는지 확인
+            if (!question.getSurveyId().equals(surveyId)) {
+                return BaseResponse.fail(ResponseMessage.QUESTION_NOT_FOUND);
+            }
+            
+            // 4. 통계 데이터 조회
+            QuestionStatisticsResponseDto statistics = statisticsService.getQuestionStatisticsResponse(questionId);
+            
+            // 5. 인사이트 조회 (선택적, 실패해도 통계는 반환)
+            try {
+                String insight = insightService.getInsight(questionId);
+                if (insight != null && !insight.isEmpty()) {
+                    statistics.setInsight(insight);
+                }
+            } catch (Exception e) {
+                log.warn("인사이트 조회 실패 (통계는 정상 반환): questionId={}, error={}", questionId, e.getMessage());
+                // 인사이트가 없어도 통계는 반환
+            }
+            
+            return BaseResponse.success(statistics);
+            
+        } catch (IllegalArgumentException e) {
+            log.error("질문 통계 조회 실패: questionId={}, error={}", questionId, e.getMessage());
+            return BaseResponse.fail(ResponseMessage.QUESTION_NOT_FOUND);
+        } catch (Exception e) {
+            log.error("질문 통계 조회 중 오류 발생: questionId={}", questionId, e);
+            return BaseResponse.fail(ResponseMessage.QUESTION_STATISTICS_ERROR);
+        }
     }
 }

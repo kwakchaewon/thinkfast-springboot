@@ -24,4 +24,9 @@ public interface OptionRepository extends JpaRepository<Option, Long> {
             "WHERE o.questionId = :questionId " +
             "ORDER BY o.id ASC")
     List<OptionDto> findOptionsByQuestionId(@Param("questionId") Long questionId);
+    
+    /**
+     * 질문 ID로 모든 옵션 조회 (엔티티 반환)
+     */
+    List<Option> findByQuestionIdOrderByIdAsc(Long questionId);
 }
