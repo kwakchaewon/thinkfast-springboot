@@ -103,6 +103,12 @@
   - [x] 데이터 타입 정의
   - [x] `SummaryReportDto` 클래스 생성
   - [x] `SummaryService` 클래스 생성 (`service/ai/SummaryService.java`)
+- [x] 요약 리포트 DB 저장 로직 구현
+  - [x] `InsightReport` 엔티티 생성 (`domain/ai/InsightReport.java`)
+  - [x] `InsightReportRepository` 생성
+  - [x] 비동기 처리 설정 (`@EnableAsync`, `AsyncConfig`)
+  - [x] 설문 종료 시 비동기 리포트 생성 로직 (`SurveySchedule`)
+  - [x] DB 조회 우선 로직 (`getSummaryReport` 메서드)
 
 ### 워드클라우드 집계 API
 - [ ] 주관식 질문 응답 데이터 수집
@@ -134,10 +140,9 @@
 ### Backend API 개발
 - [ ] 요약 리포트 조회 API (`GET /survey/:id/summary`)
   - [ ] 설문 소유자 확인 로직 구현 (userId 기반 권한 검증)
-  - [ ] 설문 데이터 분석 수행
-  - [ ] 요약 리포트 생성 로직 호출
+  - [ ] `SummaryService.getSummaryReport()` 호출 (DB 조회 우선)
   - [ ] 응답 데이터 반환
-  - [ ] 캐싱 처리 (Redis 활용)
+  - [x] DB 저장 로직 구현 완료 (설문 종료 시 비동기 생성)
 - [ ] 질문별 응답 통계 API 구현 및 인사이트 추가
   - [ ] `GET /survey/:id/questions/:questionId/statistics` API 구현 (현재 미구현 상태)
   - [ ] 설문 소유자 확인 로직 구현

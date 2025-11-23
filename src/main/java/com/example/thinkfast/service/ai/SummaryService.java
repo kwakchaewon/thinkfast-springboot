@@ -1,14 +1,21 @@
 package com.example.thinkfast.service.ai;
 
+import com.example.thinkfast.domain.ai.InsightReport;
 import com.example.thinkfast.dto.ai.OptionStatisticsDto;
 import com.example.thinkfast.dto.ai.SummaryReportDto;
+import com.example.thinkfast.repository.ai.InsightReportRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * 요약 리포트 생성 서비스
@@ -20,9 +27,38 @@ public class SummaryService {
 
     private final SurveyStatisticsService statisticsService;
     private final ImprovementExtractionService improvementExtractionService;
+    private final InsightReportRepository insightReportRepository;
+    private final ObjectMapper objectMapper;
 
     /**
-     * 설문 요약 리포트 생성
+     * 설문 요약 리포트 조회 (DB에서 먼저 조회, 없으면 생성)
+     *
+     * @param surveyId 설문 ID
+     * @return 요약 리포트 DTO
+     */
+    @Transactional(readOnly = true)
+    public SummaryReportDto getSummaryReport(Long surveyId) {
+        // 1. DB에서 기존 리포트 조회
+        Optional<InsightReport> existingReport = insightReportRepository.findBySurveyId(surveyId);
+        
+        if (existingReport.isPresent()) {
+            try {
+                // DB에 저장된 리포트가 있으면 역직렬화하여 반환
+                String summaryText = existingReport.get().getSummaryText();
+                if (summaryText != null && !summaryText.isEmpty()) {
+                    return objectMapper.readValue(summaryText, SummaryReportDto.class);
+                }
+            } catch (JsonProcessingException e) {
+                log.error("요약 리포트 역직렬화 실패: surveyId={}", surveyId, e);
+            }
+        }
+        
+        // 2. DB에 없으면 새로 생성 (실시간 계산)
+        return generateSummaryReport(surveyId);
+    }
+
+    /**
+     * 설문 요약 리포트 생성 (실시간 계산)
      *
      * @param surveyId 설문 ID
      * @return 요약 리포트 DTO
@@ -70,6 +106,54 @@ public class SummaryService {
         List<String> improvements = improvementExtractionService.extractImprovements(surveyId, maxImprovements);
 
         return new SummaryReportDto(mainPosition, mainPositionPercent, improvements);
+    }
+
+    /**
+     * 요약 리포트를 DB에 저장 (비동기 처리용)
+     *
+     * @param surveyId 설문 ID
+     */
+    @Async("taskExecutor")
+    @Transactional
+    public void saveSummaryReportAsync(Long surveyId) {
+        try {
+            log.info("요약 리포트 생성 시작: surveyId={}", surveyId);
+            
+            // 리포트 생성
+            SummaryReportDto summary = generateSummaryReport(surveyId);
+            
+            // JSON으로 직렬화
+            String summaryText = objectMapper.writeValueAsString(summary);
+            
+            // 개선 사항 키워드 추출 (키워드만)
+            List<Map.Entry<String, Integer>> keywords = 
+                improvementExtractionService.extractImprovementKeywordsFromSurvey(surveyId);
+            String keywordsJson = objectMapper.writeValueAsString(keywords);
+            
+            // DB에 저장 또는 업데이트
+            Optional<InsightReport> existing = insightReportRepository.findBySurveyId(surveyId);
+            
+            InsightReport report;
+            if (existing.isPresent()) {
+                // 기존 리포트 업데이트
+                report = existing.get();
+                report.setSummaryText(summaryText);
+                report.setKeywords(keywordsJson);
+            } else {
+                // 새 리포트 생성
+                report = InsightReport.builder()
+                        .surveyId(surveyId)
+                        .summaryText(summaryText)
+                        .keywords(keywordsJson)
+                        .build();
+            }
+            
+            insightReportRepository.save(report);
+            log.info("요약 리포트 저장 완료: surveyId={}", surveyId);
+            
+        } catch (Exception e) {
+            log.error("요약 리포트 저장 실패: surveyId={}", surveyId, e);
+        }
     }
 }
 
