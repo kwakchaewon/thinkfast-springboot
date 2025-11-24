@@ -33,8 +33,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     @Modifying
     @Query("UPDATE Notification n SET n.isRead = true " +
-            "WHERE n.type = 'SURVEY_RESPONSE' " +
-            "AND n.recipientId = :recipientId " +
+            "WHERE n.recipientId = :recipientId " +
             "AND n.referenceId IN :surveyIds")
     int updateSurveyNotificationAsRead(@Param("recipientId") Long recipientId,
                                   @Param("surveyIds") List<Long> surveyIds);
