@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -40,6 +41,7 @@ public class ResponseService {
     @Transactional
     public void createResponse(UserDetailImpl userDetail, Long surveyId, String ipAddress, CreateResponseRequest createResponseRequest){
         String responseSessionId = getRandomUuid();
+        LocalDateTime now = LocalDateTime.now();
 
         for (CreateResponseRequest.CreateResponseDto createResponseDto : createResponseRequest.getAnswers()){
             Response response = Response.builder()
@@ -48,6 +50,7 @@ public class ResponseService {
                     .optionId(createResponseDto.getOptionId())
                     .subjectiveContent(createResponseDto.getContent())
                     .questionType(createResponseDto.getType().toString())
+                    .createdAt(now)
                     .build();
             Response result =  responseRepository.save(response);
         }
