@@ -1,6 +1,7 @@
 package com.example.thinkfast.repository.survey;
 
 import com.example.thinkfast.domain.survey.Response;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -39,4 +40,17 @@ public interface ResponseRepository extends JpaRepository<Response, Long> {
            "WHERE r.questionId IN " +
            "(SELECT q.id FROM Question q WHERE q.surveyId = :surveyId)")
     List<Response> findBySurveyId(@Param("surveyId") Long surveyId);
+    
+    /**
+     * 질문별 응답 페이징 조회 (createdAt 내림차순)
+     */
+    @Query("SELECT r FROM Response r " +
+           "WHERE r.questionId = :questionId " +
+           "ORDER BY r.createdAt DESC, r.id DESC")
+    List<Response> findByQuestionIdOrderByCreatedAtDesc(@Param("questionId") Long questionId, Pageable pageable);
+    
+    /**
+     * 질문별 전체 응답 수 조회 (페이징용)
+     */
+    long countByQuestionId(Long questionId);
 }

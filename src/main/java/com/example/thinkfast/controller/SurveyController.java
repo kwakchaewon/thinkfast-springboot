@@ -27,6 +27,7 @@ import com.example.thinkfast.domain.survey.Survey;
 import com.example.thinkfast.repository.auth.UserRepository;
 import com.example.thinkfast.repository.survey.SurveyRepository;
 import com.example.thinkfast.repository.survey.QuestionRepository;
+import com.example.thinkfast.dto.survey.QuestionResponsesResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -59,6 +60,7 @@ public class SurveyController {
     private final UserRepository userRepository;
     private final SurveyRepository surveyRepository;
     private final QuestionRepository questionRepository;
+    private final ResponseService responseService;
 
     /**
      * 개선 사항: 요청 데이터 유효성 검사, Bulk Insert 를 통한 성능 최적화, 트랜잭션 전파 설정 
@@ -380,6 +382,75 @@ public class SurveyController {
         } catch (Exception e) {
             log.error("질문 통계 조회 중 오류 발생: questionId={}", questionId, e);
             return BaseResponse.fail(ResponseMessage.QUESTION_STATISTICS_ERROR);
+        }
+    }
+
+    /**
+     * 질문별 전체 응답 조회
+     * 설문 소유자만 조회 가능
+     * 페이징 지원
+     *
+     * @param surveyId 설문 ID
+     * @param questionId 질문 ID
+     * @param page 페이지 번호 (기본값: 1)
+     * @param size 페이지당 응답 수 (기본값: 10, 최대: 100)
+     * @param userDetail 현재 사용자 정보
+     * @return 질문별 응답 데이터 (페이징 정보 포함)
+     */
+    @GetMapping("/{surveyId}/questions/{questionId}/responses")
+    @PreAuthorize("hasRole('CREATOR')")
+    public BaseResponse<QuestionResponsesResponseDto> getQuestionResponses(
+            @PathVariable Long surveyId,
+            @PathVariable Long questionId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @AuthenticationPrincipal UserDetailImpl userDetail) {
+        
+        try {
+            // 1. 페이징 파라미터 검증
+            if (page < 1) {
+                return BaseResponse.fail(ResponseMessage.INVALID_PAGE_NUMBER);
+            }
+            if (size < 1 || size > 100) {
+                return BaseResponse.fail(ResponseMessage.INVALID_PAGE_SIZE);
+            }
+            
+            // 2. 설문 존재 여부 및 소유자 확인
+            Optional<Survey> surveyOpt = surveyRepository.findById(surveyId);
+            if (!surveyOpt.isPresent() || surveyOpt.get().getIsDeleted()) {
+                return BaseResponse.fail(ResponseMessage.SURVEY_NOT_FOUND);
+            }
+            
+            Survey survey = surveyOpt.get();
+            Long currentUserId = userRepository.findIdByUsername(userDetail.getUsername());
+            if (!survey.getUserId().equals(currentUserId)) {
+                return BaseResponse.fail(ResponseMessage.UNAUTHORIZED);
+            }
+            
+            // 3. 질문 존재 여부 확인
+            Optional<Question> questionOpt = questionRepository.findById(questionId);
+            if (!questionOpt.isPresent()) {
+                return BaseResponse.fail(ResponseMessage.QUESTION_NOT_FOUND);
+            }
+            
+            Question question = questionOpt.get();
+            
+            // 4. 질문이 해당 설문에 속하는지 확인
+            if (!question.getSurveyId().equals(surveyId)) {
+                return BaseResponse.fail(ResponseMessage.QUESTION_NOT_FOUND);
+            }
+            
+            // 5. 응답 조회
+            QuestionResponsesResponseDto responses = responseService.getQuestionResponses(questionId, page, size);
+            
+            return BaseResponse.success(responses);
+            
+        } catch (IllegalArgumentException e) {
+            log.error("질문 응답 조회 실패: questionId={}, error={}", questionId, e.getMessage());
+            return BaseResponse.fail(ResponseMessage.QUESTION_NOT_FOUND);
+        } catch (Exception e) {
+            log.error("질문 응답 조회 중 오류 발생: questionId={}", questionId, e);
+            return BaseResponse.fail(ResponseMessage.RESPONSE_FETCH_ERROR);
         }
     }
 }
