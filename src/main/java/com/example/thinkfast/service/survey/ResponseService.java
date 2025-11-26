@@ -129,11 +129,13 @@ public class ResponseService {
         List<Response> responses = responseRepository.findByQuestionIdOrderByCreatedAtDesc(questionId, pageable);
         
         // 5. 옵션 맵 조회 (객관식 질문인 경우)
-        Map<Long, String> optionMap = null;
+        final Map<Long, String> optionMap;
         if (question.getType() == Question.QuestionType.MULTIPLE_CHOICE) {
             List<Option> options = optionRepository.findByQuestionIdOrderByIdAsc(questionId);
             optionMap = options.stream()
                     .collect(Collectors.toMap(Option::getId, Option::getContent));
+        } else {
+            optionMap = null;
         }
         
         // 6. DTO 변환
