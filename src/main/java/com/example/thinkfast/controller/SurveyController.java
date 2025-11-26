@@ -60,7 +60,6 @@ public class SurveyController {
     private final UserRepository userRepository;
     private final SurveyRepository surveyRepository;
     private final QuestionRepository questionRepository;
-    private final ResponseService responseService;
 
     /**
      * 개선 사항: 요청 데이터 유효성 검사, Bulk Insert 를 통한 성능 최적화, 트랜잭션 전파 설정 
