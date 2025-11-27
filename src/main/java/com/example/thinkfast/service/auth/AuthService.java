@@ -6,6 +6,8 @@ import com.example.thinkfast.domain.auth.Role;
 import com.example.thinkfast.dto.auth.LoginRequest;
 import com.example.thinkfast.dto.auth.SignUpRequest;
 import com.example.thinkfast.dto.auth.TokenResponse;
+import com.example.thinkfast.dto.auth.UpdateProfileRequest;
+import com.example.thinkfast.dto.auth.UserProfileResponse;
 import com.example.thinkfast.repository.auth.RefreshTokenRepository;
 import com.example.thinkfast.repository.auth.UserRepository;
 import com.example.thinkfast.security.JwtTokenProvider;
@@ -147,5 +149,26 @@ public class AuthService {
         String username = jwtTokenProvider.getUsername(BearerToken);
         refreshTokenRepository.findByUsername(username)
                 .ifPresent(refreshTokenRepository::delete);
+    }
+
+    @Transactional
+    public void updateProfile(String username, UpdateProfileRequest request) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.updateRealUsername(request.getRealUsername());
+        userRepository.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    public UserProfileResponse getUserProfile(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return UserProfileResponse.builder()
+                .username(user.getUsername())
+                .realUsername(user.getRealUsername())
+                .role(user.getRole())
+                .birthDate(user.getBirthDate())
+                .build();
     }
 } 

@@ -7,8 +7,13 @@ import com.example.thinkfast.dto.auth.LoginRequest;
 import com.example.thinkfast.dto.auth.RefreshTokenRequest;
 import com.example.thinkfast.dto.auth.SignUpRequest;
 import com.example.thinkfast.dto.auth.TokenResponse;
+import com.example.thinkfast.dto.auth.UpdateProfileRequest;
+import com.example.thinkfast.dto.auth.UserProfileResponse;
+import com.example.thinkfast.security.UserDetailImpl;
 import com.example.thinkfast.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -49,5 +54,23 @@ public class AuthController {
     @PostMapping("/logout")
     public void logout(@RequestHeader("Authorization") String token) {
         authService.logout(token);
+    }
+
+    @PutMapping("/profile")
+    @PreAuthorize("hasRole('CREATOR') or hasRole('RESPONDER')")
+    public BaseResponse updateProfile(
+            @RequestBody UpdateProfileRequest request,
+            @AuthenticationPrincipal UserDetailImpl userDetail
+    ) {
+        authService.updateProfile(userDetail.getUsername(), request);
+        return BaseResponse.success();
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('CREATOR') or hasRole('RESPONDER')")
+    public UserProfileResponse getMyProfile(
+            @AuthenticationPrincipal UserDetailImpl userDetail
+    ) {
+        return authService.getUserProfile(userDetail.getUsername());
     }
 } 

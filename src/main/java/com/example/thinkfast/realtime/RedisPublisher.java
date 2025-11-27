@@ -33,6 +33,12 @@ public class RedisPublisher {
     public void sendAlarm(Long surveyId, String type) {
         Long userId = surveyRepository.findUserIdById(surveyId);
         String username = userRepository.findUsernameById(userId);
+        String realUsername = userRepository.findRealUsernameById(userId);
+        
+        // realUsername이 있으면 realUsername 사용, 없으면 username 사용
+        String displayName = (realUsername != null && !realUsername.isEmpty()) 
+                ? realUsername 
+                : username;
 
         String message = String.valueOf(NotificationMessage.valueOf(type));
 
@@ -50,7 +56,7 @@ public class RedisPublisher {
         // 3. 알람 저장 후 웹소켓에 전달할 메시지 (최신 30일 알람 리스트. 추후 7일로 변경 예정) 조회
         LocalDateTime monthAgo = LocalDateTime.now().minusDays(30);
         List<ResponseCreatedAlarm> responseCreatedAlarms = notificationRepository.findNotificationSummariesByRecipient(userId, monthAgo);
-        AlarmMessage alarmMessage = new AlarmMessage(username, responseCreatedAlarms);
+        AlarmMessage alarmMessage = new AlarmMessage(username, displayName, responseCreatedAlarms);
 
         try {
             String json = objectMapper.writeValueAsString(alarmMessage);

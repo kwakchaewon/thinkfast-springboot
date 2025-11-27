@@ -52,4 +52,8 @@ public class User {
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void updateRealUsername(String realUsername) {
+        this.realUsername = realUsername;
+    }
 } 

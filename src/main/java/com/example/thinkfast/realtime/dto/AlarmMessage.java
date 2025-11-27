@@ -11,5 +11,6 @@ import java.util.List;
 @AllArgsConstructor
 public class AlarmMessage {
     private String username;
+    private String displayName; // realUsername 우선, 없으면 username
     private List<ResponseCreatedAlarm> newResponseCreatedAlarms;
 }
