@@ -137,9 +137,16 @@ public class AuthService {
             refreshTokenRepository.save(newStoredToken2);
         }
 
+        // 사용자 정보 조회하여 realUsername 포함
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         return TokenResponse.builder()
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken)
+                .username(user.getUsername())
+                .realUsername(user.getRealUsername())
+                .role(user.getRole())
                 .build();
     }
 
