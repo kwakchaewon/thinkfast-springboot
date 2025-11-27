@@ -13,6 +13,7 @@ public class SignUpRequest {
     private String username;
     private String password;
     private String birthDate;
+    private String realUsername; // 실제 유저 이름 (선택적)
 
     public LocalDate getBirthDateAsLocalDate() {
         DateTimeFormatter formatter = new DateTimeFormatterBuilder()

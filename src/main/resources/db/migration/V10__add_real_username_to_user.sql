@@ -1,0 +1,6 @@
+-- USER 테이블에 REAL_USERNAME 칼럼 추가
+ALTER TABLE `USER` 
+ADD COLUMN `REAL_USERNAME` VARCHAR(100) NULL AFTER `USERNAME`;
+
+-- 기존 데이터는 NULL로 유지 (마이그레이션 후 사용자가 직접 업데이트)
+

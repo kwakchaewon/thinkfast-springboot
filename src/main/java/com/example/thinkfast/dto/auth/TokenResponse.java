@@ -16,5 +16,6 @@ public class TokenResponse {
     @Builder.Default
     private String tokenType = "Bearer";
     private String username;
+    private String realUsername; // 실제 유저 이름
     private Role role;
 } 

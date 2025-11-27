@@ -23,6 +23,9 @@ public class User {
     @Column(name = "USERNAME", nullable = false, unique = true, length = 100)
     private String username; // email로 사용
 
+    @Column(name = "REAL_USERNAME", length = 100)
+    private String realUsername; // 실제 유저 이름
+
     @Column(name = "PASSWORD", nullable = false)
     private String password;
 

@@ -35,6 +35,7 @@ public class AuthService {
     public void signUp(SignUpRequest request) {
         User user = User.builder()
                 .username(request.getUsername())
+                .realUsername(request.getRealUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.RESPONDER) // 기본 역할은 RESPONDER
                 .birthDate(request.getBirthDateAsLocalDate())
@@ -77,6 +78,7 @@ public class AuthService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .username(user.getUsername())
+                .realUsername(user.getRealUsername())
                 .role(user.getRole())
                 .build();
     }
