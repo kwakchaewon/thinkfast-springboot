@@ -41,6 +41,8 @@ public class Survey {
     private Boolean isActive;
     @Column(name = "IS_DELETED")
     private Boolean isDeleted;
+    @Column(name = "SHOW_RESULTS")
+    private Boolean showResults;
     @Column(name = "CREATED_AT", updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -52,6 +54,9 @@ public class Survey {
     protected void onCreate() {
         if (isActive == null) {
             isActive = true;
+        }
+        if (showResults == null) {
+            showResults = true;
         }
     }
 }

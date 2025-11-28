@@ -36,13 +36,13 @@ public class SurveyService {
         Long userId = userRepository.findIdByUsername(userDetail.getUsername());
 
         // 1. survey 테이블 저장
-        // show result 필드 현재 없음
         Survey survey = Survey.builder()
                 .userId(userId)
                 .title(createSurveyRequest.getTitle())
                 .description(createSurveyRequest.getDescription())
                 .endTime(LocalDateTime.of(createSurveyRequest.getEndDate(), createSurveyRequest.getEndTime()))
                 .isDeleted(false)
+                .showResults(createSurveyRequest.isShowResults())
                 .build();
         Survey createdSurvey = surveyRepository.save(survey);
 

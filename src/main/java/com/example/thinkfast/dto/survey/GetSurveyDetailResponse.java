@@ -10,5 +10,6 @@ public interface GetSurveyDetailResponse {
     LocalDateTime getStartTime();
     LocalDateTime getEndTime();
     Boolean getIsActive();
+    Boolean getShowResults();
     LocalDateTime getCreatedAt();
 }
