@@ -35,7 +35,7 @@ public interface SurveyRepository extends JpaRepository<Survey, Long> {
             "FROM Survey s " +
             "LEFT JOIN Question q on s.id = q.surveyId " +
             "LEFT JOIN Response r ON q.id = r.questionId " +
-            "WHERE s.userId = :userId AND s.isDeleted = false " +
+            "WHERE s.userId = :userId AND s.isDeleted = false AND s.showResults = true " +
             "GROUP BY s.id, s.title, s.description, s.startTime, s.isActive, s.createdAt " +
             "ORDER BY s.createdAt DESC")
     List<GetRecentSurveysResponse> getRecentSurveys(@Param("userId") Long userId);

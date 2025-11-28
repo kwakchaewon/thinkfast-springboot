@@ -14,7 +14,7 @@ public class CreateSurveyRequest {
     private String description;
     private LocalDate endDate;
     private LocalTime endTime;
-    private boolean showResults;
+    private boolean showResults; // 설문 공개 여부
     private List<QuestionRequest> questions;
 
     @Getter
