@@ -37,6 +37,7 @@ public class ResponseService {
     private final SurveyResponseHistoryRepository surveyResponseHistoryRepository;
     private final QuestionRepository questionRepository;
     private final OptionRepository optionRepository;
+    private final SurveyService surveyService;
 
     @Transactional
     public void createResponse(UserDetailImpl userDetail, Long surveyId, String ipAddress, CreateResponseRequest createResponseRequest){
@@ -59,6 +60,10 @@ public class ResponseService {
             ? createResponseRequest.getClientInfo().getDeviceId() 
             : null;
         this.createSurveyResponseHistory(surveyId, ipAddress, deviceId);
+
+        // 응답 등록 후 설문 종료 여부 확인 및 리포트 업데이트
+        // 설문이 종료되었다면 summary, insight, statistics, wordcloud가 업데이트됨
+        surveyService.checkAndUpdateExpiredSurveyReports(surveyId);
     }
 
     public void createSurveyResponseHistory(Long surveyId, String ipAddress, String deviceId){

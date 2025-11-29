@@ -10,12 +10,17 @@ import com.example.thinkfast.dto.survey.GetSurveyDetailResponse;
 import com.example.thinkfast.dto.survey.PaginationDto;
 import com.example.thinkfast.dto.survey.PublicSurveyDto;
 import com.example.thinkfast.dto.survey.PublicSurveyListResponse;
-import com.example.thinkfast.repository.auth.UserRepository;
+import com.example.thinkfast.realtime.RedisPublisher;
+import com.example.thinkfast.repository.ai.InsightReportRepository;
 import com.example.thinkfast.repository.survey.OptionRepository;
 import com.example.thinkfast.repository.survey.QuestionRepository;
 import com.example.thinkfast.repository.survey.SurveyRepository;
 import com.example.thinkfast.repository.survey.SurveyResponseHistoryRepository;
+import com.example.thinkfast.repository.auth.UserRepository;
 import com.example.thinkfast.security.UserDetailImpl;
+import com.example.thinkfast.service.ai.InsightService;
+import com.example.thinkfast.service.ai.SummaryService;
+import com.example.thinkfast.service.ai.WordCloudService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -27,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -37,6 +43,11 @@ public class SurveyService {
     private final QuestionRepository questionRepository;
     private final SurveyRepository surveyRepository;
     private final SurveyResponseHistoryRepository surveyResponseHistoryRepository;
+    private final SummaryService summaryService;
+    private final WordCloudService wordCloudService;
+    private final InsightService insightService;
+    private final InsightReportRepository insightReportRepository;
+    private final RedisPublisher redisPublisher;
 
     @Transactional
     public void createSurvey(UserDetailImpl userDetail, CreateSurveyRequest createSurveyRequest) {
@@ -212,5 +223,71 @@ public class SurveyService {
 
         // 6. 응답 DTO 생성
         return new PublicSurveyListResponse(surveyPage.getContent(), pagination);
+    }
+
+    /**
+     * 특정 설문이 종료되었는지 확인하고, 종료된 경우 AI 리포트들을 업데이트
+     * 응답 등록 시 호출되어 설문 종료 후 즉시 리포트가 업데이트되도록 함
+     *
+     * @param surveyId 설문 ID
+     */
+    @Transactional
+    public void checkAndUpdateExpiredSurveyReports(Long surveyId) {
+        try {
+            Optional<Survey> surveyOpt = surveyRepository.findById(surveyId);
+            if (surveyOpt.isEmpty()) {
+                log.warn("[설문 종료 체크] 설문을 찾을 수 없음: surveyId={}", surveyId);
+                return;
+            }
+
+            Survey survey = surveyOpt.get();
+            LocalDateTime now = LocalDateTime.now();
+
+            // 설문이 활성화되어 있고 종료 시간이 지났는지 확인
+            if (survey.getIsActive() && survey.getEndTime() != null && survey.getEndTime().isBefore(now)) {
+                log.info("[설문 종료 감지] surveyId={}, 제목={}, 종료일={}", 
+                    surveyId, survey.getTitle(), survey.getEndTime().toLocalDate());
+
+                // 설문 비활성화 처리
+                survey.setIsActive(false);
+                surveyRepository.save(survey);
+
+                // Redis 알림 전송
+                redisPublisher.sendAlarm(surveyId, "SURVEY_EXPIRED");
+
+                // 설문 종료 후 AI 리포트들 업데이트 (비동기 처리)
+                updateSurveyReports(surveyId);
+            }
+        } catch (Exception e) {
+            log.error("[설문 종료 체크 실패] surveyId={}", surveyId, e);
+        }
+    }
+
+    /**
+     * 설문 종료 후 AI 리포트들 업데이트
+     * Summary, Insight, Statistics, WordCloud를 모두 업데이트
+     *
+     * @param surveyId 설문 ID
+     */
+    private void updateSurveyReports(Long surveyId) {
+        try {
+            log.info("[AI 리포트 업데이트 시작] surveyId={}", surveyId);
+
+            // 설문 종료 후 요약 리포트 업데이트 (비동기)
+            summaryService.saveSummaryReportAsync(surveyId);
+
+            // 설문 종료 후 워드클라우드 업데이트 (비동기)
+            wordCloudService.saveWordCloudsForSurveyAsync(surveyId);
+
+            // 설문 종료 후 인사이트 텍스트 업데이트 (비동기)
+            insightService.saveInsightsForSurveyAsync(surveyId);
+
+            // Statistics는 실시간 계산되므로 별도 업데이트 불필요
+            // 필요시 통계 캐시 무효화 로직을 여기에 추가할 수 있음
+
+            log.info("[AI 리포트 업데이트 요청 완료] surveyId={}", surveyId);
+        } catch (Exception e) {
+            log.error("[AI 리포트 업데이트 실패] surveyId={}", surveyId, e);
+        }
     }
 }
