@@ -48,6 +48,21 @@ public class SurveyStatisticsService {
         // 전체 응답 수 조회 (중복 제거된 세션 수)
         Long totalResponses = responseRepository.countDistinctResponseSessionsByQuestionId(questionId);
 
+        // 응답이 없으면 빈 통계 데이터 반환 (200 OK로 응답)
+        if (totalResponses == null || totalResponses == 0) {
+            List<OptionStatisticsDto> emptyOptionStatistics = options.stream()
+                    .map(option -> new OptionStatisticsDto(option.getId(), option.getContent(), 0L, 0.0))
+                    .collect(Collectors.toList());
+            return new QuestionStatisticsDto(
+                    questionId,
+                    question.getType().toString(),
+                    question.getContent(),
+                    0L,
+                    emptyOptionStatistics,
+                    null
+            );
+        }
+
         // 옵션별 응답 수 집계
         List<Object[]> optionCounts = responseRepository.countByQuestionIdAndOptionId(questionId);
 
@@ -190,6 +205,15 @@ public class SurveyStatisticsService {
             // 객관식 질문 통계
             Long totalResponses = responseRepository.countDistinctResponseSessionsByQuestionId(questionId);
 
+            // 응답이 없으면 빈 통계 데이터 반환 (200 OK로 응답)
+            if (totalResponses == null || totalResponses == 0) {
+                statistics.setTotalResponses(0L);
+                List<QuestionStatisticsResponseDto.OptionStatistics> emptyOptionStatistics = new ArrayList<>();
+                statistics.setOptions(emptyOptionStatistics);
+                response.setStatistics(statistics);
+                return response;
+            }
+
             // 옵션별 응답 수 집계
             List<Object[]> optionCounts = responseRepository.countByQuestionIdAndOptionId(questionId);
 
@@ -229,7 +253,9 @@ public class SurveyStatisticsService {
         } else if (question.getType() == Question.QuestionType.SUBJECTIVE) {
             // 주관식 질문 통계 (전체 응답 수만)
             Long totalResponses = responseRepository.countDistinctResponseSessionsByQuestionId(questionId);
-            statistics.setTotalResponses(totalResponses);
+
+            // 응답이 없어도 빈 데이터 반환 (200 OK로 응답)
+            statistics.setTotalResponses(totalResponses != null ? totalResponses : 0L);
             // options 필드는 null 또는 빈 리스트로 설정되지 않음 (필드 자체를 포함하지 않음)
             statistics.setOptions(null);
         } else {

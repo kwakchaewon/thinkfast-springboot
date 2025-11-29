@@ -16,7 +16,8 @@ public enum ResponseMessage {
     QUESTION_STATISTICS_ERROR("질문 통계를 불러오는데 실패했습니다."),
     INVALID_PAGE_NUMBER("잘못된 페이지 번호입니다."),
     INVALID_PAGE_SIZE("페이지 크기는 1 이상 100 이하여야 합니다."),
-    RESPONSE_FETCH_ERROR("응답을 불러오는데 실패했습니다.");
+    RESPONSE_FETCH_ERROR("응답을 불러오는데 실패했습니다."),
+    NO_RESPONSE("설문에 응답이 없습니다.");
 
     private final String message;
 

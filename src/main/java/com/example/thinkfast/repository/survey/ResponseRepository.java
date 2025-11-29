@@ -53,4 +53,13 @@ public interface ResponseRepository extends JpaRepository<Response, Long> {
      * 질문별 전체 응답 수 조회 (페이징용)
      */
     long countByQuestionId(Long questionId);
+
+    /**
+     * 설문의 전체 응답 수 조회 (중복 제거된 세션 수)
+     */
+    @Query("SELECT COUNT(DISTINCT r.responseSessionId) " +
+           "FROM Response r " +
+           "WHERE r.questionId IN " +
+           "(SELECT q.id FROM Question q WHERE q.surveyId = :surveyId)")
+    Long countDistinctResponseSessionsBySurveyId(@Param("surveyId") Long surveyId);
 }

@@ -8,6 +8,7 @@ import com.example.thinkfast.dto.ai.WordCloudDto;
 import com.example.thinkfast.dto.ai.WordCloudResponseDto;
 import com.example.thinkfast.repository.ai.QuestionInsightRepository;
 import com.example.thinkfast.repository.survey.QuestionRepository;
+import com.example.thinkfast.repository.survey.ResponseRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -30,6 +31,7 @@ public class InsightService {
     private final WordCloudService wordCloudService;
     private final QuestionRepository questionRepository;
     private final QuestionInsightRepository questionInsightRepository;
+    private final ResponseRepository responseRepository;
 
     /**
      * 객관식 질문 인사이트 생성
@@ -39,18 +41,21 @@ public class InsightService {
      */
     @Transactional(readOnly = true)
     public String generateMultipleChoiceInsight(Long questionId) {
+        // 응답이 있는지 먼저 확인
+        Long totalResponses = responseRepository.countDistinctResponseSessionsByQuestionId(questionId);
+        if (totalResponses == null || totalResponses == 0) {
+            // 응답이 없으면 null 반환 (200 OK로 응답, 프론트엔드에서 처리)
+            return null;
+        }
+
         QuestionStatisticsDto statistics = statisticsService.getQuestionStatistics(questionId);
 
         if (statistics == null || statistics.getOptionStatistics() == null || statistics.getOptionStatistics().isEmpty()) {
-            return "응답 데이터가 없어 인사이트를 생성할 수 없습니다.";
+            // 통계 데이터가 없으면 null 반환
+            return null;
         }
 
         List<OptionStatisticsDto> options = statistics.getOptionStatistics();
-        Long totalResponses = statistics.getTotalResponses();
-
-        if (totalResponses == 0) {
-            return "응답이 없어 인사이트를 생성할 수 없습니다.";
-        }
 
         // 패턴 인식 및 템플릿 기반 문장 생성
         return generateMultipleChoiceInsightText(options, totalResponses);
@@ -130,18 +135,21 @@ public class InsightService {
      */
     @Transactional(readOnly = true)
     public String generateSubjectiveInsight(Long questionId) {
+        // 응답이 있는지 먼저 확인
+        Long totalResponses = responseRepository.countDistinctResponseSessionsByQuestionId(questionId);
+        if (totalResponses == null || totalResponses == 0) {
+            // 응답이 없으면 null 반환 (200 OK로 응답, 프론트엔드에서 처리)
+            return null;
+        }
+
         WordCloudResponseDto wordCloud = wordCloudService.getWordCloud(questionId);
 
         if (wordCloud == null || wordCloud.getWordCloud() == null || wordCloud.getWordCloud().isEmpty()) {
-            return "응답 데이터가 없어 인사이트를 생성할 수 없습니다.";
+            // 워드클라우드 데이터가 없으면 null 반환
+            return null;
         }
 
         List<WordCloudDto> topWords = wordCloud.getWordCloud();
-        Long totalResponses = wordCloud.getTotalResponses();
-
-        if (totalResponses == 0) {
-            return "응답이 없어 인사이트를 생성할 수 없습니다.";
-        }
 
         // 주요 키워드 기반 문장 생성
         return generateSubjectiveInsightText(topWords, totalResponses);
@@ -224,14 +232,14 @@ public class InsightService {
     }
 
     /**
-     * 질문별 인사이트 조회 (DB에서 먼저 조회, 없으면 생성)
+     * 질문별 인사이트 조회 (DB에서만 조회, 없으면 null 반환)
      *
      * @param questionId 질문 ID
-     * @return 인사이트 텍스트
+     * @return 인사이트 텍스트 (DB에 없으면 null 반환)
      */
     @Transactional(readOnly = true)
     public String getInsight(Long questionId) {
-        // 1. DB에서 기존 인사이트 조회
+        // DB에서 기존 인사이트 조회
         Optional<QuestionInsight> existingInsight = questionInsightRepository.findByQuestionId(questionId);
         
         if (existingInsight.isPresent()) {
@@ -241,8 +249,8 @@ public class InsightService {
             }
         }
         
-        // 2. DB에 없으면 새로 생성 (실시간 계산)
-        return generateInsight(questionId);
+        // DB에 없으면 null 반환
+        return null;
     }
 
     /**

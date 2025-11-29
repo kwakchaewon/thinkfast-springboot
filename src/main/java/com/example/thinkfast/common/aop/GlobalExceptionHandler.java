@@ -1,6 +1,7 @@
 package com.example.thinkfast.common.aop;
 
 import com.example.thinkfast.exception.AiServiceException;
+import com.example.thinkfast.exception.NoResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -35,6 +36,14 @@ public class GlobalExceptionHandler {
         log.error("AI 서비스 오류: {}", e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(BaseResponse.fail("AI 서비스 처리 중 오류가 발생했습니다."));
+    }
+
+    @ExceptionHandler(NoResponseException.class)
+    public ResponseEntity<BaseResponse> handleNoResponseException(NoResponseException e) {
+        log.warn("설문에 응답이 없음: {}", e.getMessage());
+        // 200 OK로 응답 (예외는 던지지 않지만, 혹시 모를 경우를 대비해 유지)
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(BaseResponse.fail(ResponseMessage.NO_RESPONSE));
     }
 
     @ExceptionHandler(Exception.class)

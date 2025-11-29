@@ -4,6 +4,7 @@ import com.example.thinkfast.domain.ai.InsightReport;
 import com.example.thinkfast.dto.ai.OptionStatisticsDto;
 import com.example.thinkfast.dto.ai.SummaryReportDto;
 import com.example.thinkfast.repository.ai.InsightReportRepository;
+import com.example.thinkfast.repository.survey.ResponseRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -28,17 +29,18 @@ public class SummaryService {
     private final SurveyStatisticsService statisticsService;
     private final ImprovementExtractionService improvementExtractionService;
     private final InsightReportRepository insightReportRepository;
+    private final ResponseRepository responseRepository;
     private final ObjectMapper objectMapper;
 
     /**
-     * 설문 요약 리포트 조회 (DB에서 먼저 조회, 없으면 생성)
+     * 설문 요약 리포트 조회 (DB에서만 조회, 없으면 빈 데이터 반환)
      *
      * @param surveyId 설문 ID
-     * @return 요약 리포트 DTO
+     * @return 요약 리포트 DTO (DB에 없으면 빈 데이터 반환)
      */
     @Transactional(readOnly = true)
     public SummaryReportDto getSummaryReport(Long surveyId) {
-        // 1. DB에서 기존 리포트 조회
+        // DB에서 기존 리포트 조회
         Optional<InsightReport> existingReport = insightReportRepository.findBySurveyId(surveyId);
         
         if (existingReport.isPresent()) {
@@ -53,18 +55,25 @@ public class SummaryService {
             }
         }
         
-        // 2. DB에 없으면 새로 생성 (실시간 계산)
-        return generateSummaryReport(surveyId);
+        // DB에 없으면 빈 데이터 반환
+        return new SummaryReportDto(null, null, new ArrayList<>());
     }
 
     /**
      * 설문 요약 리포트 생성 (실시간 계산)
      *
      * @param surveyId 설문 ID
-     * @return 요약 리포트 DTO
+     * @return 요약 리포트 DTO (응답이 없으면 빈 데이터 반환)
      */
     @Transactional(readOnly = true)
     public SummaryReportDto generateSummaryReport(Long surveyId) {
+        // 0. 설문에 응답이 있는지 확인
+        Long responseCount = responseRepository.countDistinctResponseSessionsBySurveyId(surveyId);
+        if (responseCount == null || responseCount == 0) {
+            // 응답이 없으면 빈 데이터 반환 (200 OK로 응답)
+            return new SummaryReportDto(null, null, new ArrayList<>());
+        }
+
         // 1. 첫 번째 객관식 질문에서 비율이 가장 높은 옵션 추출 (mainPosition)
         OptionStatisticsDto topOption = statisticsService.getFirstQuestionTopOption(surveyId);
 
@@ -91,6 +100,13 @@ public class SummaryService {
      */
     @Transactional(readOnly = true)
     public SummaryReportDto generateSummaryReport(Long surveyId, int maxImprovements) {
+        // 0. 설문에 응답이 있는지 확인
+        Long responseCount = responseRepository.countDistinctResponseSessionsBySurveyId(surveyId);
+        if (responseCount == null || responseCount == 0) {
+            // 응답이 없으면 빈 데이터 반환 (200 OK로 응답)
+            return new SummaryReportDto(null, null, new ArrayList<>());
+        }
+
         // 1. 첫 번째 객관식 질문에서 비율이 가장 높은 옵션 추출 (mainPosition)
         OptionStatisticsDto topOption = statisticsService.getFirstQuestionTopOption(surveyId);
 

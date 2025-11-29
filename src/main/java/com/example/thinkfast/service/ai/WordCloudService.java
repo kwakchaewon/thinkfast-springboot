@@ -61,8 +61,9 @@ public class WordCloudService {
         // 전체 응답 수 (중복 제거된 세션 수)
         Long totalResponses = responseRepository.countDistinctResponseSessionsByQuestionId(questionId);
 
-        if (subjectiveContents.isEmpty()) {
-            return new WordCloudResponseDto(questionId, Collections.emptyList(), totalResponses);
+        // 응답이 없으면 빈 워드클라우드 반환 (200 OK로 응답)
+        if (totalResponses == null || totalResponses == 0 || subjectiveContents.isEmpty()) {
+            return new WordCloudResponseDto(questionId, Collections.emptyList(), 0L);
         }
 
         // 2. 모든 응답을 하나의 텍스트로 합치기
@@ -94,14 +95,14 @@ public class WordCloudService {
     }
 
     /**
-     * 질문별 워드클라우드 조회 (DB에서 먼저 조회, 없으면 생성)
+     * 질문별 워드클라우드 조회 (DB에서만 조회, 없으면 빈 데이터 반환)
      *
      * @param questionId 질문 ID
-     * @return 워드클라우드 응답 DTO
+     * @return 워드클라우드 응답 DTO (DB에 없으면 빈 데이터 반환)
      */
     @Transactional(readOnly = true)
     public WordCloudResponseDto getWordCloud(Long questionId) {
-        // 1. DB에서 기존 워드클라우드 조회
+        // DB에서 기존 워드클라우드 조회
         Optional<WordCloud> existingWordCloud = wordCloudRepository.findByQuestionId(questionId);
         
         if (existingWordCloud.isPresent()) {
@@ -116,8 +117,10 @@ public class WordCloudService {
             }
         }
         
-        // 2. DB에 없으면 새로 생성 (실시간 계산)
-        return generateWordCloud(questionId);
+        // DB에 없으면 빈 데이터 반환
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new IllegalArgumentException("질문을 찾을 수 없습니다: " + questionId));
+        return new WordCloudResponseDto(questionId, Collections.emptyList(), 0L);
     }
 
     /**
