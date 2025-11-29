@@ -46,6 +46,8 @@ public class SecurityConfig {
                 .antMatchers("/survey/*/questions").permitAll()
                 .antMatchers("/survey/*/responses").permitAll()
                 .antMatchers("/survey/*").permitAll()
+                .antMatchers("/survey/*/summary").permitAll()  // 추가
+                .antMatchers("/survey/*/questions/**").permitAll()  // wordcloud, insight, statistics 등도 필요하면 추가
                 .antMatchers("/swagger-ui.html", "/swagger-resources/**", "/v2/api-docs", "/webjars/**").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/creator/**").hasRole("CREATOR")

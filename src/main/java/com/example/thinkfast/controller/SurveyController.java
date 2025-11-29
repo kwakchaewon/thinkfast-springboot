@@ -217,7 +217,6 @@ public class SurveyController {
      * @return 요약 리포트 (mainPosition, mainPositionPercent, improvements)
      */
     @GetMapping("/{id}/summary")
-    @PreAuthorize("hasRole('CREATOR')")
     public BaseResponse<SummaryReportDto> getSummaryReport(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetailImpl userDetail) {
@@ -229,13 +228,21 @@ public class SurveyController {
         }
         
         Survey survey = surveyOpt.get();
-        
-        // 2. 설문 소유자 확인
-        Long currentUserId = userRepository.findIdByUsername(userDetail.getUsername());
-        if (!survey.getUserId().equals(currentUserId)) {
+
+        // 2-1. 인증 유저 지만 비공개 설문 조회 시, userId 가 다를 경우 UNAUTHORIZED
+        if (userDetail!=null){
+            Long currentUserId = userRepository.findIdByUsername(userDetail.getUsername());
+            if (survey.getShowResults().equals(false) && !survey.getUserId().equals(currentUserId)) {
+                return BaseResponse.fail(ResponseMessage.UNAUTHORIZED);
+            }
+        }
+
+        // 2-2. 비인증 유저가 비공개 설문 조회 시, UNAUTHORIZED
+        if (userDetail==null && survey.getShowResults().equals(false)){
             return BaseResponse.fail(ResponseMessage.UNAUTHORIZED);
         }
-        
+
+
         // 3. 요약 리포트 조회 (DB 우선, 없으면 실시간 생성)
         SummaryReportDto summaryReport = summaryService.getSummaryReport(id);
         
@@ -253,7 +260,6 @@ public class SurveyController {
      * @return 워드클라우드 데이터
      */
     @GetMapping("/{surveyId}/questions/{questionId}/wordcloud")
-    @PreAuthorize("hasRole('CREATOR')")
     public BaseResponse<WordCloudResponseDto> getWordCloud(
             @PathVariable Long surveyId,
             @PathVariable Long questionId,
@@ -299,7 +305,6 @@ public class SurveyController {
      * @return 인사이트 텍스트
      */
     @GetMapping("/{surveyId}/questions/{questionId}/insight")
-    @PreAuthorize("hasRole('CREATOR')")
     public BaseResponse<String> getInsight(
             @PathVariable Long surveyId,
             @PathVariable Long questionId,
@@ -348,7 +353,6 @@ public class SurveyController {
      * @return 질문별 통계 데이터
      */
     @GetMapping("/{surveyId}/questions/{questionId}/statistics")
-    @PreAuthorize("hasRole('CREATOR')")
     public BaseResponse<QuestionStatisticsResponseDto> getQuestionStatistics(
             @PathVariable Long surveyId,
             @PathVariable Long questionId,
