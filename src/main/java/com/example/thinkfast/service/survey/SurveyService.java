@@ -7,6 +7,9 @@ import com.example.thinkfast.domain.survey.Survey;
 import com.example.thinkfast.dto.survey.CreateSurveyRequest;
 import com.example.thinkfast.dto.survey.GetRecentSurveysResponse;
 import com.example.thinkfast.dto.survey.GetSurveyDetailResponse;
+import com.example.thinkfast.dto.survey.PaginationDto;
+import com.example.thinkfast.dto.survey.PublicSurveyDto;
+import com.example.thinkfast.dto.survey.PublicSurveyListResponse;
 import com.example.thinkfast.repository.auth.UserRepository;
 import com.example.thinkfast.repository.survey.OptionRepository;
 import com.example.thinkfast.repository.survey.QuestionRepository;
@@ -15,6 +18,10 @@ import com.example.thinkfast.repository.survey.SurveyResponseHistoryRepository;
 import com.example.thinkfast.security.UserDetailImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -151,5 +158,59 @@ public class SurveyService {
 
         log.info("[중복 응답 체크 결과] surveyId={}, 최종결과={}", surveyId, isDuplicate);
         return isDuplicate;
+    }
+
+    /**
+     * 공개 설문 목록 조회 (페이징 및 정렬 지원)
+     *
+     * @param page 페이지 번호 (1부터 시작)
+     * @param size 페이지당 설문 수
+     * @param sort 정렬 기준 (newest, oldest, responses)
+     * @param search 검색 키워드
+     * @return 공개 설문 목록 및 페이징 정보
+     */
+    @Transactional(readOnly = true)
+    public PublicSurveyListResponse getPublicSurveys(int page, int size, String sort, String search) {
+        // 1. 페이징 파라미터 보정
+        if (page < 1) {
+            page = 1;
+        }
+        if (size < 1 || size > 100) {
+            size = 10; // 기본값
+        }
+
+        // 2. 정렬 기준 설정
+        Sort sortObj;
+        if ("oldest".equalsIgnoreCase(sort)) {
+            sortObj = Sort.by(Sort.Direction.ASC, "createdAt");
+        } else if ("responses".equalsIgnoreCase(sort)) {
+            // responses 정렬은 쿼리에서 ORDER BY 처리하므로 Pageable에는 정렬 미적용
+            sortObj = Sort.unsorted();
+        } else {
+            // 기본값: newest (최신순)
+            sortObj = Sort.by(Sort.Direction.DESC, "createdAt");
+        }
+
+        // 3. 페이징 객체 생성 (Spring Data는 0부터 시작)
+        Pageable pageable = PageRequest.of(page - 1, size, sortObj);
+
+        // 4. 공개 설문 조회
+        Page<PublicSurveyDto> surveyPage;
+        if ("responses".equalsIgnoreCase(sort)) {
+            surveyPage = surveyRepository.findPublicSurveysOrderByResponses(search, pageable);
+        } else {
+            surveyPage = surveyRepository.findPublicSurveys(search, pageable);
+        }
+
+        // 5. 페이징 정보 생성
+        PaginationDto pagination = new PaginationDto(
+                page,
+                size,
+                surveyPage.getTotalPages(),
+                surveyPage.getTotalElements()
+        );
+
+        // 6. 응답 DTO 생성
+        return new PublicSurveyListResponse(surveyPage.getContent(), pagination);
     }
 }

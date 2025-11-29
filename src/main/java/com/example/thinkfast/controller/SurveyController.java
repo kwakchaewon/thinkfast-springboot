@@ -9,6 +9,7 @@ import com.example.thinkfast.dto.survey.CreateResponseRequest;
 import com.example.thinkfast.dto.survey.CreateSurveyRequest;
 import com.example.thinkfast.dto.survey.GetRecentSurveysResponse;
 import com.example.thinkfast.dto.survey.GetSurveyDetailResponse;
+import com.example.thinkfast.dto.survey.PublicSurveyListResponse;
 import com.example.thinkfast.dto.survey.QuestionDto;
 import com.example.thinkfast.realtime.RedisPublisher;
 import com.example.thinkfast.security.UserDetailImpl;
@@ -77,6 +78,26 @@ public class SurveyController {
     @PreAuthorize("hasRole('CREATOR')")
     public void deleteSurvey(@PathVariable Long id){
         surveyService.deleteSurvey(id);
+    }
+
+    /**
+     * 공개 설문 목록 조회
+     * 인증 불필요, 모든 사용자가 접근 가능
+     *
+     * @param page   페이지 번호 (기본값: 1)
+     * @param size   한 페이지당 항목 수 (기본값: 10, 최대: 100)
+     * @param sort   정렬 기준 (newest, oldest, responses)
+     * @param search 검색 키워드 (제목/설명/작성자명)
+     * @return 공개 설문 목록 및 페이징 정보
+     */
+    @GetMapping("/public")
+    public BaseResponse<PublicSurveyListResponse> getPublicSurveys(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "newest") String sort,
+            @RequestParam(required = false) String search) {
+        PublicSurveyListResponse response = surveyService.getPublicSurveys(page, size, sort, search);
+        return BaseResponse.success(response);
     }
 
     @GetMapping
