@@ -235,7 +235,7 @@ public class SurveyService {
     public void checkAndUpdateExpiredSurveyReports(Long surveyId) {
         try {
             Optional<Survey> surveyOpt = surveyRepository.findById(surveyId);
-            if (surveyOpt.isEmpty()) {
+            if (!surveyOpt.isPresent()) {
                 log.warn("[설문 종료 체크] 설문을 찾을 수 없음: surveyId={}", surveyId);
                 return;
             }
