@@ -438,7 +438,7 @@ public class SurveyController {
 
     /**
      * 질문별 전체 응답 조회
-     * 설문 소유자만 조회 가능
+     * 공개 설문은 인증 없이 접근 가능, 비공개 설문은 소유자만 접근 가능
      * 페이징 지원
      *
      * @param surveyId 설문 ID
@@ -449,7 +449,6 @@ public class SurveyController {
      * @return 질문별 응답 데이터 (페이징 정보 포함)
      */
     @GetMapping("/{surveyId}/questions/{questionId}/responses")
-    @PreAuthorize("hasRole('CREATOR')")
     public BaseResponse<QuestionResponsesResponseDto> getQuestionResponses(
             @PathVariable Long surveyId,
             @PathVariable Long questionId,
@@ -466,19 +465,28 @@ public class SurveyController {
                 return BaseResponse.fail(ResponseMessage.INVALID_PAGE_SIZE);
             }
             
-            // 2. 설문 존재 여부 및 소유자 확인
+            // 2. 설문 존재 여부 확인
             Optional<Survey> surveyOpt = surveyRepository.findById(surveyId);
             if (!surveyOpt.isPresent() || surveyOpt.get().getIsDeleted()) {
                 return BaseResponse.fail(ResponseMessage.SURVEY_NOT_FOUND);
             }
             
             Survey survey = surveyOpt.get();
-            Long currentUserId = userRepository.findIdByUsername(userDetail.getUsername());
-            if (!survey.getUserId().equals(currentUserId)) {
+
+            // 3-1. 인증 유저지만 비공개 설문 조회 시, userId가 다를 경우 UNAUTHORIZED
+            if (userDetail != null) {
+                Long currentUserId = userRepository.findIdByUsername(userDetail.getUsername());
+                if (survey.getShowResults().equals(false) && !survey.getUserId().equals(currentUserId)) {
+                    return BaseResponse.fail(ResponseMessage.UNAUTHORIZED);
+                }
+            }
+
+            // 3-2. 비인증 유저가 비공개 설문 조회 시, UNAUTHORIZED
+            if (userDetail == null && survey.getShowResults().equals(false)) {
                 return BaseResponse.fail(ResponseMessage.UNAUTHORIZED);
             }
             
-            // 3. 질문 존재 여부 확인
+            // 4. 질문 존재 여부 확인
             Optional<Question> questionOpt = questionRepository.findById(questionId);
             if (!questionOpt.isPresent()) {
                 return BaseResponse.fail(ResponseMessage.QUESTION_NOT_FOUND);
@@ -486,12 +494,12 @@ public class SurveyController {
             
             Question question = questionOpt.get();
             
-            // 4. 질문이 해당 설문에 속하는지 확인
+            // 5. 질문이 해당 설문에 속하는지 확인
             if (!question.getSurveyId().equals(surveyId)) {
                 return BaseResponse.fail(ResponseMessage.QUESTION_NOT_FOUND);
             }
             
-            // 5. 응답 조회
+            // 6. 응답 조회
             QuestionResponsesResponseDto responses = responseService.getQuestionResponses(questionId, page, size);
             
             return BaseResponse.success(responses);
