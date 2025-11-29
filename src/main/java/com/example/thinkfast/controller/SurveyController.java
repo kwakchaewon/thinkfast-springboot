@@ -265,19 +265,28 @@ public class SurveyController {
             @PathVariable Long questionId,
             @AuthenticationPrincipal UserDetailImpl userDetail) {
         
-        // 1. 설문 존재 여부 및 소유자 확인
+        // 1. 설문 존재 여부 확인
         Optional<Survey> surveyOpt = surveyRepository.findById(surveyId);
         if (!surveyOpt.isPresent() || surveyOpt.get().getIsDeleted()) {
             return BaseResponse.fail(ResponseMessage.SURVEY_NOT_FOUND);
         }
         
         Survey survey = surveyOpt.get();
-        Long currentUserId = userRepository.findIdByUsername(userDetail.getUsername());
-        if (!survey.getUserId().equals(currentUserId)) {
+
+        // 2-1. 인증 유저지만 비공개 설문 조회 시, userId가 다를 경우 UNAUTHORIZED
+        if (userDetail != null) {
+            Long currentUserId = userRepository.findIdByUsername(userDetail.getUsername());
+            if (survey.getShowResults().equals(false) && !survey.getUserId().equals(currentUserId)) {
+                return BaseResponse.fail(ResponseMessage.UNAUTHORIZED);
+            }
+        }
+
+        // 2-2. 비인증 유저가 비공개 설문 조회 시, UNAUTHORIZED
+        if (userDetail == null && survey.getShowResults().equals(false)) {
             return BaseResponse.fail(ResponseMessage.UNAUTHORIZED);
         }
         
-        // 2. 질문 존재 여부 및 타입 확인
+        // 3. 질문 존재 여부 및 타입 확인
         Optional<Question> questionOpt = questionRepository.findById(questionId);
         if (!questionOpt.isPresent()) {
             return BaseResponse.fail(ResponseMessage.SURVEY_NOT_FOUND);
@@ -288,7 +297,7 @@ public class SurveyController {
             return BaseResponse.fail(ResponseMessage.INVALID_REQUEST);
         }
         
-        // 3. 워드클라우드 조회 (DB 우선, 없으면 실시간 생성)
+        // 4. 워드클라우드 조회 (DB 우선, 없으면 실시간 생성)
         WordCloudResponseDto wordCloud = wordCloudService.getWordCloud(questionId);
         
         return BaseResponse.success(wordCloud);
@@ -309,20 +318,29 @@ public class SurveyController {
             @PathVariable Long surveyId,
             @PathVariable Long questionId,
             @AuthenticationPrincipal UserDetailImpl userDetail) {
-        
-        // 1. 설문 존재 여부 및 소유자 확인
+
+        // 1. 설문 존재 여부 확인
         Optional<Survey> surveyOpt = surveyRepository.findById(surveyId);
         if (!surveyOpt.isPresent() || surveyOpt.get().getIsDeleted()) {
             return BaseResponse.fail(ResponseMessage.SURVEY_NOT_FOUND);
         }
-        
+
         Survey survey = surveyOpt.get();
-        Long currentUserId = userRepository.findIdByUsername(userDetail.getUsername());
-        if (!survey.getUserId().equals(currentUserId)) {
+
+        // 2-1. 인증 유저지만 비공개 설문 조회 시, userId가 다를 경우 UNAUTHORIZED
+        if (userDetail != null) {
+            Long currentUserId = userRepository.findIdByUsername(userDetail.getUsername());
+            if (survey.getShowResults().equals(false) && !survey.getUserId().equals(currentUserId)) {
+                return BaseResponse.fail(ResponseMessage.UNAUTHORIZED);
+            }
+        }
+
+        // 2-2. 비인증 유저가 비공개 설문 조회 시, UNAUTHORIZED
+        if (userDetail == null && survey.getShowResults().equals(false)) {
             return BaseResponse.fail(ResponseMessage.UNAUTHORIZED);
         }
         
-        // 2. 질문 존재 여부 확인
+        // 3. 질문 존재 여부 확인
         Optional<Question> questionOpt = questionRepository.findById(questionId);
         if (!questionOpt.isPresent()) {
             return BaseResponse.fail(ResponseMessage.SURVEY_NOT_FOUND);
@@ -330,12 +348,12 @@ public class SurveyController {
         
         Question question = questionOpt.get();
         
-        // 3. 질문이 해당 설문에 속하는지 확인
+        // 4. 질문이 해당 설문에 속하는지 확인
         if (!question.getSurveyId().equals(surveyId)) {
             return BaseResponse.fail(ResponseMessage.INVALID_REQUEST);
         }
         
-        // 4. 인사이트 조회 (DB 우선, 없으면 실시간 생성)
+        // 5. 인사이트 조회 (DB 우선, 없으면 실시간 생성)
         String insight = insightService.getInsight(questionId);
         
         return BaseResponse.success(insight);
@@ -359,19 +377,28 @@ public class SurveyController {
             @AuthenticationPrincipal UserDetailImpl userDetail) {
         
         try {
-            // 1. 설문 존재 여부 및 소유자 확인
+            // 1. 설문 존재 여부 확인
             Optional<Survey> surveyOpt = surveyRepository.findById(surveyId);
             if (!surveyOpt.isPresent() || surveyOpt.get().getIsDeleted()) {
                 return BaseResponse.fail(ResponseMessage.SURVEY_NOT_FOUND);
             }
             
             Survey survey = surveyOpt.get();
-            Long currentUserId = userRepository.findIdByUsername(userDetail.getUsername());
-            if (!survey.getUserId().equals(currentUserId)) {
+
+            // 2-1. 인증 유저지만 비공개 설문 조회 시, userId가 다를 경우 UNAUTHORIZED
+            if (userDetail != null) {
+                Long currentUserId = userRepository.findIdByUsername(userDetail.getUsername());
+                if (survey.getShowResults().equals(false) && !survey.getUserId().equals(currentUserId)) {
+                    return BaseResponse.fail(ResponseMessage.UNAUTHORIZED);
+                }
+            }
+
+            // 2-2. 비인증 유저가 비공개 설문 조회 시, UNAUTHORIZED
+            if (userDetail == null && survey.getShowResults().equals(false)) {
                 return BaseResponse.fail(ResponseMessage.UNAUTHORIZED);
             }
             
-            // 2. 질문 존재 여부 확인
+            // 3. 질문 존재 여부 확인
             Optional<Question> questionOpt = questionRepository.findById(questionId);
             if (!questionOpt.isPresent()) {
                 return BaseResponse.fail(ResponseMessage.QUESTION_NOT_FOUND);
@@ -379,15 +406,15 @@ public class SurveyController {
             
             Question question = questionOpt.get();
             
-            // 3. 질문이 해당 설문에 속하는지 확인
+            // 4. 질문이 해당 설문에 속하는지 확인
             if (!question.getSurveyId().equals(surveyId)) {
                 return BaseResponse.fail(ResponseMessage.QUESTION_NOT_FOUND);
             }
             
-            // 4. 통계 데이터 조회
+            // 5. 통계 데이터 조회
             QuestionStatisticsResponseDto statistics = statisticsService.getQuestionStatisticsResponse(questionId);
             
-            // 5. 인사이트 조회 (선택적, 실패해도 통계는 반환)
+            // 6. 인사이트 조회 (선택적, 실패해도 통계는 반환)
             try {
                 String insight = insightService.getInsight(questionId);
                 if (insight != null && !insight.isEmpty()) {
