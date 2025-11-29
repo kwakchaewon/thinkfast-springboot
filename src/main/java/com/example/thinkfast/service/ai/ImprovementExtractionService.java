@@ -13,8 +13,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 개선 사항 추출 서비스
- * 주관식 질문에서 개선 관련 키워드를 추출하고 템플릿 기반 문장을 생성
+ * 키워드 추출 서비스
+ * 주관식 질문에서 키워드와 빈도수를 추출하고 템플릿 기반 문장을 생성
  */
 @Slf4j
 @Service
@@ -25,21 +25,11 @@ public class ImprovementExtractionService {
     private final QuestionRepository questionRepository;
     private final TextAnalysisService textAnalysisService;
 
-    // 개선 관련 키워드 사전 (하드코딩)
-    private static final Set<String> IMPROVEMENT_KEYWORDS = new HashSet<>(Arrays.asList(
-            "개선", "향상", "보완", "수정", "변경", "개발", "추가", "보강",
-            "필요", "요청", "제안", "건의", "바람", "원함", "희망",
-            "문제", "이슈", "버그", "오류", "에러", "장애", "불편",
-            "최적화", "성능", "속도", "안정성", "안정화", "보안",
-            "매칭", "시스템", "서버", "클라이언트", "인터페이스", "UI", "UX",
-            "패치", "업데이트", "업그레이드", "리뉴얼", "개편"
-    ));
-
     /**
-     * 주관식 질문에서 개선 관련 키워드 추출
+     * 주관식 질문에서 키워드와 빈도수 추출
      *
      * @param questionId 질문 ID
-     * @return 개선 관련 키워드와 빈도수 리스트
+     * @return 키워드와 빈도수 리스트
      */
     @Transactional(readOnly = true)
     public List<Map.Entry<String, Integer>> extractImprovementKeywords(Long questionId) {
@@ -48,7 +38,7 @@ public class ImprovementExtractionService {
 
         // 주관식 질문이 아닌 경우 예외 처리
         if (question.getType() != Question.QuestionType.SUBJECTIVE) {
-            throw new IllegalArgumentException("주관식 질문만 개선 사항을 추출할 수 있습니다: " + questionId);
+            throw new IllegalArgumentException("주관식 질문만 키워드를 추출할 수 있습니다: " + questionId);
         }
 
         // 주관식 응답 수집
@@ -66,25 +56,18 @@ public class ImprovementExtractionService {
         // 모든 응답을 하나의 텍스트로 합치기
         String combinedText = String.join(" ", subjectiveContents);
 
-        // 키워드 추출
+        // 키워드 추출 (모든 키워드)
         List<String> keywords = textAnalysisService.extractKeywords(combinedText);
 
-        // 개선 관련 키워드만 필터링
-        List<String> improvementKeywords = keywords.stream()
-                .filter(keyword -> IMPROVEMENT_KEYWORDS.contains(keyword) || 
-                        keyword.contains("개선") || keyword.contains("향상") || 
-                        keyword.contains("수정") || keyword.contains("필요"))
-                .collect(Collectors.toList());
-
         // 빈도수 계산 및 정렬
-        return textAnalysisService.getTopKeywords(improvementKeywords, 20);
+        return textAnalysisService.getTopKeywords(keywords, 20);
     }
 
     /**
-     * 설문의 모든 주관식 질문에서 개선 사항 추출
+     * 설문의 모든 주관식 질문에서 키워드 추출
      *
      * @param surveyId 설문 ID
-     * @return 개선 관련 키워드와 빈도수 리스트 (모든 주관식 질문 통합)
+     * @return 키워드와 빈도수 리스트 (모든 주관식 질문 통합)
      */
     @Transactional(readOnly = true)
     public List<Map.Entry<String, Integer>> extractImprovementKeywordsFromSurvey(Long surveyId) {
@@ -119,24 +102,17 @@ public class ImprovementExtractionService {
         // 모든 응답을 하나의 텍스트로 합치기
         String combinedText = String.join(" ", allSubjectiveContents);
 
-        // 키워드 추출
+        // 키워드 추출 (모든 키워드)
         List<String> keywords = textAnalysisService.extractKeywords(combinedText);
 
-        // 개선 관련 키워드만 필터링
-        List<String> improvementKeywords = keywords.stream()
-                .filter(keyword -> IMPROVEMENT_KEYWORDS.contains(keyword) || 
-                        keyword.contains("개선") || keyword.contains("향상") || 
-                        keyword.contains("수정") || keyword.contains("필요"))
-                .collect(Collectors.toList());
-
         // 빈도수 계산 및 정렬
-        return textAnalysisService.getTopKeywords(improvementKeywords, 20);
+        return textAnalysisService.getTopKeywords(keywords, 20);
     }
 
     /**
      * 템플릿 기반 개선 사항 문장 생성
      *
-     * @param keywords 개선 관련 키워드와 빈도수 리스트
+     * @param keywords 키워드와 빈도수 리스트
      * @param maxCount 최대 생성할 문장 수
      * @return 개선 사항 문장 리스트
      */
@@ -203,7 +179,7 @@ public class ImprovementExtractionService {
      */
     @Transactional(readOnly = true)
     public List<String> extractImprovements(Long surveyId, int maxCount) {
-        // 개선 관련 키워드 추출
+        // 키워드 추출
         List<Map.Entry<String, Integer>> keywords = extractImprovementKeywordsFromSurvey(surveyId);
 
         // 템플릿 기반 문장 생성
