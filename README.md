@@ -19,6 +19,7 @@ Think Fast는 실시간 설문 조사, 알림, AI 기반 인사이트 분석 등
 
 ---
 
+<br></br>
 ## ✨ 주요 기능
 
 ### 🔐 인증/인가
@@ -26,6 +27,7 @@ Think Fast는 실시간 설문 조사, 알림, AI 기반 인사이트 분석 등
 - **Spring Security**: 역할 기반 접근 제어 (CREATOR, RESPONDER)
 - **회원가입/로그인**: 필드별 유효성 검사 및 중복 체크
 - **프로필 관리**: 사용자 정보 조회 및 수정
+<br></br>
 
 ### 📊 설문 관리
 - **설문 CRUD**: 설문 생성, 조회, 삭제
@@ -97,9 +99,8 @@ Think Fast는 실시간 설문 조사, 알림, AI 기반 인사이트 분석 등
 
 ### Infrastructure
 - **Containerization**: Docker
-- **CI/CD**: Jenkins
-- **Cloud**: AWS EC2 & RDS
-- **Cookie**: HttpOnly Cookie (HTTPS only)
+- **CI/CD**: Github Actions & Jenkins
+- **Cloud**: AWS EC2
 
 ---
 
