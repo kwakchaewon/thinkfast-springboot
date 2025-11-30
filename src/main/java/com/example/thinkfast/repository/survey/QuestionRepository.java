@@ -27,4 +27,15 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
            "FROM Question q " +
            "WHERE q.id = :questionId")
     QuestionDto findQuestionById(@Param("questionId") Long questionId);
+
+    /**
+     * 여러 설문의 질문을 한 번에 조회 (배치 처리용)
+     *
+     * @param surveyIds 설문 ID 리스트
+     * @return 질문 리스트
+     */
+    @Query("SELECT q FROM Question q " +
+           "WHERE q.surveyId IN :surveyIds " +
+           "ORDER BY q.surveyId, q.orderIndex")
+    List<Question> findBySurveyIdIn(@Param("surveyIds") List<Long> surveyIds);
 }

@@ -48,6 +48,9 @@ public class SurveyStatisticsService {
         // 전체 응답 수 조회 (중복 제거된 세션 수)
         Long totalResponses = responseRepository.countDistinctResponseSessionsByQuestionId(questionId);
 
+        // 옵션 정보 조회 (응답이 없을 때도 빈 통계를 위해 필요)
+        List<Option> options = optionRepository.findByQuestionIdOrderByIdAsc(questionId);
+
         // 응답이 없으면 빈 통계 데이터 반환 (200 OK로 응답)
         if (totalResponses == null || totalResponses == 0) {
             List<OptionStatisticsDto> emptyOptionStatistics = options.stream()
@@ -65,9 +68,6 @@ public class SurveyStatisticsService {
 
         // 옵션별 응답 수 집계
         List<Object[]> optionCounts = responseRepository.countByQuestionIdAndOptionId(questionId);
-
-        // 옵션 정보 조회
-        List<Option> options = optionRepository.findByQuestionIdOrderByIdAsc(questionId);
 
         // 옵션별 통계 생성
         List<OptionStatisticsDto> optionStatistics = new ArrayList<>();

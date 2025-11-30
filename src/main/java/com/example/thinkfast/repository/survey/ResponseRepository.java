@@ -62,4 +62,18 @@ public interface ResponseRepository extends JpaRepository<Response, Long> {
            "WHERE r.questionId IN " +
            "(SELECT q.id FROM Question q WHERE q.surveyId = :surveyId)")
     Long countDistinctResponseSessionsBySurveyId(@Param("surveyId") Long surveyId);
+
+    /**
+     * 여러 설문의 응답 수를 한 번에 조회 (배치 처리용)
+     * 설문 ID와 응답 수를 매핑하여 반환
+     *
+     * @param surveyIds 설문 ID 리스트
+     * @return [surveyId, responseCount] 형태의 Object 배열 리스트
+     */
+    @Query("SELECT q.surveyId, COUNT(DISTINCT r.responseSessionId) " +
+           "FROM Question q " +
+           "LEFT JOIN Response r ON q.id = r.questionId " +
+           "WHERE q.surveyId IN :surveyIds " +
+           "GROUP BY q.surveyId")
+    List<Object[]> countDistinctResponseSessionsBySurveyIds(@Param("surveyIds") List<Long> surveyIds);
 }

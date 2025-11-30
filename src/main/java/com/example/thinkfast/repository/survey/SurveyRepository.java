@@ -31,6 +31,18 @@ public interface SurveyRepository extends JpaRepository<Survey, Long> {
 
     List<Survey> findByIsActiveTrueAndEndTimeBefore(LocalDateTime endDate);
 
+    /**
+     * 진행 중인 설문 조회 (활성화되어 있고 종료 시간이 아직 지나지 않은 설문)
+     * - isActive = true
+     * - isDeleted = false
+     * - endTime > 현재 시간
+     */
+    @Query("SELECT s FROM Survey s " +
+           "WHERE s.isActive = true " +
+           "AND s.isDeleted = false " +
+           "AND s.endTime > :now")
+    List<Survey> findActiveSurveysByEndTimeAfter(@Param("now") LocalDateTime now);
+
     @Query("SELECT new com.example.thinkfast.dto.survey.GetRecentSurveysResponse(" +
             "s.id, s.title, s.description, s.startTime, s.isActive, s.createdAt, " +
             "COUNT(DISTINCT r.responseSessionId)) " +
