@@ -5,24 +5,24 @@
 -- =========================================
 
 -- 기존 테스트 데이터 삭제
-DELETE FROM `insight_reports`;
-DELETE FROM `notifications`;
-DELETE FROM `options`;
-DELETE FROM `questions`;
-DELETE FROM `question_embeddings`;
-DELETE FROM `question_insights`;
-DELETE FROM `refresh_tokens`;
-DELETE FROM `responses`;
-DELETE FROM `surveys`;
-DELETE FROM `survey_logs`;
-DELETE FROM `survey_response_history`;
-DELETE FROM `word_clouds`;
+DELETE FROM `INSIGHT_REPORTS`;
+DELETE FROM `NOTIFICATIONS`;
+DELETE FROM `OPTIONS`;
+DELETE FROM `QUESTIONS`;
+DELETE FROM `QUESTION_EMBEDDINGS`;
+DELETE FROM `QUESTION_INSIGHTS`;
+DELETE FROM `REFRESH_TOKENS`;
+DELETE FROM `RESPONSES`;
+DELETE FROM `SURVEYS`;
+DELETE FROM `SURVEY_LOGS`;
+DELETE FROM `SURVEY_RESPONSE_HISTORY`;
+DELETE FROM `WORD_CLOUDS`;
 
 -- =========================================
 -- SURVEYS 테이블 데이터
 -- =========================================
 
-INSERT INTO `surveys` (`ID`, `USER_ID`, `TITLE`, `DESCRIPTION`, `START_TIME`, `END_TIME`, `IS_ACTIVE`, `CREATED_AT`, `UPDATED_AT`, `IS_DELETED`, `SHOW_RESULTS`) VALUES
+INSERT INTO `SURVEYS` (`ID`, `USER_ID`, `TITLE`, `DESCRIPTION`, `START_TIME`, `END_TIME`, `IS_ACTIVE`, `CREATED_AT`, `UPDATED_AT`, `IS_DELETED`, `SHOW_RESULTS`) VALUES
 	(1, 1, '리그오브레전드(LoL) 설문', '롤 플레이어 여러분의 소중한 의견을 듣고 싶습니다.', NULL, '2025-12-31 23:59:59', 1, '2025-11-30 11:43:42', '2025-11-30 11:43:42', 0, 1),
 	(2, 1, '사회 이슈 인식도 조사', '현재 사회에서 가장 중요하다고 생각하는 이슈에 대한 여러분의 의견을 듣고 싶습니다.', '2025-12-01 00:00:00', '2025-12-31 23:59:59', 1, '2025-12-01 10:00:00', '2025-12-01 10:00:00', 0, 1),
 	(3, 1, '경제 상황 인식 설문', '현재 경제 상황과 미래 전망에 대한 여러분의 생각을 공유해주세요.', '2025-12-01 00:00:00', '2025-12-31 23:59:59', 1, '2025-12-01 10:00:00', '2025-12-01 10:00:00', 0, 1),
@@ -39,60 +39,60 @@ INSERT INTO `surveys` (`ID`, `USER_ID`, `TITLE`, `DESCRIPTION`, `START_TIME`, `E
 -- =========================================
 
 -- Survey ID 1: 리그오브레전드
-INSERT INTO `questions` (`ID`, `SURVEY_ID`, `TYPE`, `CONTENT`, `ORDER_INDEX`) VALUES
+INSERT INTO `QUESTIONS` (`ID`, `SURVEY_ID`, `TYPE`, `CONTENT`, `ORDER_INDEX`) VALUES
 	(1, 1, 'MULTIPLE_CHOICE', '주로 플레이하는 포지션은 무엇인가요?', 1),
 	(2, 1, 'SUBJECTIVE', '최근 시즌에서 가장 개선되었으면 하는 점을 자유롭게 작성해주세요.', 2);
 
 -- Survey ID 2: 사회 이슈
-INSERT INTO `questions` (`ID`, `SURVEY_ID`, `TYPE`, `CONTENT`, `ORDER_INDEX`) VALUES
+INSERT INTO `QUESTIONS` (`ID`, `SURVEY_ID`, `TYPE`, `CONTENT`, `ORDER_INDEX`) VALUES
 	(3, 2, 'MULTIPLE_CHOICE', '현재 우리 사회에서 가장 시급하게 해결해야 할 문제는 무엇이라고 생각하시나요?', 1),
 	(4, 2, 'SUBJECTIVE', '사회 문제 해결을 위해 개인적으로 실천하고 있는 것이 있다면 작성해주세요.', 2),
 	(5, 2, 'MULTIPLE_CHOICE', '사회 변화를 위해 가장 중요한 것은 무엇이라고 생각하시나요?', 3);
 
 -- Survey ID 3: 경제 상황
-INSERT INTO `questions` (`ID`, `SURVEY_ID`, `TYPE`, `CONTENT`, `ORDER_INDEX`) VALUES
+INSERT INTO `QUESTIONS` (`ID`, `SURVEY_ID`, `TYPE`, `CONTENT`, `ORDER_INDEX`) VALUES
 	(6, 3, 'MULTIPLE_CHOICE', '현재 경제 상황에 대한 전반적인 인식은 어떠신가요?', 1),
 	(7, 3, 'SUBJECTIVE', '경제 상황 개선을 위해 가장 필요하다고 생각하는 정책이나 방안을 작성해주세요.', 2),
 	(8, 3, 'MULTIPLE_CHOICE', '주로 사용하는 금융 서비스는 무엇인가요?', 3);
 
 -- Survey ID 4: 정치 참여
-INSERT INTO `questions` (`ID`, `SURVEY_ID`, `TYPE`, `CONTENT`, `ORDER_INDEX`) VALUES
+INSERT INTO `QUESTIONS` (`ID`, `SURVEY_ID`, `TYPE`, `CONTENT`, `ORDER_INDEX`) VALUES
 	(9, 4, 'MULTIPLE_CHOICE', '정치에 대한 관심도는 어느 정도인가요?', 1),
 	(10, 4, 'SUBJECTIVE', '정치 참여를 활성화하기 위해 필요한 것이 있다면 작성해주세요.', 2),
 	(11, 4, 'MULTIPLE_CHOICE', '정치 정보를 주로 어디서 얻으시나요?', 3);
 
 -- Survey ID 5: 한국사
-INSERT INTO `questions` (`ID`, `SURVEY_ID`, `TYPE`, `CONTENT`, `ORDER_INDEX`) VALUES
+INSERT INTO `QUESTIONS` (`ID`, `SURVEY_ID`, `TYPE`, `CONTENT`, `ORDER_INDEX`) VALUES
 	(12, 5, 'MULTIPLE_CHOICE', '한국사에 대한 관심도는 어느 정도인가요?', 1),
 	(13, 5, 'SUBJECTIVE', '가장 관심 있는 한국사 시대나 사건이 있다면 작성해주세요.', 2),
 	(14, 5, 'MULTIPLE_CHOICE', '한국사를 학습하는 주된 방법은 무엇인가요?', 3);
 
 -- Survey ID 6: 문화 콘텐츠
-INSERT INTO `questions` (`ID`, `SURVEY_ID`, `TYPE`, `CONTENT`, `ORDER_INDEX`) VALUES
+INSERT INTO `QUESTIONS` (`ID`, `SURVEY_ID`, `TYPE`, `CONTENT`, `ORDER_INDEX`) VALUES
 	(15, 6, 'MULTIPLE_CHOICE', '가장 선호하는 문화 콘텐츠 유형은 무엇인가요?', 1),
 	(16, 6, 'SUBJECTIVE', '최근 본 영화나 드라마 중 가장 인상 깊었던 작품과 그 이유를 작성해주세요.', 2),
 	(17, 6, 'MULTIPLE_CHOICE', '문화 콘텐츠를 소비하는 주된 플랫폼은 무엇인가요?', 3);
 
 -- Survey ID 7: 연예계 트렌드
-INSERT INTO `questions` (`ID`, `SURVEY_ID`, `TYPE`, `CONTENT`, `ORDER_INDEX`) VALUES
+INSERT INTO `QUESTIONS` (`ID`, `SURVEY_ID`, `TYPE`, `CONTENT`, `ORDER_INDEX`) VALUES
 	(18, 7, 'MULTIPLE_CHOICE', '가장 관심 있는 연예 콘텐츠는 무엇인가요?', 1),
 	(19, 7, 'SUBJECTIVE', '최근 연예계에서 가장 주목받고 있다고 생각하는 트렌드나 현상을 작성해주세요.', 2),
 	(20, 7, 'MULTIPLE_CHOICE', '연예 정보를 주로 어디서 접하시나요?', 3);
 
 -- Survey ID 8: 스포츠
-INSERT INTO `questions` (`ID`, `SURVEY_ID`, `TYPE`, `CONTENT`, `ORDER_INDEX`) VALUES
+INSERT INTO `QUESTIONS` (`ID`, `SURVEY_ID`, `TYPE`, `CONTENT`, `ORDER_INDEX`) VALUES
 	(21, 8, 'MULTIPLE_CHOICE', '가장 관심 있는 스포츠 종목은 무엇인가요?', 1),
 	(22, 8, 'SUBJECTIVE', '스포츠 관람 경험 중 가장 기억에 남는 순간을 작성해주세요.', 2),
 	(23, 8, 'MULTIPLE_CHOICE', '스포츠를 즐기는 주된 방법은 무엇인가요?', 3);
 
 -- Survey ID 9: 교육 시스템
-INSERT INTO `questions` (`ID`, `SURVEY_ID`, `TYPE`, `CONTENT`, `ORDER_INDEX`) VALUES
+INSERT INTO `QUESTIONS` (`ID`, `SURVEY_ID`, `TYPE`, `CONTENT`, `ORDER_INDEX`) VALUES
 	(24, 9, 'MULTIPLE_CHOICE', '현재 교육 시스템에 대한 전반적인 평가는 어떠신가요?', 1),
 	(25, 9, 'SUBJECTIVE', '교육 시스템 개선을 위해 가장 필요하다고 생각하는 것이 있다면 작성해주세요.', 2),
 	(26, 9, 'MULTIPLE_CHOICE', '가장 중요하다고 생각하는 교육 목표는 무엇인가요?', 3);
 
 -- Survey ID 10: 환경 보호
-INSERT INTO `questions` (`ID`, `SURVEY_ID`, `TYPE`, `CONTENT`, `ORDER_INDEX`) VALUES
+INSERT INTO `QUESTIONS` (`ID`, `SURVEY_ID`, `TYPE`, `CONTENT`, `ORDER_INDEX`) VALUES
 	(27, 10, 'MULTIPLE_CHOICE', '환경 보호에 대한 관심도는 어느 정도인가요?', 1),
 	(28, 10, 'SUBJECTIVE', '일상생활에서 실천하고 있는 환경 보호 활동이 있다면 작성해주세요.', 2),
 	(29, 10, 'MULTIPLE_CHOICE', '가장 시급하다고 생각하는 환경 문제는 무엇인가요?', 3);
@@ -102,7 +102,7 @@ INSERT INTO `questions` (`ID`, `SURVEY_ID`, `TYPE`, `CONTENT`, `ORDER_INDEX`) VA
 -- =========================================
 
 -- Survey 1: 리그오브레전드 - Question 1
-INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
+INSERT INTO `OPTIONS` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(1, 1, '탑'),
 	(2, 1, '정글'),
 	(3, 1, '미드'),
@@ -110,7 +110,7 @@ INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(5, 1, '서폿');
 
 -- Survey 2: 사회 이슈 - Question 3
-INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
+INSERT INTO `OPTIONS` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(6, 3, '경제 불평등'),
 	(7, 3, '고용 불안'),
 	(8, 3, '주거 문제'),
@@ -119,7 +119,7 @@ INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(11, 3, '기타');
 
 -- Survey 2: 사회 이슈 - Question 5
-INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
+INSERT INTO `OPTIONS` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(12, 5, '정부 정책'),
 	(13, 5, '시민 참여'),
 	(14, 5, '기업의 사회적 책임'),
@@ -127,7 +127,7 @@ INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(16, 5, '기술 혁신');
 
 -- Survey 3: 경제 상황 - Question 6
-INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
+INSERT INTO `OPTIONS` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(17, 6, '매우 좋음'),
 	(18, 6, '좋음'),
 	(19, 6, '보통'),
@@ -135,7 +135,7 @@ INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(21, 6, '매우 나쁨');
 
 -- Survey 3: 경제 상황 - Question 8
-INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
+INSERT INTO `OPTIONS` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(22, 8, '은행'),
 	(23, 8, '카드사'),
 	(24, 8, '핀테크 앱'),
@@ -143,7 +143,7 @@ INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(26, 8, '기타');
 
 -- Survey 4: 정치 참여 - Question 9
-INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
+INSERT INTO `OPTIONS` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(27, 9, '매우 관심 있음'),
 	(28, 9, '관심 있음'),
 	(29, 9, '보통'),
@@ -151,7 +151,7 @@ INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(31, 9, '전혀 관심 없음');
 
 -- Survey 4: 정치 참여 - Question 11
-INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
+INSERT INTO `OPTIONS` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(32, 11, 'TV 뉴스'),
 	(33, 11, '온라인 뉴스'),
 	(34, 11, 'SNS'),
@@ -160,7 +160,7 @@ INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(37, 11, '기타');
 
 -- Survey 5: 한국사 - Question 12
-INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
+INSERT INTO `OPTIONS` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(38, 12, '매우 관심 있음'),
 	(39, 12, '관심 있음'),
 	(40, 12, '보통'),
@@ -168,7 +168,7 @@ INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(42, 12, '전혀 관심 없음');
 
 -- Survey 5: 한국사 - Question 14
-INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
+INSERT INTO `OPTIONS` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(43, 14, '학교 수업'),
 	(44, 14, '도서'),
 	(45, 14, '다큐멘터리'),
@@ -177,7 +177,7 @@ INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(48, 14, '기타');
 
 -- Survey 6: 문화 콘텐츠 - Question 15
-INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
+INSERT INTO `OPTIONS` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(49, 15, '영화'),
 	(50, 15, '드라마'),
 	(51, 15, '음악'),
@@ -187,7 +187,7 @@ INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(55, 15, '기타');
 
 -- Survey 6: 문화 콘텐츠 - Question 17
-INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
+INSERT INTO `OPTIONS` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(56, 17, '넷플릭스'),
 	(57, 17, '왓챠'),
 	(58, 17, '디즈니+'),
@@ -196,7 +196,7 @@ INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(61, 17, '기타');
 
 -- Survey 7: 연예계 트렌드 - Question 18
-INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
+INSERT INTO `OPTIONS` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(62, 18, 'K-POP'),
 	(63, 18, '드라마/예능'),
 	(64, 18, '영화'),
@@ -205,7 +205,7 @@ INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(67, 18, '기타');
 
 -- Survey 7: 연예계 트렌드 - Question 20
-INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
+INSERT INTO `OPTIONS` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(68, 20, '인스타그램'),
 	(69, 20, '유튜브'),
 	(70, 20, '틱톡'),
@@ -214,7 +214,7 @@ INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(73, 20, '기타');
 
 -- Survey 8: 스포츠 - Question 21
-INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
+INSERT INTO `OPTIONS` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(74, 21, '축구'),
 	(75, 21, '야구'),
 	(76, 21, '농구'),
@@ -224,7 +224,7 @@ INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(80, 21, '기타');
 
 -- Survey 8: 스포츠 - Question 23
-INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
+INSERT INTO `OPTIONS` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(81, 23, '직접 관람'),
 	(82, 23, 'TV 중계 시청'),
 	(83, 23, '온라인 스트리밍'),
@@ -233,7 +233,7 @@ INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(86, 23, '기타');
 
 -- Survey 9: 교육 시스템 - Question 24
-INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
+INSERT INTO `OPTIONS` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(87, 24, '매우 만족'),
 	(88, 24, '만족'),
 	(89, 24, '보통'),
@@ -241,7 +241,7 @@ INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(91, 24, '매우 불만족');
 
 -- Survey 9: 교육 시스템 - Question 26
-INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
+INSERT INTO `OPTIONS` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(92, 26, '창의성 함양'),
 	(93, 26, '인성 교육'),
 	(94, 26, '실용적 지식'),
@@ -250,7 +250,7 @@ INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(97, 26, '기타');
 
 -- Survey 10: 환경 보호 - Question 27
-INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
+INSERT INTO `OPTIONS` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(98, 27, '매우 관심 있음'),
 	(99, 27, '관심 있음'),
 	(100, 27, '보통'),
@@ -258,7 +258,7 @@ INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(102, 27, '전혀 관심 없음');
 
 -- Survey 10: 환경 보호 - Question 29
-INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
+INSERT INTO `OPTIONS` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 	(103, 29, '기후 변화'),
 	(104, 29, '대기 오염'),
 	(105, 29, '해양 오염'),
@@ -271,7 +271,7 @@ INSERT INTO `options` (`ID`, `QUESTION_ID`, `CONTENT`) VALUES
 -- =========================================
 
 -- Survey 1: 리그오브레전드 (7개 응답)
-INSERT INTO `responses` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, `OPTION_ID`, `SUBJECTIVE_CONTENT`, `SCALE_VALUE`, `CREATED_AT`) VALUES
+INSERT INTO `RESPONSES` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, `OPTION_ID`, `SUBJECTIVE_CONTENT`, `SCALE_VALUE`, `CREATED_AT`) VALUES
 	('a1b2c3d4-e5f6-4789-a012-345678901234', 1, 'MULTIPLE_CHOICE', 3, NULL, NULL, '2025-12-01 10:15:00'),
 	('a1b2c3d4-e5f6-4789-a012-345678901234', 2, 'SUBJECTIVE', NULL, '밸런스 패치가 너무 자주 일어나서 적응하기 힘듭니다. 챔피언별 밸런스를 더 신중하게 조정해주세요.', NULL, '2025-12-01 10:15:00'),
 	('b2c3d4e5-f6a7-4890-b123-456789012345', 1, 'MULTIPLE_CHOICE', 1, NULL, NULL, '2025-12-01 11:20:00'),
@@ -288,7 +288,7 @@ INSERT INTO `responses` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, 
 	('a7b8c9d0-e1f2-4345-a678-901234567890', 2, 'SUBJECTIVE', NULL, '아이템 빌드 다양성을 높여주세요. 매 게임 비슷한 빌드를 가는 게 지루합니다.', NULL, '2025-12-01 16:25:00');
 
 -- Survey 2: 사회 이슈 (8개 응답)
-INSERT INTO `responses` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, `OPTION_ID`, `SUBJECTIVE_CONTENT`, `SCALE_VALUE`, `CREATED_AT`) VALUES
+INSERT INTO `RESPONSES` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, `OPTION_ID`, `SUBJECTIVE_CONTENT`, `SCALE_VALUE`, `CREATED_AT`) VALUES
 	('b8c9d0e1-f2a3-4456-b789-012345678901', 3, 'MULTIPLE_CHOICE', 7, NULL, NULL, '2025-12-02 09:00:00'),
 	('b8c9d0e1-f2a3-4456-b789-012345678901', 4, 'SUBJECTIVE', NULL, '주변 사람들에게 사회 문제에 대해 이야기하고, 작은 실천부터 시작하고 있습니다. 분리수거와 에너지 절약을 꾸준히 하고 있어요.', NULL, '2025-12-02 09:00:00'),
 	('b8c9d0e1-f2a3-4456-b789-012345678901', 5, 'MULTIPLE_CHOICE', 13, NULL, NULL, '2025-12-02 09:00:00'),
@@ -315,7 +315,7 @@ INSERT INTO `responses` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, 
 	('c5d6e7f8-a9b0-4123-c456-789012345678', 5, 'MULTIPLE_CHOICE', 15, NULL, NULL, '2025-12-02 17:50:00');
 
 -- Survey 3: 경제 상황 (6개 응답)
-INSERT INTO `responses` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, `OPTION_ID`, `SUBJECTIVE_CONTENT`, `SCALE_VALUE`, `CREATED_AT`) VALUES
+INSERT INTO `RESPONSES` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, `OPTION_ID`, `SUBJECTIVE_CONTENT`, `SCALE_VALUE`, `CREATED_AT`) VALUES
 	('d6e7f8a9-b0c1-4234-d567-890123456789', 6, 'MULTIPLE_CHOICE', 20, NULL, NULL, '2025-12-03 09:10:00'),
 	('d6e7f8a9-b0c1-4234-d567-890123456789', 7, 'SUBJECTIVE', NULL, '청년 일자리 창출과 중소기업 지원 정책을 강화해야 합니다. 또한 주거비 부담을 줄이는 정책이 필요합니다.', NULL, '2025-12-03 09:10:00'),
 	('d6e7f8a9-b0c1-4234-d567-890123456789', 8, 'MULTIPLE_CHOICE', 24, NULL, NULL, '2025-12-03 09:10:00'),
@@ -336,7 +336,7 @@ INSERT INTO `responses` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, 
 	('c1d2e3f4-a5b6-4789-c012-345678901234', 8, 'MULTIPLE_CHOICE', 26, NULL, NULL, '2025-12-03 15:30:00');
 
 -- Survey 4: 정치 참여 (9개 응답) - 일부만 포함 (나머지는 생략)
-INSERT INTO `responses` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, `OPTION_ID`, `SUBJECTIVE_CONTENT`, `SCALE_VALUE`, `CREATED_AT`) VALUES
+INSERT INTO `RESPONSES` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, `OPTION_ID`, `SUBJECTIVE_CONTENT`, `SCALE_VALUE`, `CREATED_AT`) VALUES
 	('d2e3f4a5-b6c7-4890-d123-456789012345', 9, 'MULTIPLE_CHOICE', 28, NULL, NULL, '2025-12-04 09:20:00'),
 	('d2e3f4a5-b6c7-4890-d123-456789012345', 10, 'SUBJECTIVE', NULL, '정치에 대한 접근성을 높이고, 젊은 세대의 목소리를 더 잘 반영할 수 있는 시스템이 필요합니다.', NULL, '2025-12-04 09:20:00'),
 	('d2e3f4a5-b6c7-4890-d123-456789012345', 11, 'MULTIPLE_CHOICE', 33, NULL, NULL, '2025-12-04 09:20:00'),
@@ -366,7 +366,7 @@ INSERT INTO `responses` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, 
 	('f0a1b2c3-d4e5-4678-f901-234567890123', 11, 'MULTIPLE_CHOICE', 34, NULL, NULL, '2025-12-04 19:20:00');
 
 -- Survey 5: 한국사 (7개 응답)
-INSERT INTO `responses` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, `OPTION_ID`, `SUBJECTIVE_CONTENT`, `SCALE_VALUE`, `CREATED_AT`) VALUES
+INSERT INTO `RESPONSES` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, `OPTION_ID`, `SUBJECTIVE_CONTENT`, `SCALE_VALUE`, `CREATED_AT`) VALUES
 	('a1b2c3d4-e5f6-4789-a012-345678901235', 12, 'MULTIPLE_CHOICE', 39, NULL, NULL, '2025-12-05 09:30:00'),
 	('a1b2c3d4-e5f6-4789-a012-345678901235', 13, 'SUBJECTIVE', NULL, '조선 후기 실학 사상과 개화기에 가장 관심이 많습니다. 당시의 변화와 개혁 시도가 인상적입니다.', NULL, '2025-12-05 09:30:00'),
 	('a1b2c3d4-e5f6-4789-a012-345678901235', 14, 'MULTIPLE_CHOICE', 45, NULL, NULL, '2025-12-05 09:30:00'),
@@ -390,7 +390,7 @@ INSERT INTO `responses` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, 
 	('a7b8c9d0-e1f2-4345-a678-901234567891', 14, 'MULTIPLE_CHOICE', 48, NULL, NULL, '2025-12-05 17:00:00');
 
 -- Survey 6: 문화 콘텐츠 (10개 응답)
-INSERT INTO `responses` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, `OPTION_ID`, `SUBJECTIVE_CONTENT`, `SCALE_VALUE`, `CREATED_AT`) VALUES
+INSERT INTO `RESPONSES` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, `OPTION_ID`, `SUBJECTIVE_CONTENT`, `SCALE_VALUE`, `CREATED_AT`) VALUES
 	('b8c9d0e1-f2a3-4456-b789-012345678902', 15, 'MULTIPLE_CHOICE', 50, NULL, NULL, '2025-12-06 09:40:00'),
 	('b8c9d0e1-f2a3-4456-b789-012345678902', 16, 'SUBJECTIVE', NULL, '최근 본 드라마 "오징어 게임"이 가장 인상 깊었습니다. 사회 문제를 다루는 방식이 참신하고 메시지가 강렬했습니다.', NULL, '2025-12-06 09:40:00'),
 	('b8c9d0e1-f2a3-4456-b789-012345678902', 17, 'MULTIPLE_CHOICE', 56, NULL, NULL, '2025-12-06 09:40:00'),
@@ -423,7 +423,7 @@ INSERT INTO `responses` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, 
 	('e7f8a9b0-c1d2-4345-e678-901234567891', 17, 'MULTIPLE_CHOICE', 61, NULL, NULL, '2025-12-06 20:55:00');
 
 -- Survey 7: 연예계 트렌드 (8개 응답)
-INSERT INTO `responses` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, `OPTION_ID`, `SUBJECTIVE_CONTENT`, `SCALE_VALUE`, `CREATED_AT`) VALUES
+INSERT INTO `RESPONSES` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, `OPTION_ID`, `SUBJECTIVE_CONTENT`, `SCALE_VALUE`, `CREATED_AT`) VALUES
 	('f8a9b0c1-d2e3-4456-f789-012345678902', 18, 'MULTIPLE_CHOICE', 62, NULL, NULL, '2025-12-07 09:50:00'),
 	('f8a9b0c1-d2e3-4456-f789-012345678902', 19, 'SUBJECTIVE', NULL, 'K-POP의 글로벌 진출이 가장 주목받고 있습니다. 특히 해외 시장에서의 성공이 인상적입니다.', NULL, '2025-12-07 09:50:00'),
 	('f8a9b0c1-d2e3-4456-f789-012345678902', 20, 'MULTIPLE_CHOICE', 68, NULL, NULL, '2025-12-07 09:50:00'),
@@ -450,7 +450,7 @@ INSERT INTO `responses` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, 
 	('a5b6c7d8-e9f0-4123-a456-789012345679', 20, 'MULTIPLE_CHOICE', 73, NULL, NULL, '2025-12-07 18:35:00');
 
 -- Survey 8: 스포츠 (6개 응답)
-INSERT INTO `responses` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, `OPTION_ID`, `SUBJECTIVE_CONTENT`, `SCALE_VALUE`, `CREATED_AT`) VALUES
+INSERT INTO `RESPONSES` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, `OPTION_ID`, `SUBJECTIVE_CONTENT`, `SCALE_VALUE`, `CREATED_AT`) VALUES
 	('b6c7d8e9-f0a1-4234-b567-890123456780', 21, 'MULTIPLE_CHOICE', 74, NULL, NULL, '2025-12-08 09:00:00'),
 	('b6c7d8e9-f0a1-4234-b567-890123456780', 22, 'SUBJECTIVE', NULL, '월드컵 경기장에서 직접 본 한국 대표팀의 골이 가장 기억에 남습니다. 그 순간의 감동을 잊을 수 없습니다.', NULL, '2025-12-08 09:00:00'),
 	('b6c7d8e9-f0a1-4234-b567-890123456780', 23, 'MULTIPLE_CHOICE', 81, NULL, NULL, '2025-12-08 09:00:00'),
@@ -471,7 +471,7 @@ INSERT INTO `responses` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, 
 	('a1b2c3d4-e5f6-4789-a012-345678901236', 23, 'MULTIPLE_CHOICE', 86, NULL, NULL, '2025-12-08 15:15:00');
 
 -- Survey 9: 교육 시스템 (5개 응답)
-INSERT INTO `responses` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, `OPTION_ID`, `SUBJECTIVE_CONTENT`, `SCALE_VALUE`, `CREATED_AT`) VALUES
+INSERT INTO `RESPONSES` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, `OPTION_ID`, `SUBJECTIVE_CONTENT`, `SCALE_VALUE`, `CREATED_AT`) VALUES
 	('b2c3d4e5-f6a7-4890-b123-456789012347', 24, 'MULTIPLE_CHOICE', 90, NULL, NULL, '2025-12-09 09:25:00'),
 	('b2c3d4e5-f6a7-4890-b123-456789012347', 25, 'SUBJECTIVE', NULL, '입시 위주 교육에서 벗어나 학생들의 창의성과 인성을 기를 수 있는 교육으로 전환해야 합니다.', NULL, '2025-12-09 09:25:00'),
 	('b2c3d4e5-f6a7-4890-b123-456789012347', 26, 'MULTIPLE_CHOICE', 95, NULL, NULL, '2025-12-09 09:25:00'),
@@ -489,7 +489,7 @@ INSERT INTO `responses` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, 
 	('f6a7b8c9-d0e1-4234-f567-890123456791', 26, 'MULTIPLE_CHOICE', 96, NULL, NULL, '2025-12-09 14:25:00');
 
 -- Survey 10: 환경 보호 (10개 응답)
-INSERT INTO `responses` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, `OPTION_ID`, `SUBJECTIVE_CONTENT`, `SCALE_VALUE`, `CREATED_AT`) VALUES
+INSERT INTO `RESPONSES` (`RESPONSE_SESSION_ID`, `QUESTION_ID`, `QUESTION_TYPE`, `OPTION_ID`, `SUBJECTIVE_CONTENT`, `SCALE_VALUE`, `CREATED_AT`) VALUES
 	('a7b8c9d0-e1f2-4345-a678-901234567892', 27, 'MULTIPLE_CHOICE', 98, NULL, NULL, '2025-12-10 09:35:00'),
 	('a7b8c9d0-e1f2-4345-a678-901234567892', 28, 'SUBJECTIVE', NULL, '일회용품 사용을 최소화하고, 텀블러와 장바구니를 항상 가지고 다닙니다. 또한 분리수거를 철저히 하고 있습니다.', NULL, '2025-12-10 09:35:00'),
 	('a7b8c9d0-e1f2-4345-a678-901234567892', 29, 'MULTIPLE_CHOICE', 103, NULL, NULL, '2025-12-10 09:35:00'),
