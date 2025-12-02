@@ -37,9 +37,7 @@ Think Fast는 실시간 설문 조사, AI 기반 인사이트 분석, 실시간 
 
 <img width="957" height="502" alt="image" src="https://github.com/user-attachments/assets/f81d6f22-f243-4e08-a1b2-8c45715ec31c" />
 
-### Infrastructure
-
-#### 클라우드 인프라
+### 클라우드 인프라 구성
 <table>
 <thead>
 <tr>
@@ -54,16 +52,16 @@ Think Fast는 실시간 설문 조사, AI 기반 인사이트 분석, 실시간 
 </tr>
 <tr>
 <td><strong>Docker & Docker Compose</strong></td>
-<td>컨테이너화를 통한 배포 표준화 및 서비스 오케스트레이션</td>
+<td>컨테이너화를 통한 배포 표준화</td>
 </tr>
 <tr>
-<td><strong>비용 최적화</strong></td>
+<td><strong>비용 최적화 전략</strong></td>
 <td>EventBridge + Lambda를 활용한 자동 스케줄링<br>매일 02:00~09:00 (KST) 자동 중지, 그 외 시간 운영<br>월 비용 약 50% 절감 효과</td>
 </tr>
 </tbody>
 </table>
 
-#### CI/CD 파이프라인
+### CI/CD 파이프라인
 <table>
 <thead>
 <tr>
@@ -87,7 +85,7 @@ Think Fast는 실시간 설문 조사, AI 기반 인사이트 분석, 실시간 
 </tbody>
 </table>
 
-#### 컨테이너 구성
+### 컨테이너 구성
 <table>
 <thead>
 <tr>
