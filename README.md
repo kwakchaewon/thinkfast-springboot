@@ -17,7 +17,7 @@ Think Fast는 실시간 설문 조사, AI 기반 인사이트 분석, 실시간 
 
 ---
 
-## 🎯 프로젝트 개요
+## 🎯 개요
 
 ### 주요 기능
 - **실시간 설문 조사**: 비회원 참여 가능, 중복 응답 방지
@@ -33,9 +33,9 @@ Think Fast는 실시간 설문 조사, AI 기반 인사이트 분석, 실시간 
 
 ---
 
-## 🛠 기술 스택 및 구성
+## 아키텍쳐
 
-![시스템 아키텍처](./docs/architecture.png)
+<img width="957" height="502" alt="image" src="https://github.com/user-attachments/assets/f81d6f22-f243-4e08-a1b2-8c45715ec31c" />
 
 
 ### Backend
