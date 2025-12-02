@@ -1,0 +1,67 @@
+## CREATED BY cwkwak@edentns.com
+## https://app.eraser.io/workspace/oTZuWD9ZgPKh2pdL4ZHS
+
+Create a modern, minimal cloud architecture diagram for a real-time survey platform called “ThinkFast”.
+
+Use clean, balanced spacing and minimal styling.
+Use color-coded layers & Icons for clear distinction, not grayscale
+
+# Overall Layout
+- Place an “External Users” group at the top.
+- Below it, place a large group labeled “AWS EC2 (Single Host)” that contains all system containers.
+- On the left or bottom-left, place “GitHub” and “Jenkins CI/CD” to show the deployment pipeline.
+- Draw all Docker containers as individual components inside the EC2 box.
+
+# External Users
+Component: “Survey Users (Browser / Mobile)”
+- Connect to Frontend (port 80) inside EC2.
+
+# AWS EC2 (Single Host)
+Group Name: “AWS EC2 (Single Host) — Docker Engine”
+
+Inside this group, create the following components:
+
+1. Component: “thinkfast-frontend (Vue 3 + Nginx)”
+   - Label: “Port 80”
+   - This serves the survey UI.
+
+2. Component: “thinkfast-backend (Spring Boot API)”
+   - Label: “Port 8080”
+   - Provides REST APIs and WebSocket endpoints.
+
+3. Component: “redis:7 (Cache + Pub/Sub)”
+   - Label: “Port 6379”
+   - Used for real-time WebSocket broadcasting, participant counts, pub/sub events.
+
+4. Component: “mariadb:11 (Database)”
+   - Label: “Port 3306”
+   - Stores surveys, questions, answers, responses, statistics.
+
+5. Component: “jenkins (CI/CD Server)”
+   - Label: “Port 9090 → 8080, 50000”
+   - Builds Docker images and redeploys containers.
+
+# Connections inside EC2
+- Arrow: frontend → backend (HTTP + WebSocket)
+- Arrow: backend ↔ redis (real-time pub/sub)
+- Arrow: backend ↔ mariadb (database queries)
+
+# External CI/CD Flow
+Create the following components outside the EC2 box:
+
+1. Component: “GitHub Repository”
+   - Connect: GitHub → Jenkins (webhook or polling)
+
+2. Jenkins → Docker Engine inside EC2
+   - Arrow label: “Build, Push, Restart Containers”
+
+# Data Flow Summary
+Use arrows to show:
+- User → Frontend (port 80)
+- Frontend → Backend (REST/WebSocket 8080)
+- Backend ↔ Redis (6379)
+- Backend ↔ MariaDB (3306)
+- Jenkins → EC2 Docker Engine (CI/CD Deploy)
+- GitHub → Jenkins (source updates)
+
+Generate the diagram with minimal, modern node boxes and clean layout.
