@@ -28,6 +28,7 @@
 
 <img width="957" height="502" alt="image" src="https://github.com/user-attachments/assets/f81d6f22-f243-4e08-a1b2-8c45715ec31c" />
 
+
 ### 클라우드 인프라 구성
 <table>
 <thead>
@@ -173,6 +174,7 @@
 </table>
 
 <br></br>
+
 ## 💡 핵심 기능
 ### 1. 실시간 알림 시스템 (WebSocket + Redis Pub/Sub)
 
@@ -192,6 +194,7 @@ public void onMessage(String message, Pattern pattern) {
     // WebSocket 세션에 메시지 전달
     webSocketHandler.sendToAll(message);
 }
+```
 
 ### 2. 중복 응답 방지 전략 수립 (DeviceId + IP 해시화)
 
@@ -237,8 +240,6 @@ List<Object[]> responseCounts = responseRepository.countDistinctResponseSessions
 **성능 개선:**
 - 쿼리 수: O(N) → O(1)
 - 100개 설문 처리 시: 200+ 쿼리 → 2-3 쿼리로 감소
-
-<br></br>
 
 ### 4. 비동기 AI 리포트 생성
 - **동기 처리의 문제**: AI API 호출 시 응답 시간 5-30초, 사용자 대기 시간 증가
@@ -295,7 +296,6 @@ public void updateActiveSurveyReports() {
 - 진행 중인 설문도 실시간으로 통계 확인 가능
 - 배치 처리로 서버 부하 최소화
 
-
 ### 6. AI 서비스 통합 (Gemini API)
 
 **기술적 의사결정:**
@@ -333,6 +333,7 @@ public String generateInsight(String prompt) {
 - 비동기 처리로 성능 최적화
 
 <br></br>
+
 ## ⚡ 성능 최적화 전략
 
 ### 1. 배치 처리
@@ -353,6 +354,7 @@ public String generateInsight(String prompt) {
 - 진행 중인 설문만 필터링하여 불필요한 처리 방지
 
 <br></br>
+
 ## 🎯 주요 의사결정 내역
 
 ### 1. Redis Pub/Sub vs 메시지 큐
@@ -393,6 +395,7 @@ public String generateInsight(String prompt) {
   - AI API 호출 실패 시에도 기존 리포트 제공 가능
 
 <br></br>
+
 ## 📊 프로젝트 구조
 
 ```
@@ -414,6 +417,7 @@ thinkfast/
 ```
 
 <br></br>
+
 ## 🚀 배포
 
 ### Docker 빌드
@@ -428,6 +432,7 @@ docker run -d -p 8080:8080 thinkfast:latest
 - `GEMINI_API_KEY`: Gemini API 키
 
 <br></br>
+
 ## 📝 향후 개선 계획
 
 ### Phase 1: 핵심 개선
