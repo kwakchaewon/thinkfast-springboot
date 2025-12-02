@@ -33,24 +33,78 @@ Think Fast는 실시간 설문 조사, AI 기반 인사이트 분석, 실시간 
 
 ---
 
-## 🛠 기술 스택 및 선택 이유
+## 🛠 기술 스택 및 구성
+
+![시스템 아키텍처](./docs/architecture.png)
+
 
 ### Backend
-| 기술 | 버전 | 선택 이유 |
-|------|------|----------|
-| **Spring Boot** | 2.5.8 | 빠른 개발, 풍부한 생태계, 엔터프라이즈급 안정성 |
-| **Java** | 8 | 안정성과 성숙도, 넓은 커뮤니티 지원 |
-| **Spring Security + JWT** | - | Stateless 인증, 확장 가능한 보안 아키텍처 |
-| **MariaDB** | 10.x | MySQL 호환성, 오픈소스, 안정적인 성능 |
-| **Redis** | 6.x | Pub/Sub 메시징, 캐싱, 빠른 I/O 성능 |
-| **Flyway** | 7.1.1 | 버전 관리된 DB 마이그레이션, 자동화된 스키마 관리 |
-| **Spring WebFlux** | - | 비동기 AI API 호출, 논블로킹 I/O |
+<table>
+<thead>
+<tr>
+<th style="width: 25%">기술</th>
+<th style="width: 15%">버전</th>
+<th style="width: 60%">선택 이유</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Spring Boot</strong></td>
+<td>2.5.8</td>
+<td>빠른 개발, 풍부한 생태계, 엔터프라이즈급 안정성</td>
+</tr>
+<tr>
+<td><strong>Java</strong></td>
+<td>8</td>
+<td>안정성과 성숙도, 넓은 커뮤니티 지원</td>
+</tr>
+<tr>
+<td><strong>Spring Security + JWT</strong></td>
+<td>-</td>
+<td>Stateless 인증, 확장 가능한 보안 아키텍처</td>
+</tr>
+<tr>
+<td><strong>MariaDB</strong></td>
+<td>10.x</td>
+<td>MySQL 호환성, 오픈소스, 안정적인 성능</td>
+</tr>
+<tr>
+<td><strong>Redis</strong></td>
+<td>6.x</td>
+<td>Pub/Sub 메시징, 캐싱, 빠른 I/O 성능</td>
+</tr>
+<tr>
+<td><strong>Flyway</strong></td>
+<td>7.1.1</td>
+<td>버전 관리된 DB 마이그레이션, 자동화된 스키마 관리</td>
+</tr>
+<tr>
+<td><strong>Spring WebFlux</strong></td>
+<td>-</td>
+<td>비동기 AI API 호출, 논블로킹 I/O</td>
+</tr>
+</tbody>
+</table>
 
 ### AI/LLM
-| 기술 | 선택 이유 |
-|------|----------|
-| **Google Gemini 2.0 Flash** | 무료 티어 제공, 빠른 응답 속도, Java에서 직접 호출 가능 |
-| **Java 단일 구현** | Python 서버 없이 Java 백엔드에서 직접 AI API 호출하여 인프라 단순화 |
+<table>
+<thead>
+<tr>
+<th style="width: 25%">기술</th>
+<th style="width: 75%">선택 이유</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Google Gemini 2.0 Flash</strong></td>
+<td>무료 티어 제공, 빠른 응답 속도, Java에서 직접 호출 가능</td>
+</tr>
+<tr>
+<td><strong>Java 단일 구현</strong></td>
+<td>Python 서버 없이 Java 백엔드에서 직접 AI API 호출하여 인프라 단순화</td>
+</tr>
+</tbody>
+</table>
 
 ### Infrastructure
 - **Docker**: 컨테이너화를 통한 배포 표준화
