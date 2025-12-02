@@ -1,8 +1,6 @@
 # 🚀 ThinkFast (띵패스트)
 실시간 설문 조사, AI 기반 인사이트 분석, 실시간 알림 등의 서비스를 제공하는 웹 애플리케이션
-
----
-
+<br></br>
 ## 📋 목차
 
 - [개요](#-개요)
@@ -11,9 +9,7 @@
 - [핵심 기능 및 기술적 구현](#-핵심-기능-및-기술적-구현)
 - [성능 최적화 전략](#-성능-최적화-전략)
 - [주요 기술적 의사결정](#-주요-기술적-의사결정)
-
----
-
+<br></br>
 ## 🎯 개요
 
 ### 주요 기능
@@ -27,9 +23,7 @@
 
 ### Frontend Repository
 - [thinkfast-vue3](https://github.com/kwakchaewon/thinkfast-vue3)
-
----
-
+<br></br>
 ## 아키텍쳐
 
 <img width="957" height="502" alt="image" src="https://github.com/user-attachments/assets/f81d6f22-f243-4e08-a1b2-8c45715ec31c" />
@@ -58,6 +52,8 @@
 </tbody>
 </table>
 
+<br></br>
+
 ### CI/CD 파이프라인
 <table>
 <thead>
@@ -82,6 +78,7 @@
 </tbody>
 </table>
 
+<br></br>
 ### 컨테이너 구성
 <table>
 <thead>
@@ -109,6 +106,8 @@
 </tr>
 </tbody>
 </table>
+
+<br></br>
 
 ### Backend
 <table>
@@ -158,6 +157,8 @@
 </tbody>
 </table>
 
+<br></br>
+
 ### AI/LLM
 <table>
 <thead>
@@ -178,7 +179,7 @@
 </tbody>
 </table>
 
----
+<br></br>
 
 ## 💡 핵심 기능
 
@@ -200,9 +201,8 @@ public void onMessage(String message, Pattern pattern) {
     // WebSocket 세션에 메시지 전달
     webSocketHandler.sendToAll(message);
 }
-```
 
----
+<br></br>
 
 ### 2. 중복 응답 방지 전략 수립 (DeviceId + IP 해시화)
 
@@ -224,10 +224,7 @@ if (deviceId != null && ipAddress != null) {
     // IP만으로 체크
 }
 ```
-
-
-
----
+<br></br>
 
 ### 3. 배치 처리 최적화 (스케줄러)
 
@@ -253,7 +250,7 @@ List<Object[]> responseCounts = responseRepository.countDistinctResponseSessions
 - 쿼리 수: O(N) → O(1)
 - 100개 설문 처리 시: 200+ 쿼리 → 2-3 쿼리로 감소
 
----
+<br></br>
 
 ### 4. 비동기 AI 리포트 생성
 - **동기 처리의 문제**: AI API 호출 시 응답 시간 5-30초, 사용자 대기 시간 증가
@@ -282,7 +279,7 @@ public SummaryReportDto getSummaryReport(Long surveyId) {
 }
 ```
 
----
+<br></br>
 
 ### 5. 실시간 통계 업데이트 스케줄러
 - **진행 중인 설문**: 설문 종료 전에도 실시간으로 통계 업데이트 필요
@@ -312,7 +309,7 @@ public void updateActiveSurveyReports() {
 - 진행 중인 설문도 실시간으로 통계 확인 가능
 - 배치 처리로 서버 부하 최소화
 
----
+<br></br>
 
 ### 6. AI 서비스 통합 (Gemini API)
 
@@ -350,7 +347,7 @@ public String generateInsight(String prompt) {
 - 단일 언어 스택으로 개발/운영 단순화
 - 비동기 처리로 성능 최적화
 
----
+<br></br>
 
 ## ⚡ 성능 최적화 전략
 
@@ -371,7 +368,7 @@ public String generateInsight(String prompt) {
 - 1분 간격으로 배치 처리
 - 진행 중인 설문만 필터링하여 불필요한 처리 방지
 
----
+<br></br>
 
 ## 🎯 주요 의사결정 내역
 
@@ -412,7 +409,7 @@ public String generateInsight(String prompt) {
   - 사용자 경험 개선
   - AI API 호출 실패 시에도 기존 리포트 제공 가능
 
----
+<br></br>
 
 ## 📊 프로젝트 구조
 
@@ -434,7 +431,7 @@ thinkfast/
     └── db/migration/        # Flyway 마이그레이션 스크립트
 ```
 
----
+<br></br>
 
 ## 🚀 배포
 
@@ -449,7 +446,7 @@ docker run -d -p 8080:8080 thinkfast:latest
 - `SPRING_DATASOURCE_URL`: MariaDB 연결 정보
 - `GEMINI_API_KEY`: Gemini API 키
 
----
+<br></br>
 
 ## 📝 향후 개선 계획
 
@@ -467,13 +464,3 @@ docker run -d -p 8080:8080 thinkfast:latest
 - [ ] 리포트 버전 관리
 - [ ] 질문 간 상관관계 분석
 - [ ] 응답 품질 검증 (이상치 탐지)
-
----
-
-## 📄 라이선스
-
-이 프로젝트는 개인 프로젝트입니다.
-
----
-
-**Think Fast** - 빠르고 스마트한 설문조사 플랫폼 🚀
