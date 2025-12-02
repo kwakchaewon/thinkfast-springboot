@@ -40,35 +40,80 @@ Think Fast는 실시간 설문 조사, AI 기반 인사이트 분석, 실시간 
 ### Infrastructure
 
 #### 클라우드 인프라
-- **AWS EC2**: Amazon Linux 2023 기반 `t3.small` 인스턴스
-  - 단일 호스트에서 모든 서비스 컨테이너화 운영
-  - Elastic IP를 통한 고정 IP 주소 할당
-  - 보안 그룹: SSH(22), HTTP(80), HTTPS(443), MariaDB(3306, VPC 전용), Jenkins(9090)
-- **Docker & Docker Compose**: 컨테이너화를 통한 배포 표준화 및 서비스 오케스트레이션
-- **비용 최적화**: EventBridge + Lambda를 활용한 자동 스케줄링
-  - 매일 02:00~09:00 (KST) 자동 중지, 그 외 시간 운영
-  - 월 비용 약 50% 절감 효과
+<table>
+<thead>
+<tr>
+<th style="width: 25%">기술</th>
+<th style="width: 75%">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AWS EC2</strong></td>
+<td>Amazon Linux 2023 기반 <code>t3.small</code> 인스턴스<br>단일 호스트에서 모든 서비스 컨테이너화 운영<br>Elastic IP를 통한 고정 IP 주소 할당<br>보안 그룹: SSH(22), HTTP(80), HTTPS(443), MariaDB(3306, VPC 전용), Jenkins(9090)</td>
+</tr>
+<tr>
+<td><strong>Docker & Docker Compose</strong></td>
+<td>컨테이너화를 통한 배포 표준화 및 서비스 오케스트레이션</td>
+</tr>
+<tr>
+<td><strong>비용 최적화</strong></td>
+<td>EventBridge + Lambda를 활용한 자동 스케줄링<br>매일 02:00~09:00 (KST) 자동 중지, 그 외 시간 운영<br>월 비용 약 50% 절감 효과</td>
+</tr>
+</tbody>
+</table>
 
 #### CI/CD 파이프라인
-**무중단 배포 전략:**
-1. **GitHub Actions**: 코드 푸시 시 자동 트리거
-   - Docker 이미지 빌드 및 Docker Hub 푸시
-   - Jenkins 빌드 API 호출로 배포 트리거
-2. **Jenkins**: 배포 자동화
-   - Docker Hub에서 최신 이미지 Pull
-   - Docker Compose 기반 컨테이너 재구동
-   - 사용하지 않는 이미지 자동 정리
-3. **배포 구성**
-   - Frontend: Vue3 빌드 산출물을 nginx로 서빙, `/api` 경로는 백엔드로 프록시
-   - Backend: Spring Boot 애플리케이션
-   - Database: MariaDB 11 (Docker 볼륨으로 데이터 영속성 보장)
-   - Cache/Pub-Sub: Redis 7 (Docker 볼륨으로 데이터 영속성 보장)
+<table>
+<thead>
+<tr>
+<th style="width: 25%">단계</th>
+<th style="width: 75%">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>GitHub Actions</strong></td>
+<td>코드 푸시 시 자동 트리거<br>Docker 이미지 빌드 및 Docker Hub 푸시<br>Jenkins 빌드 API 호출로 배포 트리거</td>
+</tr>
+<tr>
+<td><strong>Jenkins</strong></td>
+<td>배포 자동화<br>Docker Hub에서 최신 이미지 Pull<br>Docker Compose 기반 컨테이너 재구동<br>사용하지 않는 이미지 자동 정리</td>
+</tr>
+<tr>
+<td><strong>배포 구성</strong></td>
+<td>Frontend: Vue3 빌드 산출물을 nginx로 서빙, <code>/api</code> 경로는 백엔드로 프록시<br>Backend: Spring Boot 애플리케이션<br>Database: MariaDB 11 (Docker 볼륨으로 데이터 영속성 보장)<br>Cache/Pub-Sub: Redis 7 (Docker 볼륨으로 데이터 영속성 보장)</td>
+</tr>
+</tbody>
+</table>
 
 #### 컨테이너 구성
-- **thinkfast-frontend**: Vue3 + Nginx (멀티 스테이지 빌드)
-- **thinkfast-backend**: Spring Boot 애플리케이션
-- **mariadb:11**: 관계형 데이터베이스
-- **redis:7**: 캐싱 및 Pub/Sub 메시징
+<table>
+<thead>
+<tr>
+<th style="width: 25%">컨테이너</th>
+<th style="width: 75%">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>thinkfast-frontend</strong></td>
+<td>Vue3 + Nginx (멀티 스테이지 빌드)</td>
+</tr>
+<tr>
+<td><strong>thinkfast-backend</strong></td>
+<td>Spring Boot 애플리케이션</td>
+</tr>
+<tr>
+<td><strong>mariadb:11</strong></td>
+<td>관계형 데이터베이스</td>
+</tr>
+<tr>
+<td><strong>redis:7</strong></td>
+<td>캐싱 및 Pub/Sub 메시징</td>
+</tr>
+</tbody>
+</table>
 
 ### Backend
 <table>
@@ -138,10 +183,6 @@ Think Fast는 실시간 설문 조사, AI 기반 인사이트 분석, 실시간 
 </tbody>
 </table>
 
-### Infrastructure
-- **Docker**: 컨테이너화를 통한 배포 표준화
-- **AWS EC2**: 클라우드 인프라
-- **Jenkins**: CI/CD 파이프라인
 
 ---
 
