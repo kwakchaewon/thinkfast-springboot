@@ -173,9 +173,7 @@
 </table>
 
 <br></br>
-
 ## 💡 핵심 기능
-
 ### 1. 실시간 알림 시스템 (WebSocket + Redis Pub/Sub)
 
 - **WebSocket 단독 사용의 한계**: 단일 서버 인스턴스에서만 동작, 수평 확장 불가
@@ -194,8 +192,6 @@ public void onMessage(String message, Pattern pattern) {
     // WebSocket 세션에 메시지 전달
     webSocketHandler.sendToAll(message);
 }
-
-<br></br>
 
 ### 2. 중복 응답 방지 전략 수립 (DeviceId + IP 해시화)
 
@@ -217,7 +213,6 @@ if (deviceId != null && ipAddress != null) {
     // IP만으로 체크
 }
 ```
-<br></br>
 
 ### 3. 배치 처리 최적화 (스케줄러)
 
@@ -272,8 +267,6 @@ public SummaryReportDto getSummaryReport(Long surveyId) {
 }
 ```
 
-<br></br>
-
 ### 5. 실시간 통계 업데이트 스케줄러
 - **진행 중인 설문**: 설문 종료 전에도 실시간으로 통계 업데이트 필요
 - **1분 간격 스케줄링**: 실시간성과 서버 부하의 균형
@@ -302,7 +295,6 @@ public void updateActiveSurveyReports() {
 - 진행 중인 설문도 실시간으로 통계 확인 가능
 - 배치 처리로 서버 부하 최소화
 
-<br></br>
 
 ### 6. AI 서비스 통합 (Gemini API)
 
@@ -341,7 +333,6 @@ public String generateInsight(String prompt) {
 - 비동기 처리로 성능 최적화
 
 <br></br>
-
 ## ⚡ 성능 최적화 전략
 
 ### 1. 배치 처리
@@ -362,7 +353,6 @@ public String generateInsight(String prompt) {
 - 진행 중인 설문만 필터링하여 불필요한 처리 방지
 
 <br></br>
-
 ## 🎯 주요 의사결정 내역
 
 ### 1. Redis Pub/Sub vs 메시지 큐
@@ -403,7 +393,6 @@ public String generateInsight(String prompt) {
   - AI API 호출 실패 시에도 기존 리포트 제공 가능
 
 <br></br>
-
 ## 📊 프로젝트 구조
 
 ```
@@ -425,7 +414,6 @@ thinkfast/
 ```
 
 <br></br>
-
 ## 🚀 배포
 
 ### Docker 빌드
@@ -440,7 +428,6 @@ docker run -d -p 8080:8080 thinkfast:latest
 - `GEMINI_API_KEY`: Gemini API 키
 
 <br></br>
-
 ## 📝 향후 개선 계획
 
 ### Phase 1: 핵심 개선
