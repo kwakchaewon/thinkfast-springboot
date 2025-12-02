@@ -181,7 +181,31 @@ Think Fast는 실시간 설문 조사, AI 기반 인사이트 분석, 실시간 
 </tbody>
 </table>
 
+---
+
+## 💡 핵심 기능
+
+### 1. 실시간 알림 시스템 (WebSocket + Redis Pub/Sub)
+
+- **WebSocket 단독 사용의 한계**: 단일 서버 인스턴스에서만 동작, 수평 확장 불가
+- **Redis Pub/Sub 도입**: 여러 서버 인스턴스 간 메시지 브로드캐스트 가능
+
+```java
+// RedisPublisher: 이벤트 발생 시 Redis 채널에 메시지 발행
+public void sendAlarm(Long surveyId, String type) {
+    AlarmMessage alarmMessage = new AlarmMessage(...);
+    String json = objectMapper.writeValueAsString(alarmMessage);
+    redisTemplate.convertAndSend("alarm-channel", json);
+}
+
+// RedisSubscriber: Redis 채널 구독 및 WebSocket으로 전달
+public void onMessage(String message, Pattern pattern) {
+    // WebSocket 세션에 메시지 전달
+    webSocketHandler.sendToAll(message);
+}
 ```
+
+---
 
 ### 2. 중복 응답 방지 전략 수립 (DeviceId + IP 해시화)
 
