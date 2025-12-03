@@ -1,0 +1,201 @@
+Create a modern, clean Entity Relationship Diagram (ERD) for a real-time survey platform called "ThinkFast".
+
+Use clean, balanced spacing and minimal styling.
+Use color-coded entity groups for clear distinction (User Management, Survey Core, Responses, AI Insights, System)
+
+# Overall Layout
+- Group related entities together with clear visual boundaries
+- Place "User Management" entities at the top-left
+- Place "Survey Core" entities in the center
+- Place "Responses" entities on the right
+- Place "AI Insights" entities at the bottom
+- Place "System" entities at the bottom-right
+
+# Entity Groups
+
+## 1. User Management Group
+**Color: Blue**
+
+### USER
+- Primary Key: ID (BIGINT, AUTO_INCREMENT)
+- Attributes:
+  - USERNAME (VARCHAR(50), UNIQUE, NOT NULL) - email로 사용
+  - REAL_USERNAME (VARCHAR(100), NULLABLE) - 실제 유저 이름
+  - PASSWORD (VARCHAR(255), NOT NULL)
+  - BIRTH_DATE (DATE, NOT NULL)
+  - ROLE (ENUM: 'ADMIN', 'CREATOR', 'RESPONDER', NOT NULL, DEFAULT 'RESPONDER')
+  - CREATED_AT (TIMESTAMP)
+  - UPDATED_AT (TIMESTAMP)
+
+### REFRESH_TOKENS
+- Primary Key: ID (BIGINT, AUTO_INCREMENT)
+- Attributes:
+  - USERNAME (VARCHAR(50), NOT NULL) - Foreign Key to USER.USERNAME
+  - TOKEN (VARCHAR(255), UNIQUE, NOT NULL)
+  - EXPIRES_AT (TIMESTAMP, NOT NULL)
+  - CREATED_AT (TIMESTAMP)
+
+**Relationships:**
+- REFRESH_TOKENS.USERNAME -> USER.USERNAME (Many-to-One)
+
+## 2. Survey Core Group
+**Color: Green**
+
+### SURVEYS
+- Primary Key: ID (BIGINT, AUTO_INCREMENT)
+- Attributes:
+  - USER_ID (BIGINT, NOT NULL) - Foreign Key to USER.ID
+  - TITLE (VARCHAR(255), NOT NULL)
+  - DESCRIPTION (TEXT, NULLABLE)
+  - START_TIME (DATETIME, NULLABLE)
+  - END_TIME (DATETIME, NOT NULL)
+  - IS_ACTIVE (BOOLEAN, DEFAULT TRUE)
+  - IS_DELETED (TINYINT(1), DEFAULT 0)
+  - SHOW_RESULTS (TINYINT(1), DEFAULT 1)
+  - CREATED_AT (TIMESTAMP)
+  - UPDATED_AT (TIMESTAMP)
+
+### QUESTIONS
+- Primary Key: ID (BIGINT, AUTO_INCREMENT)
+- Attributes:
+  - SURVEY_ID (BIGINT, NOT NULL) - Foreign Key to SURVEYS.ID
+  - TYPE (ENUM: 'MULTIPLE_CHOICE', 'SUBJECTIVE', 'SCALE', NOT NULL)
+  - CONTENT (TEXT, NOT NULL)
+  - ORDER_INDEX (INT, NOT NULL)
+
+### OPTIONS
+- Primary Key: ID (BIGINT, AUTO_INCREMENT)
+- Attributes:
+  - QUESTION_ID (BIGINT, NOT NULL) - Foreign Key to QUESTIONS.ID
+  - CONTENT (VARCHAR(500), NOT NULL)
+
+**Relationships:**
+- SURVEYS.USER_ID -> USER.ID (Many-to-One)
+- QUESTIONS.SURVEY_ID -> SURVEYS.ID (Many-to-One, Cascade Delete)
+- OPTIONS.QUESTION_ID -> QUESTIONS.ID (Many-to-One, Cascade Delete)
+
+## 3. Responses Group
+**Color: Orange**
+
+### RESPONSES
+- Primary Key: ID (BIGINT, AUTO_INCREMENT)
+- Attributes:
+  - RESPONSE_SESSION_ID (VARCHAR(36), NOT NULL) - 세션 식별자
+  - QUESTION_ID (BIGINT, NOT NULL) - Foreign Key to QUESTIONS.ID
+  - QUESTION_TYPE (TEXT, NOT NULL)
+  - OPTION_ID (BIGINT, NULLABLE) - Foreign Key to OPTIONS.ID
+  - SUBJECTIVE_CONTENT (TEXT, NULLABLE) - 주관식 응답
+  - SCALE_VALUE (INT, NULLABLE) - 척도형 응답 값
+  - CREATED_AT (TIMESTAMP, NOT NULL)
+
+### SURVEY_RESPONSE_HISTORY
+- Primary Key: ID (BIGINT, AUTO_INCREMENT)
+- Attributes:
+  - SURVEY_ID (BIGINT, NOT NULL) - Foreign Key to SURVEYS.ID
+  - DEVICE_ID_HASH (VARCHAR(255), NOT NULL) - SHA256 해시값
+  - IP_ADDRESS_HASH (VARCHAR(255), NULLABLE) - SHA256 해시값
+  - RESPONDED_AT (DATETIME, DEFAULT CURRENT_TIMESTAMP)
+
+**Relationships:**
+- RESPONSES.QUESTION_ID -> QUESTIONS.ID (Many-to-One, Cascade Delete)
+- RESPONSES.OPTION_ID -> OPTIONS.ID (Many-to-One, NULLABLE, Set Null on Delete)
+- SURVEY_RESPONSE_HISTORY.SURVEY_ID -> SURVEYS.ID (Many-to-One)
+
+## 4. AI Insights Group
+**Color: Purple**
+
+### INSIGHT_REPORTS
+- Primary Key: ID (BIGINT, AUTO_INCREMENT)
+- Attributes:
+  - SURVEY_ID (BIGINT, NOT NULL, UNIQUE) - Foreign Key to SURVEYS.ID
+  - SUMMARY_TEXT (TEXT, NULLABLE) - JSON 직렬화된 요약 리포트
+  - KEYWORDS (TEXT, NULLABLE) - JSON 형식의 키워드 리스트
+  - SENTIMENT_SUMMARY (TEXT, NULLABLE) - 감정 분석 요약
+  - CREATED_AT (TIMESTAMP, NOT NULL)
+
+### WORD_CLOUDS
+- Primary Key: ID (BIGINT, AUTO_INCREMENT)
+- Attributes:
+  - QUESTION_ID (BIGINT, NOT NULL, UNIQUE) - Foreign Key to QUESTIONS.ID
+  - WORD_CLOUD_DATA (TEXT, NULLABLE) - JSON 직렬화된 워드클라우드 데이터
+  - CREATED_AT (TIMESTAMP, NOT NULL)
+
+### QUESTION_INSIGHTS
+- Primary Key: ID (BIGINT, AUTO_INCREMENT)
+- Attributes:
+  - QUESTION_ID (BIGINT, NOT NULL, UNIQUE) - Foreign Key to QUESTIONS.ID
+  - INSIGHT_TEXT (TEXT, NULLABLE) - 질문별 인사이트 텍스트
+  - CREATED_AT (TIMESTAMP, NOT NULL)
+
+**Relationships:**
+- INSIGHT_REPORTS.SURVEY_ID -> SURVEYS.ID (One-to-One, Cascade Delete)
+- WORD_CLOUDS.QUESTION_ID -> QUESTIONS.ID (One-to-One, Cascade Delete)
+- QUESTION_INSIGHTS.QUESTION_ID -> QUESTIONS.ID (One-to-One, Cascade Delete)
+
+## 5. System Group
+**Color: Gray**
+
+### NOTIFICATIONS
+- Primary Key: ID (BIGINT, AUTO_INCREMENT)
+- Attributes:
+  - RECIPIENT_ID (BIGINT, NOT NULL) - Foreign Key to USER.ID
+  - TYPE (VARCHAR(50), NOT NULL) - 알림 유형 (예: SURVEY_RESPONSE)
+  - MESSAGE (TEXT, NOT NULL) - 알림 내용
+  - REFERENCE_ID (BIGINT, NULLABLE) - 연관된 설문 ID 등
+  - IS_READ (BOOLEAN, DEFAULT FALSE) - 읽음 여부
+  - CREATED_AT (DATETIME, NOT NULL)
+  - EXPIRES_AT (DATETIME, NULLABLE) - 만료일 (기본값: CREATED_AT + 7일)
+
+### SURVEY_LOGS
+- Primary Key: ID (BIGINT, AUTO_INCREMENT)
+- Attributes:
+  - SURVEY_ID (BIGINT, NOT NULL) - Foreign Key to SURVEYS.ID
+  - USER_ID (BIGINT, NULLABLE) - Foreign Key to USER.ID
+  - ACTION_TYPE (ENUM: 'ANSWER_SUBMITTED', 'NOTIFICATION_SENT', 'SURVEY_CREATED', NOT NULL)
+  - METADATA (JSON, NULLABLE)
+  - TIMESTAMP (TIMESTAMP, DEFAULT CURRENT_TIMESTAMP)
+
+### QUESTION_EMBEDDINGS
+- Primary Key: ID (BIGINT, AUTO_INCREMENT)
+- Attributes:
+  - QUESTION_ID (BIGINT, NOT NULL) - Foreign Key to QUESTIONS.ID
+  - RESPONSE_ID (BIGINT, NOT NULL) - Foreign Key to RESPONSES.ID
+  - EMBEDDING_VECTOR (JSON, NULLABLE)
+  - CREATED_AT (TIMESTAMP)
+
+**Relationships:**
+- NOTIFICATIONS.RECIPIENT_ID -> USER.ID (Many-to-One, Cascade Delete)
+- SURVEY_LOGS.SURVEY_ID -> SURVEYS.ID (Many-to-One, Cascade Delete)
+- SURVEY_LOGS.USER_ID -> USER.ID (Many-to-One, NULLABLE, Set Null on Delete)
+- QUESTION_EMBEDDINGS.QUESTION_ID -> QUESTIONS.ID (Many-to-One, Cascade Delete)
+- QUESTION_EMBEDDINGS.RESPONSE_ID -> RESPONSES.ID (Many-to-One, Cascade Delete)
+
+# Relationship Summary
+- USER (1) -> (N) SURVEYS
+- USER (1) -> (N) NOTIFICATIONS (as RECIPIENT_ID)
+- USER (1) -> (N) SURVEY_LOGS (nullable)
+- USER (1) -> (N) REFRESH_TOKENS (via USERNAME)
+- SURVEYS (1) -> (N) QUESTIONS
+- SURVEYS (1) -> (1) INSIGHT_REPORTS (UNIQUE)
+- SURVEYS (1) -> (N) SURVEY_RESPONSE_HISTORY
+- SURVEYS (1) -> (N) SURVEY_LOGS
+- QUESTIONS (1) -> (N) OPTIONS
+- QUESTIONS (1) -> (N) RESPONSES
+- QUESTIONS (1) -> (1) WORD_CLOUDS (UNIQUE)
+- QUESTIONS (1) -> (1) QUESTION_INSIGHTS (UNIQUE)
+- QUESTIONS (1) -> (N) QUESTION_EMBEDDINGS
+- OPTIONS (1) -> (N) RESPONSES (nullable)
+- RESPONSES (1) -> (N) QUESTION_EMBEDDINGS
+
+# Visual Guidelines
+- Use distinct colors for each entity group
+- Show primary keys with bold/underline
+- Show foreign keys with italic or different color
+- Use clear relationship lines with cardinality indicators (1, N)
+- Label relationships clearly
+- Group entities by domain (User Management, Survey Core, Responses, AI Insights, System)
+- Use minimal, modern styling with clean layout
+
+Generate the ERD with clear entity boxes, proper relationships, and color-coded groups.
+
+

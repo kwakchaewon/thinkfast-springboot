@@ -1,0 +1,127 @@
+## CREATED BY cwkwak@edentns.com
+## https://app.eraser.io/ AI Generator를 위한 데이터 플로우 차트 생성 컨텍스트
+
+Create a clean, focused data flow diagram for "ThinkFast" - a real-time survey platform with AI-powered insights.
+
+Use minimal styling with color-coded components and clear directional arrows.
+
+# Overall Layout
+- Place "Users" at the top
+- Place "Frontend (Vue 3)" below users
+- Place "Backend (Spring Boot)" in the center
+- Place "Data Storage" at the bottom (MariaDB, Redis)
+- Place "External Services" on the right (Gemini API)
+- Show "Scheduler" on the left side
+
+# 주요 데이터 플로우
+
+## 1. 설문 응답 제출 플로우
+**Flow Path:**
+- Respondent → Frontend
+- Frontend → Backend `/survey/{surveyId}/responses` (POST)
+- Backend → 설문 유효성 검증 (활성화 여부)
+- Backend → 중복 응답 체크 (DeviceId + IP 해시 조회)
+- Backend → MariaDB (RESPONSES 테이블 저장)
+- Backend → MariaDB (SURVEY_RESPONSE_HISTORY 테이블 저장)
+- Backend → Redis Publisher (실시간 알림 발송)
+- Backend → Frontend (성공 응답)
+
+**Components:**
+- Component: "Respondent (사용자)"
+- Component: "Frontend (Vue 3)"
+- Component: "Backend API" - ResponseService
+- Component: "MariaDB" - RESPONSES, SURVEY_RESPONSE_HISTORY
+- Component: "Redis Publisher"
+- Data Flow: Respondent → Frontend → Backend → Validation → Duplicate Check → MariaDB → Redis Pub → Backend → Frontend
+
+## 2. 실시간 알림 플로우 (WebSocket + Redis Pub/Sub)
+**Flow Path:**
+- Backend (응답 생성) → Redis Publisher
+- Redis Publisher → Redis Channel "alarm-channel"
+- Redis Subscriber → AlarmHandler (WebSocket 핸들러)
+- AlarmHandler → WebSocket Session
+- WebSocket → Frontend (연결된 사용자)
+- Frontend → 알림 표시
+
+**Components:**
+- Component: "Backend Service"
+- Component: "Redis Publisher"
+- Component: "Redis Channel" - "alarm-channel"
+- Component: "Redis Subscriber"
+- Component: "AlarmHandler" - WebSocket
+- Component: "Frontend" - WebSocket 클라이언트
+- Data Flow: Backend → Redis Pub → Redis Channel → Redis Sub → AlarmHandler → WebSocket → Frontend
+
+## 3. AI 리포트 생성 플로우 (Summary, WordCloud, Insight)
+**Flow Path:**
+- Trigger: 설문 종료 OR 스케줄러 (1분 간격)
+- Backend → AI Service (@Async 비동기 처리)
+- AI Service → MariaDB (설문, 질문, 응답 데이터 조회)
+- AI Service → 통계 계산
+- AI Service → GeminiApiService (Gemini API 호출)
+- Gemini API → AI 생성 인사이트 반환
+- AI Service → JSON 직렬화
+- AI Service → MariaDB (INSIGHT_REPORTS, WORD_CLOUDS, QUESTION_INSIGHTS 저장)
+
+**Components:**
+- Component: "Trigger" - SurveySchedule
+- Component: "SummaryService / WordCloudService / InsightService" - @Async
+- Component: "MariaDB" - 설문 데이터 조회
+- Component: "GeminiApiService" - WebClient
+- Component: "Gemini API" - 외부 AI 서비스
+- Component: "MariaDB" - 리포트 테이블 저장
+- Data Flow: Trigger → AI Service (async) → MariaDB (read) → Statistics → Gemini API → AI Service → JSON → MariaDB (write)
+
+## 4. 스케줄러 기반 리포트 업데이트
+**Flow Path:**
+- Spring Scheduler (1분 간격) → SurveySchedule
+- SurveySchedule → MariaDB (진행 중인 설문 조회)
+- SurveySchedule → MariaDB (배치 조회: 응답 수 집계)
+- SurveySchedule → 필터링 (응답 1개 이상인 설문만)
+- SurveySchedule → AI Service들 비동기 호출 (Summary, WordCloud, Insight)
+
+**Components:**
+- Component: "Spring Scheduler" - @Scheduled (1분 간격)
+- Component: "SurveySchedule"
+- Component: "MariaDB" - 배치 쿼리
+- Component: "AI Services" - @Async 처리
+- Data Flow: Scheduler → SurveySchedule → MariaDB (batch read) → Filter → AI Services (async)
+
+# 주요 데이터 저장소
+
+## MariaDB
+- **RESPONSES**: 사용자 응답 데이터
+- **SURVEY_RESPONSE_HISTORY**: 중복 응답 방지 (DeviceId + IP 해시)
+- **INSIGHT_REPORTS**: 요약 리포트 (JSON)
+- **WORD_CLOUDS**: 워드클라우드 데이터 (JSON)
+- **QUESTION_INSIGHTS**: 질문별 인사이트
+
+## Redis
+- **Pub/Sub Channel**: "alarm-channel" (실시간 알림)
+
+# 주요 데이터 변환
+
+1. **DeviceId + IP → SHA256 Hash**: 중복 응답 방지
+2. **응답 데이터 → JSON**: 리포트 저장용 직렬화
+3. **AI 프롬프트 → 인사이트**: Gemini API 호출
+
+# 색상 코딩
+
+- **사용자**: Blue
+- **Frontend**: Light Blue
+- **Backend**: Green
+- **Database**: Orange
+- **Redis**: Red
+- **External Services**: Purple (Gemini API)
+- **Scheduler**: Gray
+- **비동기 플로우**: Dashed arrows
+
+# 다이어그램 스타일
+
+- 직사각형 박스로 컴포넌트 표시
+- 화살표에 라벨로 데이터 플로우 표시
+- 관련 컴포넌트 그룹화
+- 비동기 플로우는 점선 화살표로 표시
+
+Generate a clean, focused data flow diagram showing these 4 main flows with proper grouping and color coding.
+
