@@ -175,6 +175,10 @@
 
 <br></br>
 
+## ERD 설계
+<img width="2424" height="2561" alt="diagram-export-2025 -12 -8 -오후-10_12_32" src="https://github.com/user-attachments/assets/52f0b171-63d1-4143-b681-e5d1c887ef74" />
+<br></br>
+
 ## 💡 핵심 기능
 ### 1. 실시간 알림 시스템 (WebSocket + Redis Pub/Sub)
 
