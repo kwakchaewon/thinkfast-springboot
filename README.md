@@ -177,6 +177,22 @@
 
 ## ERD 설계
 <img width="2424" height="2561" alt="diagram-export-2025 -12 -8 -오후-10_12_32" src="https://github.com/user-attachments/assets/52f0b171-63d1-4143-b681-e5d1c887ef74" />
+
+### 주요 테이블
+- `USER` - 사용자 정보
+- `REFRESH_TOKENS` - JWT 리프레시 토큰
+- `SURVEYS` - 설문 정보
+- `QUESTIONS` - 질문 정보
+- `OPTIONS` - 객관식 선택지
+- `RESPONSES` - 응답 데이터
+- `NOTIFICATIONS` - 알림 정보
+- `SURVEY_LOGS` - 설문 로그
+- `SURVEY_RESPONSE_HISTORY` - 중복 응답 방지 이력
+- `INSIGHT_REPORTS` - AI 요약 리포트
+- `WORD_CLOUDS` - 워드클라우드 데이터
+- `QUESTION_INSIGHTS` - 질문별 인사이트
+- `QUESTION_EMBEDDINGS` - 벡터 임베딩 (향후 RAG용)
+
 <br></br>
 
 ## 💡 핵심 기능
