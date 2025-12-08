@@ -41,3 +41,5 @@ gemini:
 llm:
   summary:
     enabled: true # 요약 리포트 LLM 생성 사용 여부 (환경변수로 오버라이드 권장)
+  wordcloud:
+    enabled: true # 워드클라우드 LLM 생성 사용 여부 (false 시 Java 기반만 사용)

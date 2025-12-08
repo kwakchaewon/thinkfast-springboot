@@ -32,6 +32,12 @@ jwt:
   refresh-token-validity-in-seconds: 604800 # 7 days  (604800)
 
 gemini:
-  api-key: GEMINI_API_KEY
+  api-key: AIzaSyBb4bfYr4gEpvWijCcwaWZXKqHRRlQclJ4
   api-url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
   timeout-seconds: 30
+
+llm:
+  summary:
+    enabled: true # 요약 리포트 LLM 생성 사용 여부 (false 시 템플릿만 사용)
+  wordcloud:
+    enabled: true # 워드클라우드 LLM 생성 사용 여부 (false 시 Java 기반만 사용)

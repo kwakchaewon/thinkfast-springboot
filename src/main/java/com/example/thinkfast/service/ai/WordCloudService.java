@@ -5,6 +5,7 @@ import com.example.thinkfast.domain.survey.Question;
 import com.example.thinkfast.domain.survey.Response;
 import com.example.thinkfast.dto.ai.WordCloudDto;
 import com.example.thinkfast.dto.ai.WordCloudResponseDto;
+import com.example.thinkfast.exception.AiServiceException;
 import com.example.thinkfast.repository.ai.WordCloudRepository;
 import com.example.thinkfast.repository.survey.QuestionRepository;
 import com.example.thinkfast.repository.survey.ResponseRepository;
@@ -12,11 +13,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -32,9 +36,13 @@ public class WordCloudService {
     private final TextAnalysisService textAnalysisService;
     private final WordCloudRepository wordCloudRepository;
     private final ObjectMapper objectMapper;
+    private final GeminiApiService geminiApiService;
+
+    @Value("${llm.wordcloud.enabled:true}")
+    private boolean llmWordCloudEnabled;
 
     /**
-     * 질문별 워드클라우드 생성
+     * 질문별 워드클라우드 생성 (Gemini API 기반, 실패 시 Java 기반 폴백)
      *
      * @param questionId 질문 ID
      * @param topN 상위 N개 키워드 (기본값: 50)
@@ -66,16 +74,155 @@ public class WordCloudService {
             return new WordCloudResponseDto(questionId, Collections.emptyList(), 0L);
         }
 
-        // 2. 모든 응답을 하나의 텍스트로 합치기
+        // 2. Gemini API 기반 키워드 추출 시도
+        if (llmWordCloudEnabled) {
+            try {
+                List<WordCloudDto> llmKeywords = generateWordCloudWithGemini(
+                        questionId,
+                        question.getContent(),
+                        subjectiveContents,
+                        totalResponses,
+                        topN
+                );
+                
+                if (llmKeywords != null && !llmKeywords.isEmpty()) {
+                    log.info("Gemini API 기반 워드클라우드 생성 성공: questionId={}, 키워드 수={}", 
+                            questionId, llmKeywords.size());
+                    return new WordCloudResponseDto(questionId, llmKeywords, totalResponses);
+                }
+            } catch (Exception e) {
+                log.warn("Gemini API 기반 워드클라우드 생성 실패, Java 기반으로 폴백: questionId={}, reason={}", 
+                        questionId, e.getMessage());
+            }
+        }
+
+        // 3. 폴백: Java 기반 키워드 추출
+        return generateWordCloudWithJava(questionId, subjectiveContents, totalResponses, topN);
+    }
+
+    /**
+     * Gemini API를 사용하여 질문과 연관된 키워드를 추출합니다.
+     *
+     * @param questionId 질문 ID
+     * @param questionContent 질문 내용
+     * @param responses 주관식 응답 리스트
+     * @param totalResponses 총 응답 수
+     * @param topN 상위 N개 키워드
+     * @return 키워드 리스트 (실패 시 null)
+     */
+    private List<WordCloudDto> generateWordCloudWithGemini(Long questionId,
+                                                           String questionContent,
+                                                           List<String> responses,
+                                                           Long totalResponses,
+                                                           int topN) {
+        try {
+            String prompt = buildWordCloudPrompt(questionContent, responses, totalResponses, topN);
+            String raw = geminiApiService.generateText(prompt);
+            return parseWordCloudKeywords(raw, topN);
+        } catch (AiServiceException e) {
+            log.warn("Gemini API 호출 실패: questionId={}, reason={}", questionId, e.getMessage());
+            return null;
+        } catch (Exception e) {
+            log.warn("Gemini API 기반 키워드 추출 중 예외 발생: questionId={}", questionId, e);
+            return null;
+        }
+    }
+
+    /**
+     * Gemini API용 프롬프트 생성
+     */
+    private String buildWordCloudPrompt(String questionContent,
+                                        List<String> responses,
+                                        Long totalResponses,
+                                        int topN) {
+        // 응답 샘플 (최대 30개)
+        String samplesText;
+        if (responses == null || responses.isEmpty()) {
+            samplesText = "- 응답 샘플: 없음";
+        } else {
+            String joined = responses.stream()
+                    .limit(30)
+                    .map(s -> "• " + s)
+                    .collect(Collectors.joining("\n"));
+            samplesText = "- 응답 샘플:\n" + joined;
+        }
+
+        return String.format(
+                "역할: 한국어 설문 분석가. 질문 내용과 응답을 분석하여 질문과 가장 연관된 키워드를 추출하라.\n" +
+                        "\n" +
+                        "규칙:\n" +
+                        "- 질문의 의도와 목적을 고려하여 관련성 높은 키워드만 추출\n" +
+                        "- 응답에서 실제로 언급된 단어/구문을 우선 추출\n" +
+                        "- 일반적인 불필요한 단어(예: '입니다', '있습니다' 등) 제외\n" +
+                        "- 키워드는 명사, 명사구 위주로 추출\n" +
+                        "- 빈도수는 해당 키워드가 응답에서 언급된 횟수\n" +
+                        "- 출력 형식: \"키워드1:빈도수, 키워드2:빈도수, ...\" (쉼표로 구분)\n" +
+                        "- 최대 %d개의 키워드만 추출\n" +
+                        "\n" +
+                        "질문 내용:\n" +
+                        "%s\n" +
+                        "\n" +
+                        "응답 정보:\n" +
+                        "- 총 응답 수: %d\n" +
+                        "%s\n" +
+                        "\n" +
+                        "위 정보를 바탕으로 질문과 가장 연관된 키워드를 추출하여 \"키워드:빈도수\" 형식으로 출력하라.",
+                topN,
+                questionContent != null ? questionContent : "질문 내용 없음",
+                totalResponses != null ? totalResponses : 0,
+                samplesText
+        );
+    }
+
+    /**
+     * Gemini 응답에서 키워드 파싱 (형식: "키워드1:빈도수, 키워드2:빈도수, ...")
+     */
+    private List<WordCloudDto> parseWordCloudKeywords(String raw, int maxCount) {
+        if (raw == null || raw.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<WordCloudDto> keywords = new ArrayList<>();
+        
+        // "키워드:빈도수" 패턴 매칭
+        Pattern pattern = Pattern.compile("([^:,]+):(\\d+)");
+        Matcher matcher = pattern.matcher(raw);
+        
+        while (matcher.find() && keywords.size() < maxCount) {
+            String word = matcher.group(1).trim();
+            try {
+                int count = Integer.parseInt(matcher.group(2).trim());
+                if (!word.isEmpty() && count > 0) {
+                    keywords.add(new WordCloudDto(word, count));
+                }
+            } catch (NumberFormatException e) {
+                log.debug("빈도수 파싱 실패: {}", matcher.group(2));
+            }
+        }
+
+        // 빈도수 기준 내림차순 정렬
+        keywords.sort((a, b) -> b.getCount().compareTo(a.getCount()));
+
+        return keywords;
+    }
+
+    /**
+     * Java 기반 키워드 추출 (폴백)
+     */
+    private WordCloudResponseDto generateWordCloudWithJava(Long questionId,
+                                                           List<String> subjectiveContents,
+                                                           Long totalResponses,
+                                                           int topN) {
+        // 모든 응답을 하나의 텍스트로 합치기
         String combinedText = String.join(" ", subjectiveContents);
 
-        // 3. 키워드 추출 및 빈도수 계산
+        // 키워드 추출 및 빈도수 계산
         List<String> keywords = textAnalysisService.extractKeywords(combinedText);
 
-        // 4. 상위 N개 키워드 추출
+        // 상위 N개 키워드 추출
         List<Map.Entry<String, Integer>> topKeywords = textAnalysisService.getTopKeywords(keywords, topN);
 
-        // 5. DTO 변환
+        // DTO 변환
         List<WordCloudDto> wordCloud = topKeywords.stream()
                 .map(entry -> new WordCloudDto(entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
