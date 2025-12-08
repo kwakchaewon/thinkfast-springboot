@@ -245,6 +245,7 @@ List<Object[]> responseCounts = responseRepository.countDistinctResponseSessions
 - **동기 처리의 문제**: AI API 호출 시 응답 시간 5-30초, 사용자 대기 시간 증가
 - **@Async 비동기 처리**: 리포트 생성은 백그라운드에서 처리, API는 즉시 응답
 - API 응답 시간 감소: 5-30초 → < 100ms
+- 요약/워드클라우드/인사이트는 비동기로 생성 후 DB에 저장된 결과만 API에서 조회 (미생성 시 빈 데이터 반환)
 
 ```java
 @Async("taskExecutor")
@@ -331,6 +332,12 @@ public String generateInsight(String prompt) {
 **효과:**
 - 단일 언어 스택으로 개발/운영 단순화
 - 비동기 처리로 성능 최적화
+
+**운영 설정 및 폴백**
+- `llm.wordcloud.enabled` (기본 true): Gemini 기반 키워드 추출 활성화. 비활성 또는 실패 시 Java 기반 키워드 추출로 자동 폴백.
+- `llm.summary.enabled` (기본 true): LLM이 요약 bullet을 생성. 비활성 또는 실패 시 템플릿 기반 개선 문장으로 폴백.
+- `gemini.timeout-seconds` (기본 30초): WebClient 타임아웃 및 429/503 백오프 재시도 설정. `gemini.api-url`, `gemini.api-key`로 엔드포인트/키 주입.
+- 생성 결과는 `INSIGHT_REPORTS.summaryText`, `WORD_CLOUDS.wordCloudData`에 JSON으로 저장되며, GET API는 저장된 결과만 반환.
 
 <br></br>
 
@@ -429,7 +436,11 @@ docker run -d -p 8080:8080 thinkfast:latest
 ### 환경 변수
 - `SPRING_PROFILES_ACTIVE`: prod
 - `SPRING_DATASOURCE_URL`: MariaDB 연결 정보
-- `GEMINI_API_KEY`: Gemini API 키
+- `GEMINI_API_KEY` (`gemini.api-key`): Gemini API 키
+- `GEMINI_API_URL` (`gemini.api-url`): Gemini 호출 엔드포인트
+- `GEMINI_TIMEOUT_SECONDS` (`gemini.timeout-seconds`, 기본 30): LLM HTTP 타임아웃
+- `LLM_WORDCLOUD_ENABLED` (`llm.wordcloud.enabled`, 기본 true): LLM 워드클라우드 토글
+- `LLM_SUMMARY_ENABLED` (`llm.summary.enabled`, 기본 true): LLM 요약/인사이트 토글
 
 <br></br>
 
