@@ -1,7 +1,11 @@
+## CREATED BY cwkwak@edentns.com
+## https://app.eraser.io/ AI Generator 차트 생성 컨텍스트
+
 Create a modern, clean Entity Relationship Diagram (ERD) for a real-time survey platform called "ThinkFast".
 
 Use clean, balanced spacing and minimal styling.
 Use color-coded entity groups for clear distinction (User Management, Survey Core, Responses, AI Insights, System)
+Additionally, organize the tables in a clear, user-friendly layout.
 
 # Overall Layout
 - Group related entities together with clear visual boundaries
@@ -195,7 +199,5 @@ Use color-coded entity groups for clear distinction (User Management, Survey Cor
 - Label relationships clearly
 - Group entities by domain (User Management, Survey Core, Responses, AI Insights, System)
 - Use minimal, modern styling with clean layout
-
-Generate the ERD with clear entity boxes, proper relationships, and color-coded groups.
 
 
