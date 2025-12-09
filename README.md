@@ -178,7 +178,6 @@
 ## ERD 설계
 <img width="2424" height="2561" alt="diagram-export-2025 -12 -8 -오후-10_12_32" src="https://github.com/user-attachments/assets/52f0b171-63d1-4143-b681-e5d1c887ef74" />
 
-### 주요 테이블
 - `USER` - 사용자 정보
 - `REFRESH_TOKENS` - JWT 리프레시 토큰
 - `SURVEYS` - 설문 정보
