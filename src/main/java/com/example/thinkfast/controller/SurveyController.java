@@ -29,6 +29,10 @@ import com.example.thinkfast.repository.auth.UserRepository;
 import com.example.thinkfast.repository.survey.SurveyRepository;
 import com.example.thinkfast.repository.survey.QuestionRepository;
 import com.example.thinkfast.dto.survey.QuestionResponsesResponseDto;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -46,6 +50,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/survey")
 @RequiredArgsConstructor
+@Tag(name = "설문 관리", description = "설문 생성, 조회, 응답 및 AI 기반 인사이트 분석 API")
 /**
  * 개선 사항: 호출 전 본인 권한 확인 필요
  */
@@ -67,16 +72,20 @@ public class SurveyController {
      * @param userDetail
      * @param createSurveyRequest
      */
+    @Operation(summary = "설문 생성", description = "새로운 설문을 생성합니다. CREATOR 권한이 필요합니다.")
     @PostMapping
     @PreAuthorize("hasRole('CREATOR')")
+    @SecurityRequirement(name = "bearerAuth")
     public void createSurvey(@AuthenticationPrincipal UserDetailImpl userDetail,
                              @RequestBody CreateSurveyRequest createSurveyRequest){
         surveyService.createSurvey(userDetail, createSurveyRequest);
     }
 
+    @Operation(summary = "설문 삭제", description = "설문을 삭제합니다. CREATOR 권한이 필요합니다.")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('CREATOR')")
-    public void deleteSurvey(@PathVariable Long id){
+    @SecurityRequirement(name = "bearerAuth")
+    public void deleteSurvey(@Parameter(description = "설문 ID") @PathVariable Long id){
         surveyService.deleteSurvey(id);
     }
 
@@ -90,6 +99,7 @@ public class SurveyController {
      * @param search 검색 키워드 (제목/설명/작성자명)
      * @return 공개 설문 목록 및 페이징 정보
      */
+    @Operation(summary = "공개 설문 목록 조회", description = "공개된 설문 목록을 페이징하여 조회합니다. 인증이 필요하지 않습니다.")
     @GetMapping("/public")
     public BaseResponse<PublicSurveyListResponse> getPublicSurveys(
             @RequestParam(defaultValue = "1") int page,
@@ -100,8 +110,10 @@ public class SurveyController {
         return BaseResponse.success(response);
     }
 
+    @Operation(summary = "내 설문 목록 조회", description = "현재 사용자가 생성한 설문 목록을 조회합니다. CREATOR 권한이 필요합니다.")
     @GetMapping
     @PreAuthorize("hasRole('CREATOR')")
+    @SecurityRequirement(name = "bearerAuth")
     public List<GetRecentSurveysResponse> getSurveys(@AuthenticationPrincipal UserDetailImpl userDetail) {
         return surveyService.getSurveys(userDetail);
     }
@@ -111,8 +123,10 @@ public class SurveyController {
      * @param userDetail
      * @return
      */
+    @Operation(summary = "최근 설문 목록 조회", description = "현재 사용자의 최근 설문 목록을 조회합니다. CREATOR 권한이 필요합니다.")
     @GetMapping("/recent")
     @PreAuthorize("hasRole('CREATOR')")
+    @SecurityRequirement(name = "bearerAuth")
     public List<GetRecentSurveysResponse> getRecentSurveys(@AuthenticationPrincipal UserDetailImpl userDetail) {
         return surveyService.getRecentSurveys(userDetail);
     }
@@ -122,9 +136,11 @@ public class SurveyController {
      * @param id
      * @return
      */
+    @Operation(summary = "설문 상세 조회", description = "설문의 상세 정보를 조회합니다. CREATOR 권한이 필요합니다.")
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('CREATOR')")
-    public BaseResponse<GetSurveyDetailResponse> getSurveyDetail(@PathVariable Long id) {
+    @SecurityRequirement(name = "bearerAuth")
+    public BaseResponse<GetSurveyDetailResponse> getSurveyDetail(@Parameter(description = "설문 ID") @PathVariable Long id) {
         GetSurveyDetailResponse getSurveyDetailResponse = surveyService.getSurveyDetail(id);
         if (getSurveyDetailResponse == null) return BaseResponse.fail(ResponseMessage.SURVEY_NOT_FOUND);
         return BaseResponse.success(getSurveyDetailResponse);
@@ -161,9 +177,10 @@ public class SurveyController {
      * 개선 사항2: 알람 메시지 DB 저장 후 read, unread 등 status 관리
      * @param createResponseRequest
      */
+    @Operation(summary = "설문 응답 생성", description = "설문에 응답을 제출합니다. 비회원도 참여 가능하며, 중복 응답은 방지됩니다.")
     @PostMapping("/{surveyId}/responses")
     @Transactional
-    public BaseResponse createResponse(@PathVariable Long surveyId, @AuthenticationPrincipal UserDetailImpl userDetail,
+    public BaseResponse createResponse(@Parameter(description = "설문 ID") @PathVariable Long surveyId, @AuthenticationPrincipal UserDetailImpl userDetail,
                                        @RequestBody CreateResponseRequest createResponseRequest, HttpServletRequest request) {
         String clientIpAddress = IpUtil.getClientIp(request);
         
@@ -216,9 +233,10 @@ public class SurveyController {
      * @param userDetail 현재 사용자 정보
      * @return 요약 리포트 (mainPosition, mainPositionPercent, improvements)
      */
+    @Operation(summary = "설문 요약 리포트 조회", description = "AI 기반 설문 요약 리포트를 조회합니다. 공개 설문은 인증 없이, 비공개 설문은 소유자만 조회 가능합니다.")
     @GetMapping("/{id}/summary")
     public BaseResponse<SummaryReportDto> getSummaryReport(
-            @PathVariable Long id,
+            @Parameter(description = "설문 ID") @PathVariable Long id,
             @AuthenticationPrincipal UserDetailImpl userDetail) {
         
         // 1. 설문 존재 여부 확인
@@ -259,6 +277,7 @@ public class SurveyController {
      * @param userDetail 현재 사용자 정보
      * @return 워드클라우드 데이터
      */
+    @Operation(summary = "워드클라우드 조회", description = "주관식 질문의 워드클라우드 데이터를 조회합니다. 공개 설문은 인증 없이, 비공개 설문은 소유자만 조회 가능합니다.")
     @GetMapping("/{surveyId}/questions/{questionId}/wordcloud")
     public BaseResponse<WordCloudResponseDto> getWordCloud(
             @PathVariable Long surveyId,
@@ -313,6 +332,7 @@ public class SurveyController {
      * @param userDetail 현재 사용자 정보
      * @return 인사이트 텍스트
      */
+    @Operation(summary = "질문별 인사이트 조회", description = "AI 기반 질문별 인사이트를 조회합니다. 공개 설문은 인증 없이, 비공개 설문은 소유자만 조회 가능합니다.")
     @GetMapping("/{surveyId}/questions/{questionId}/insight")
     public BaseResponse<String> getInsight(
             @PathVariable Long surveyId,
@@ -370,6 +390,7 @@ public class SurveyController {
      * @param userDetail 현재 사용자 정보
      * @return 질문별 통계 데이터
      */
+    @Operation(summary = "질문별 통계 조회", description = "질문별 통계 데이터를 조회합니다. 객관식은 선택지별 응답 수/비율, 주관식은 전체 응답 수를 반환합니다.")
     @GetMapping("/{surveyId}/questions/{questionId}/statistics")
     public BaseResponse<QuestionStatisticsResponseDto> getQuestionStatistics(
             @PathVariable Long surveyId,
@@ -448,6 +469,7 @@ public class SurveyController {
      * @param userDetail 현재 사용자 정보
      * @return 질문별 응답 데이터 (페이징 정보 포함)
      */
+    @Operation(summary = "질문별 응답 조회", description = "질문별 전체 응답을 페이징하여 조회합니다. 공개 설문은 인증 없이, 비공개 설문은 소유자만 조회 가능합니다.")
     @GetMapping("/{surveyId}/questions/{questionId}/responses")
     public BaseResponse<QuestionResponsesResponseDto> getQuestionResponses(
             @PathVariable Long surveyId,
