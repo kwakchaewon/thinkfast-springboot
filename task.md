@@ -15,10 +15,10 @@ RAG 기반 메뉴얼 챗봇 구현: Qdrant Vector DB를 활용한 메뉴얼 검�
 - [x] build.gradle에 파일 파싱 라이브러리 추가 (Apache Tika for PDF/DOCX)
 
 ### 2. 데이터베이스 스키마
-- [ ] V13__create_manuals_tables.sql - MANUALS 테이블 생성
-- [ ] V14__create_manual_chunks_table.sql - MANUAL_CHUNKS 테이블 생성
-- [ ] V15__create_suggestions_table.sql - SUGGESTIONS 테이블 생성
-- [ ] V16__create_chat_history_table.sql - CHAT_HISTORY 테이블 생성
+- [x] V13__create_manuals_tables.sql - MANUALS 테이블 생성
+- [x] V14__create_manual_chunks_table.sql - MANUAL_CHUNKS 테이블 생성
+- [x] V15__create_suggestions_table.sql - SUGGESTIONS 테이블 생성
+- [x] V16__create_chat_history_table.sql - CHAT_HISTORY 테이블 생성
 
 ### 3. 환경 변수 설정
 - [ ] application-local.yml에 Qdrant 설정 추가
