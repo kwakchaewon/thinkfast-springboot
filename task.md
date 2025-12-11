@@ -11,7 +11,7 @@ RAG 기반 메뉴얼 챗봇 구현: Qdrant Vector DB를 활용한 메뉴얼 검�
 - [x] 운영 docker-compose.yml Qdrant 서비스 추가 (포트 6333/6334, 볼륨 `qdrant_data`)
 - [x] 로컬 실행 확인  
   `docker run -d --name thinkfast-qdrant --restart unless-stopped -e TZ=Asia/Seoul -e QDRANT__SERVICE__GRPC_PORT=6334 -e QDRANT__SERVICE__HTTP_PORT=6333 -p 6333:6333 -p 6334:6334 -v qdrant_data:/qdrant/storage qdrant/qdrant:v1.7.0`
-- [x] build.gradle에 Qdrant Java 클라이언트 의존성 추가
+- [x] build.gradle에 Qdrant Java 클라이언트 의존성 추가 (io.qdrant:client:1.7.0)
 - [x] build.gradle에 파일 파싱 라이브러리 추가 (Apache Tika for PDF/DOCX)
 
 ### 2. 데이터베이스 스키마

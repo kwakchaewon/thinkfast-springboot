@@ -48,7 +48,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'io.projectreactor.netty:reactor-netty-http'
 	implementation 'org.springdoc:springdoc-openapi-ui:1.6.15'
-	implementation 'io.qdrant:qdrant-java-client:1.7.0'
+	implementation 'io.qdrant:client:1.7.0'
 	implementation 'org.apache.tika:tika-core:2.9.1'
 	implementation 'org.apache.tika:tika-parsers-standard-package:2.9.1'
 }
