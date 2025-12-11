@@ -21,9 +21,9 @@ RAG 기반 메뉴얼 챗봇 구현: Qdrant Vector DB를 활용한 메뉴얼 검�
 - [x] V16__create_chat_history_table.sql - CHAT_HISTORY 테이블 생성
 
 ### 3. 환경 변수 설정
-- [ ] application-local.yml에 Qdrant 설정 추가
-- [ ] application-prod.yml에 Qdrant 설정 추가
-- [ ] Gemini Embedding API URL 설정 추가
+- [x] application-local.yml에 Qdrant 설정 추가
+- [x] application-prod.yml에 Qdrant 설정 추가
+- [x] Gemini Embedding API URL 설정 추가
 
 ---
 

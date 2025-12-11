@@ -37,6 +37,12 @@ gemini:
   api-key: GEMINI_API_KEY
   api-url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
   timeout-seconds: 30
+  embedding-api-url: https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent
+  embedding-dimension: 768
+
+qdrant:
+  url: http://qdrant:6333
+  collection-name: manuals
 
 llm:
   summary:
