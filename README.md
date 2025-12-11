@@ -470,6 +470,7 @@ docker run -d -p 8080:8080 thinkfast:latest
 - [ ] RAG + 벡터 DB 기반 메뉴얼 챗봇
 - [ ] 개발자용 MCP 서버 도입
 - [ ] AI 리포트 호출 시점 고도화
+- [ ] 로깅 시스템 개선
 
 ### Phase 2
 - [ ] PQC 인증서 백엔드 연동 설계
