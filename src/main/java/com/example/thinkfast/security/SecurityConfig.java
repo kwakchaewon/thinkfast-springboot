@@ -19,6 +19,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
+import com.example.thinkfast.common.config.WebClientLoggingConfig;
 
 import java.time.Duration;
 
@@ -73,7 +74,7 @@ public class SecurityConfig {
 
     @Bean
     @Primary
-    public WebClient webClient(com.example.thinkfast.common.config.WebClientLoggingConfig loggingConfig) {
+    public WebClient webClient(WebClientLoggingConfig loggingConfig) {
         log.info("SecurityConfig에서 WebClient 빈 생성 시작 - timeout: {}초", timeoutSeconds);
         
         try {
