@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -42,7 +43,7 @@ public class SurveySchedule {
         String jobId = "job-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss")) + "-expired";
         long startTime = System.currentTimeMillis();
         int processedCount = 0;
-        int failedCount = 0;
+        AtomicInteger failedCount = new AtomicInteger(0);
 
         try {
             MDC.put("log_type", "scheduler");
@@ -85,25 +86,26 @@ public class SurveySchedule {
                     // 설문 종료 후 인사이트 텍스트 비동기 생성
                     insightService.saveInsightsForSurveyAsync(survey.getId());
                 } catch (Exception e) {
-                    failedCount++;
+                    failedCount.incrementAndGet();
                     log.warn("Failed to process expired survey: ID={}", survey.getId(), e);
                 }
             });
 
             long duration = System.currentTimeMillis() - startTime;
+            int failed = failedCount.get();
             MDC.put("scheduler.execution_time_ms", String.valueOf(duration));
             MDC.put("scheduler.processed_count", String.valueOf(processedCount));
-            MDC.put("scheduler.failed_count", String.valueOf(failedCount));
-            MDC.put("scheduler.status", failedCount > 0 ? "partial" : "success");
+            MDC.put("scheduler.failed_count", String.valueOf(failed));
+            MDC.put("scheduler.status", failed > 0 ? "partial" : "success");
 
             log.info("Scheduler job completed: updateExpiredSurvey (jobId: {}, duration: {}ms, processed: {}, failed: {})", 
-                    jobId, duration, processedCount, failedCount);
+                    jobId, duration, processedCount, failed);
         } catch (Exception e) {
             long duration = System.currentTimeMillis() - startTime;
-            failedCount++;
+            int failed = failedCount.incrementAndGet();
             MDC.put("scheduler.execution_time_ms", String.valueOf(duration));
             MDC.put("scheduler.processed_count", String.valueOf(processedCount));
-            MDC.put("scheduler.failed_count", String.valueOf(failedCount));
+            MDC.put("scheduler.failed_count", String.valueOf(failed));
             MDC.put("scheduler.status", "failure");
             MDC.put("scheduler.error_message", e.getMessage());
 
@@ -135,7 +137,7 @@ public class SurveySchedule {
         String jobId = "job-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss")) + "-reports";
         long startTime = System.currentTimeMillis();
         int processedCount = 0;
-        int failedCount = 0;
+        AtomicInteger failedCount = new AtomicInteger(0);
 
         try {
             MDC.put("log_type", "scheduler");
@@ -214,26 +216,27 @@ public class SurveySchedule {
                     
                     processedCount++;
                 } catch (Exception e) {
-                    failedCount++;
+                    failedCount.incrementAndGet();
                     log.warn("Failed to update reports for survey: surveyId={}", surveyId, e);
                 }
             }
             
             long duration = System.currentTimeMillis() - startTime;
+            int failed = failedCount.get();
             MDC.put("scheduler.execution_time_ms", String.valueOf(duration));
             MDC.put("scheduler.processed_count", String.valueOf(processedCount));
-            MDC.put("scheduler.failed_count", String.valueOf(failedCount));
-            MDC.put("scheduler.status", failedCount > 0 ? "partial" : "success");
+            MDC.put("scheduler.failed_count", String.valueOf(failed));
+            MDC.put("scheduler.status", failed > 0 ? "partial" : "success");
 
             log.info("Scheduler job completed: updateActiveSurveyReports (jobId: {}, duration: {}ms, processed: {}, failed: {})", 
-                    jobId, duration, processedCount, failedCount);
+                    jobId, duration, processedCount, failed);
             
         } catch (Exception e) {
             long duration = System.currentTimeMillis() - startTime;
-            failedCount++;
+            int failed = failedCount.incrementAndGet();
             MDC.put("scheduler.execution_time_ms", String.valueOf(duration));
             MDC.put("scheduler.processed_count", String.valueOf(processedCount));
-            MDC.put("scheduler.failed_count", String.valueOf(failedCount));
+            MDC.put("scheduler.failed_count", String.valueOf(failed));
             MDC.put("scheduler.status", "failure");
             MDC.put("scheduler.error_message", e.getMessage());
 

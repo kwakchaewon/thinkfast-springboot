@@ -17,6 +17,7 @@ import reactor.util.retry.Retry;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Service
@@ -43,7 +44,7 @@ public class GeminiApiService {
      */
     public String generateText(String prompt) {
         Instant startTime = Instant.now();
-        int retryCount = 0;
+        AtomicInteger retryCount = new AtomicInteger(0);
         
         try {
             GeminiRequest request = GeminiRequest.create(prompt);
@@ -66,20 +67,21 @@ public class GeminiApiService {
                             .filter(throwable -> throwable instanceof WebClientResponseException.TooManyRequests
                                     || throwable instanceof WebClientResponseException.ServiceUnavailable)
                             .doBeforeRetry(retrySignal -> {
-                                retryCount = retrySignal.totalRetries() + 1;
-                                MDC.put("external_api.retry_count", String.valueOf(retryCount));
-                                log.warn("Gemini API 재시도: {}", retryCount);
+                                int count = (int) (retrySignal.totalRetries() + 1);
+                                retryCount.set(count);
+                                MDC.put("external_api.retry_count", String.valueOf(count));
+                                log.warn("Gemini API 재시도: {}", count);
                             }))
                     .block();
 
             long duration = Duration.between(startTime, Instant.now()).toMillis();
             MDC.put("external_api.duration_ms", String.valueOf(duration));
-            MDC.put("external_api.retry_count", String.valueOf(retryCount));
+            MDC.put("external_api.retry_count", String.valueOf(retryCount.get()));
 
             if (response == null) {
                 MDC.put("external_api.status", "failure");
                 MDC.put("external_api.error_message", "Response is null");
-                log.error("Gemini API 응답이 null입니다. ({}ms, retries: {})", duration, retryCount);
+                log.error("Gemini API 응답이 null입니다. ({}ms, retries: {})", duration, retryCount.get());
                 throw new AiServiceException("Gemini API 응답이 null입니다.");
             }
 
@@ -90,13 +92,13 @@ public class GeminiApiService {
                 MDC.put("external_api.status", "failure");
                 MDC.put("external_api.error_message", "Empty response text. finishReason: " + finishReason);
                 log.warn("Gemini API 응답에 텍스트가 없습니다. finishReason: {} ({}ms, retries: {})", 
-                    finishReason, duration, retryCount);
+                    finishReason, duration, retryCount.get());
                 throw new AiServiceException("Gemini API 응답에 텍스트가 없습니다.");
             }
 
             MDC.put("external_api.status", "success");
             MDC.put("external_api.response_status", "200");
-            log.info("Gemini API 호출 성공: generateContent ({}ms, retries: {})", duration, retryCount);
+            log.info("Gemini API 호출 성공: generateContent ({}ms, retries: {})", duration, retryCount.get());
 
             return text;
         } catch (WebClientResponseException e) {
@@ -105,19 +107,19 @@ public class GeminiApiService {
             MDC.put("external_api.status", "failure");
             MDC.put("external_api.response_status", String.valueOf(e.getStatusCode().value()));
             MDC.put("external_api.error_message", e.getMessage());
-            MDC.put("external_api.retry_count", String.valueOf(retryCount));
+            MDC.put("external_api.retry_count", String.valueOf(retryCount.get()));
             
             log.error("Gemini API 호출 실패: status={}, body={} ({}ms, retries: {})", 
-                    e.getStatusCode(), e.getResponseBodyAsString(), duration, retryCount);
+                    e.getStatusCode(), e.getResponseBodyAsString(), duration, retryCount.get());
             throw new AiServiceException("Gemini API 호출 실패: " + e.getMessage(), e);
         } catch (Exception e) {
             long duration = Duration.between(startTime, Instant.now()).toMillis();
             MDC.put("external_api.duration_ms", String.valueOf(duration));
             MDC.put("external_api.status", "failure");
             MDC.put("external_api.error_message", e.getMessage());
-            MDC.put("external_api.retry_count", String.valueOf(retryCount));
+            MDC.put("external_api.retry_count", String.valueOf(retryCount.get()));
             
-            log.error("Gemini API 호출 중 예외 발생 ({}ms, retries: {})", duration, retryCount, e);
+            log.error("Gemini API 호출 중 예외 발생 ({}ms, retries: {})", duration, retryCount.get(), e);
             throw new AiServiceException("Gemini API 호출 중 예외 발생: " + e.getMessage(), e);
         } finally {
             // MDC 정리
@@ -140,7 +142,7 @@ public class GeminiApiService {
      * @return 생성된 텍스트를 포함한 Mono
      */
     public Mono<String> generateTextAsync(String prompt) {
-        Instant startTime = Instant.now();
+        final Instant startTime = Instant.now();
         GeminiRequest request = GeminiRequest.create(prompt);
 
         // 구조화된 로깅을 위한 MDC 설정

@@ -13,9 +13,9 @@ import java.io.StringWriter;
  * 비동기 작업 예외 처리 핸들러
  * @Async 메서드에서 발생한 예외를 구조화된 로그로 기록
  */
-public class AsyncUncaughtExceptionHandler implements org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler {
+public class CustomAsyncUncaughtExceptionHandler implements org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(AsyncUncaughtExceptionHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(CustomAsyncUncaughtExceptionHandler.class);
 
     @Override
     public void handleUncaughtException(Throwable throwable, Method method, Object... params) {
