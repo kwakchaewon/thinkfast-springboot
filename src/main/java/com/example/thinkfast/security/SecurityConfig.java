@@ -18,7 +18,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import reactor.netty.http.client.HttpClient;
 
 import java.time.Duration;
@@ -74,7 +73,7 @@ public class SecurityConfig {
 
     @Bean
     @Primary
-    public WebClient webClient(ExchangeFilterFunction loggingFilter) {
+    public WebClient webClient() {
         log.info("SecurityConfig에서 WebClient 빈 생성 시작 - timeout: {}초", timeoutSeconds);
         
         try {
@@ -85,7 +84,6 @@ public class SecurityConfig {
             WebClient webClient = WebClient.builder()
                     .clientConnector(new ReactorClientHttpConnector(httpClient))
                     .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024)) // 10MB
-                    .filter(loggingFilter) // 로깅 필터 추가
                     .build();
             
             log.info("SecurityConfig에서 WebClient 빈 생성 완료 (ReactorClientHttpConnector 사용)");
@@ -95,7 +93,6 @@ public class SecurityConfig {
             // Fallback: 기본 WebClient 생성 (Reactor 없이)
             WebClient webClient = WebClient.builder()
                     .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
-                    .filter(loggingFilter) // 로깅 필터 추가
                     .build();
             log.info("SecurityConfig에서 기본 WebClient 빈 생성 완료");
             return webClient;
