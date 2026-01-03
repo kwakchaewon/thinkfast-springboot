@@ -12,11 +12,13 @@ import com.example.thinkfast.service.ai.WordCloudService;
 import com.example.thinkfast.service.ai.InsightService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,8 +39,18 @@ public class SurveySchedule {
     @Scheduled(fixedRate = 60000)
     @Transactional
     public void updateExpiredSurvey() {
-        log.info("[SCHEDULER] SURVEY CHECK");
+        String jobId = "job-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss")) + "-expired";
+        long startTime = System.currentTimeMillis();
+        int processedCount = 0;
+        int failedCount = 0;
+
         try {
+            MDC.put("log_type", "scheduler");
+            MDC.put("scheduler.job_name", "updateExpiredSurvey");
+            MDC.put("scheduler.job_id", jobId);
+
+            log.info("Scheduler job started: updateExpiredSurvey (jobId: {})", jobId);
+
             // 현재 시간
             LocalDateTime now = LocalDateTime.now();
             
@@ -47,30 +59,66 @@ public class SurveySchedule {
             
             // 설문 비활성화 처리
             expiredSurveys.forEach(survey -> {
-                survey.setIsActive(false);
-                log.info("[UPDATE] survey update unactive - ID: {}, 제목: {}, 종료일: {}", 
-                    survey.getId(), 
-                    survey.getTitle(), 
-                    survey.getEndTime().toLocalDate());
+                try {
+                    survey.setIsActive(false);
+                    log.debug("Survey deactivated: ID={}, title={}, endDate={}", 
+                        survey.getId(), survey.getTitle(), survey.getEndTime().toLocalDate());
+                } catch (Exception e) {
+                    log.warn("Failed to deactivate survey: ID={}", survey.getId(), e);
+                }
             });
             
             // 변경사항 저장
             surveyRepository.saveAll(expiredSurveys);
+            processedCount = expiredSurveys.size();
 
             expiredSurveys.forEach(survey -> {
-                redisPublisher.sendAlarm(survey.getId(), "SURVEY_EXPIRED");
-                
-                // 설문 종료 후 요약 리포트 비동기 생성
-                generateSummaryReportIfNotExists(survey.getId());
-                
-                // 설문 종료 후 워드클라우드 비동기 생성
-                wordCloudService.saveWordCloudsForSurveyAsync(survey.getId());
-                
-                // 설문 종료 후 인사이트 텍스트 비동기 생성
-                insightService.saveInsightsForSurveyAsync(survey.getId());
+                try {
+                    redisPublisher.sendAlarm(survey.getId(), "SURVEY_EXPIRED");
+                    
+                    // 설문 종료 후 요약 리포트 비동기 생성
+                    generateSummaryReportIfNotExists(survey.getId());
+                    
+                    // 설문 종료 후 워드클라우드 비동기 생성
+                    wordCloudService.saveWordCloudsForSurveyAsync(survey.getId());
+                    
+                    // 설문 종료 후 인사이트 텍스트 비동기 생성
+                    insightService.saveInsightsForSurveyAsync(survey.getId());
+                } catch (Exception e) {
+                    failedCount++;
+                    log.warn("Failed to process expired survey: ID={}", survey.getId(), e);
+                }
             });
+
+            long duration = System.currentTimeMillis() - startTime;
+            MDC.put("scheduler.execution_time_ms", String.valueOf(duration));
+            MDC.put("scheduler.processed_count", String.valueOf(processedCount));
+            MDC.put("scheduler.failed_count", String.valueOf(failedCount));
+            MDC.put("scheduler.status", failedCount > 0 ? "partial" : "success");
+
+            log.info("Scheduler job completed: updateExpiredSurvey (jobId: {}, duration: {}ms, processed: {}, failed: {})", 
+                    jobId, duration, processedCount, failedCount);
         } catch (Exception e) {
-            log.error("스케줄러 실행 중 오류 발생", e);
+            long duration = System.currentTimeMillis() - startTime;
+            failedCount++;
+            MDC.put("scheduler.execution_time_ms", String.valueOf(duration));
+            MDC.put("scheduler.processed_count", String.valueOf(processedCount));
+            MDC.put("scheduler.failed_count", String.valueOf(failedCount));
+            MDC.put("scheduler.status", "failure");
+            MDC.put("scheduler.error_message", e.getMessage());
+
+            log.error("Scheduler job failed: updateExpiredSurvey (jobId: {}, duration: {}ms)", 
+                    jobId, duration, e);
+        } finally {
+            // MDC 정리
+            MDC.remove("log_type");
+            MDC.remove("scheduler.job_name");
+            MDC.remove("scheduler.job_id");
+            MDC.remove("scheduler.execution_time_ms");
+            MDC.remove("scheduler.processed_count");
+            MDC.remove("scheduler.failed_count");
+            MDC.remove("scheduler.status");
+            MDC.remove("scheduler.error_message");
         }
     }
 
@@ -84,19 +132,29 @@ public class SurveySchedule {
     @Scheduled(fixedRate = 60000)
     @Transactional
     public void updateActiveSurveyReports() {
-        log.info("[실시간 통계 업데이트 스케줄러] 시작");
+        String jobId = "job-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss")) + "-reports";
+        long startTime = System.currentTimeMillis();
+        int processedCount = 0;
+        int failedCount = 0;
+
         try {
+            MDC.put("log_type", "scheduler");
+            MDC.put("scheduler.job_name", "updateActiveSurveyReports");
+            MDC.put("scheduler.job_id", jobId);
+
+            log.info("Scheduler job started: updateActiveSurveyReports (jobId: {})", jobId);
+
             LocalDateTime now = LocalDateTime.now();
             
             // 1. 진행 중인 설문 조회 (배치)
             List<Survey> activeSurveys = surveyRepository.findActiveSurveysByEndTimeAfter(now);
             
             if (activeSurveys.isEmpty()) {
-                log.debug("[실시간 통계 업데이트] 진행 중인 설문 없음");
+                log.debug("No active surveys found for update");
                 return;
             }
             
-            log.info("[실시간 통계 업데이트] 진행 중인 설문 수: {}", activeSurveys.size());
+            log.debug("Active surveys found: {}", activeSurveys.size());
             
             // 2. 설문 ID 리스트 추출
             List<Long> surveyIds = activeSurveys.stream()
@@ -122,11 +180,11 @@ public class SurveySchedule {
                     .collect(Collectors.toList());
             
             if (targetSurveyIds.isEmpty()) {
-                log.debug("[실시간 통계 업데이트] 응답이 있는 진행 중인 설문 없음");
+                log.debug("No active surveys with responses found");
                 return;
             }
             
-            log.info("[실시간 통계 업데이트] 처리 대상 설문 수: {}", targetSurveyIds.size());
+            log.debug("Target surveys for update: {}", targetSurveyIds.size());
             
             // 6. 배치 처리: 여러 설문의 질문을 한 번에 조회
             List<Question> allQuestions = questionRepository.findBySurveyIdIn(targetSurveyIds);
@@ -136,35 +194,61 @@ public class SurveySchedule {
                     .collect(Collectors.groupingBy(Question::getSurveyId));
             
             // 8. 각 설문에 대해 요약 리포트, 워드클라우드, 인사이트 업데이트 (비동기)
-            targetSurveyIds.forEach(surveyId -> {
-                List<Question> questions = questionsBySurvey.getOrDefault(surveyId, Collections.emptyList());
-                
-                if (questions.isEmpty()) {
-                    log.debug("[실시간 통계 업데이트] 설문에 질문 없음: surveyId={}", surveyId);
-                    return;
+            for (Long surveyId : targetSurveyIds) {
+                try {
+                    List<Question> questions = questionsBySurvey.getOrDefault(surveyId, Collections.emptyList());
+                    
+                    if (questions.isEmpty()) {
+                        log.debug("Survey has no questions: surveyId={}", surveyId);
+                        continue;
+                    }
+                    
+                    // 요약 리포트 업데이트 (비동기)
+                    summaryService.saveSummaryReportAsync(surveyId);
+                    
+                    // 워드클라우드 업데이트 (비동기)
+                    wordCloudService.saveWordCloudsForSurveyAsync(surveyId);
+                    
+                    // 인사이트 업데이트 (비동기)
+                    insightService.saveInsightsForSurveyAsync(surveyId);
+                    
+                    processedCount++;
+                } catch (Exception e) {
+                    failedCount++;
+                    log.warn("Failed to update reports for survey: surveyId={}", surveyId, e);
                 }
-                
-                log.info("[실시간 통계 업데이트] 설문 처리 시작: surveyId={}, 질문 수={}", 
-                        surveyId, questions.size());
-                
-                // 요약 리포트 업데이트 (비동기)
-                summaryService.saveSummaryReportAsync(surveyId);
-                
-                // 워드클라우드 업데이트 (비동기)
-                wordCloudService.saveWordCloudsForSurveyAsync(surveyId);
-                
-                // 인사이트 업데이트 (비동기)
-                insightService.saveInsightsForSurveyAsync(surveyId);
-                
-                // 통계는 실시간 계산되므로 별도 저장 불필요
-                // (현재 구조상 통계는 DB에 저장하지 않고 실시간 계산)
-                log.debug("[실시간 통계 업데이트] 설문 처리 완료: surveyId={}", surveyId);
-            });
+            }
             
-            log.info("[실시간 통계 업데이트 스케줄러] 완료 - 처리된 설문 수: {}", targetSurveyIds.size());
+            long duration = System.currentTimeMillis() - startTime;
+            MDC.put("scheduler.execution_time_ms", String.valueOf(duration));
+            MDC.put("scheduler.processed_count", String.valueOf(processedCount));
+            MDC.put("scheduler.failed_count", String.valueOf(failedCount));
+            MDC.put("scheduler.status", failedCount > 0 ? "partial" : "success");
+
+            log.info("Scheduler job completed: updateActiveSurveyReports (jobId: {}, duration: {}ms, processed: {}, failed: {})", 
+                    jobId, duration, processedCount, failedCount);
             
         } catch (Exception e) {
-            log.error("[실시간 통계 업데이트 스케줄러] 오류 발생", e);
+            long duration = System.currentTimeMillis() - startTime;
+            failedCount++;
+            MDC.put("scheduler.execution_time_ms", String.valueOf(duration));
+            MDC.put("scheduler.processed_count", String.valueOf(processedCount));
+            MDC.put("scheduler.failed_count", String.valueOf(failedCount));
+            MDC.put("scheduler.status", "failure");
+            MDC.put("scheduler.error_message", e.getMessage());
+
+            log.error("Scheduler job failed: updateActiveSurveyReports (jobId: {}, duration: {}ms)", 
+                    jobId, duration, e);
+        } finally {
+            // MDC 정리
+            MDC.remove("log_type");
+            MDC.remove("scheduler.job_name");
+            MDC.remove("scheduler.job_id");
+            MDC.remove("scheduler.execution_time_ms");
+            MDC.remove("scheduler.processed_count");
+            MDC.remove("scheduler.failed_count");
+            MDC.remove("scheduler.status");
+            MDC.remove("scheduler.error_message");
         }
     }
 

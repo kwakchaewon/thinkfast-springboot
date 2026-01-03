@@ -1,0 +1,51 @@
+# Filebeat 설정 파일 예시
+# THINKFAST WAS 로그 수집을 위한 Filebeat 설정
+
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/thinkfast/application.log
+      - /var/log/thinkfast/application.log.*.gz
+    fields:
+      service: thinkfast
+      env: prod
+    fields_under_root: true
+    multiline.pattern: '^\{'
+    multiline.negate: true
+    multiline.match: after
+    json.keys_under_root: true
+    json.add_error_key: true
+    json.message_key: message
+
+# 로그 파싱 설정
+processors:
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+  - add_docker_metadata: ~
+  - add_kubernetes_metadata: ~
+
+# Logstash로 전송
+output.logstash:
+  hosts: ["logstash:5044"]
+  ssl.enabled: false
+
+# 또는 Elasticsearch로 직접 전송
+# output.elasticsearch:
+#   hosts: ["elasticsearch:9200"]
+#   index: "thinkfast-logs-%{+yyyy.MM.dd}"
+#   template.name: "thinkfast-logs"
+#   template.pattern: "thinkfast-logs-*"
+#   template.settings:
+#     index.number_of_shards: 1
+#     index.number_of_replicas: 1
+
+# 로깅 설정
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat
+  keepfiles: 7
+  permissions: 0644
+

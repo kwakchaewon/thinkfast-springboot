@@ -6,5 +6,7 @@ server:
       enabled: true
 
 spring:
+  application:
+    name: thinkfast
   profiles:
     active: local

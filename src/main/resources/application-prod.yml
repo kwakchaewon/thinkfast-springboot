@@ -24,9 +24,13 @@ spring:
         format_sql: false
 
 logging:
+  file:
+    name: /var/log/thinkfast/application.log
+    max-size: 100MB
+    max-history: 30
   level:
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.hibernate.SQL: INFO
+    org.hibernate.type.descriptor.sql.BasicBinder: OFF
 
 jwt:
   secret: your-secret-key-should-be-very-long-and-secure-at-least-256-bits

@@ -39,8 +39,8 @@ gemini:
   embedding-dimension: 768
 
 qdrant:
-  url: http://localhost:6333
-  collection-name: manuals
+  host: localhost
+  port: 6334
 
 llm:
   summary:

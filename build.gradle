@@ -51,6 +51,7 @@ dependencies {
 	implementation 'io.qdrant:client:1.7.0'
 	implementation 'org.apache.tika:tika-core:2.9.1'
 	implementation 'org.apache.tika:tika-parsers-standard-package:2.9.1'
+	implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
 }
 
 tasks.named('test') {
