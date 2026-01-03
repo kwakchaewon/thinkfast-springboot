@@ -77,19 +77,8 @@ springBoot {
 
 // Windows에서 "Command line is too long" 에러 해결
 // classpath 파일을 사용하여 명령줄 길이 제한 문제 해결
+// bootRun도 JavaExec의 서브타입이므로 이 설정이 자동으로 적용됨
 tasks.withType(JavaExec) {
-	if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-		doFirst {
-			def classpathFile = file("$buildDir/classpath.txt")
-			classpathFile.parentFile.mkdirs()
-			classpathFile.text = classpath.asPath
-			classpath = files(classpathFile)
-		}
-	}
-}
-
-// bootRun 태스크에도 동일한 설정 적용
-tasks.named('bootRun') {
 	if (System.getProperty("os.name").toLowerCase().contains("windows")) {
 		doFirst {
 			def classpathFile = file("$buildDir/classpath.txt")
