@@ -1,9 +1,10 @@
 FROM gradle:7.6.3-jdk8 AS builder
 WORKDIR /workspace
 COPY . .
-# gradle 이미지에는 gradle이 이미 설치되어 있으므로 gradle 명령어 직접 사용
-# gradlew의 line ending 문제를 피하기 위해 gradle 명령어 사용
-RUN gradle clean bootJar -x test
+# gradlew의 Windows line ending(CRLF) 문제 해결 및 실행 권한 부여
+RUN sed -i 's/\r$//' gradlew && chmod +x gradlew
+# gradlew를 사용하여 프로젝트의 Gradle wrapper 버전(8.13) 사용
+RUN ./gradlew clean bootJar -x test
 
 FROM eclipse-temurin:8-jre-jammy
 ENV RUN_TYPE=prod
