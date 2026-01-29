@@ -253,4 +253,3 @@ public TokenResponse login(LoginRequest request) {
 - 현재 최신 마이그레이션: `V9__add_created_at_to_responses.sql`
 - 새 마이그레이션: `V10__add_real_username_to_user.sql`
 - 버전 번호는 순차적으로 증가해야 함
-

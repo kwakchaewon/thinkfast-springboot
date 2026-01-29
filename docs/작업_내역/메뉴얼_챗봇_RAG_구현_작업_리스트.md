@@ -1,4 +1,4 @@
-﻿# 메뉴얼 챗봇 RAG 구현 작업 리스트
+# 메뉴얼 챗봇 RAG 구현 작업 리스트
 
 ## 개요
 RAG 기반 메뉴얼 챗봇 구현: Qdrant Vector DB를 활용한 메뉴얼 검색, Gemini API를 통한 답변 생성, 건의사항 MariaDB 저장 기능을 추가합니다.
